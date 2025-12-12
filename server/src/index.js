@@ -6,7 +6,7 @@ import productsRouter from "./routes/products.js";
 import pricingRouter from "./routes/pricing.js";
 import uploadsRouter from "./routes/uploads.js";
 import cartRouter from "./routes/cart.js";
-import ordersRouter from "./routes/orders.js";
+import ordersRouter from "./routes/order.js";
 import path from "path";
 
 dotenv.config();
