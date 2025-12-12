@@ -1,0 +1,15 @@
+{
+  "name": "goldenartframes",
+  "version": "1.0.0",
+  "description": "MVP: Print editor flow (portrait) - upload -> crop/zoom -> price -> add to cart.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}
