@@ -261,7 +261,11 @@ export default function EditorPrintPortrait() {
 									</div>
 
 									<div className="mt-4">
-										<FramePreview imageUrl={originalUrl} />
+										<FramePreview
+                      imageUrl={originalUrl}
+                      frame={frame}
+                      mat={mat}
+                    />
 									</div>
 								</>
 							)}
