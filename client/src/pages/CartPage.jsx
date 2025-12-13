@@ -96,7 +96,12 @@ export default function Cart() {
       {!cart ? (
         <p className="text-gray-600">Loading cart…</p>
       ) : (cart.items || []).length === 0 ? (
-        <p className="text-gray-600">Your cart is empty.</p>
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-gray-600">Your cart is empty.</p>
+          <Link to="/" className="mt-4 inline-block rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
+            Start Shopping
+          </Link>
+        </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1.7fr,1fr]">
           {/* LEFT: Items */}
@@ -137,8 +142,7 @@ export default function Cart() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <h3 className="text-base font-semibold text-gray-900">
-                            {it.productSlug?.toUpperCase() || "ITEM"} —{" "}
-                            {cfg.orientation || "portrait"}
+                            {it.productSlug?.toUpperCase() || "ITEM"}{" "}  
                           </h3>
 
                           <div className="mt-2 space-y-1 text-sm text-gray-700">
@@ -163,16 +167,12 @@ export default function Cart() {
                               <b>Total Size:</b>{" "}
                               {total ? `${total.w}x${total.h}cm` : "—"}
                             </div>
-
-                            <div>
-                              <b>Ratio:</b> {cfg.transform?.ratio || "—"}
-                            </div>
                           </div>
                         </div>
 
                         <button
                           onClick={() => handleRemove(it._id)}
-                          className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-gray-50"
+                          className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-red-600 transition-colors active:scale-[0.98] hover:text-white"
                         >
                           Remove
                         </button>
@@ -221,11 +221,12 @@ export default function Cart() {
                 {totals.subtotal} {totals.currency}
               </b>
             </div>
-            <button className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
-              <Link to="/checkout">
-                Proceed to Checkout
-              </Link>
-            </button>
+
+            <Link to="/checkout">
+              <button className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
+                  Proceed to Checkout
+              </button>
+            </Link>
             <p className="mt-2 text-xs text-gray-500">
               Preview is for reference only.
             </p>
