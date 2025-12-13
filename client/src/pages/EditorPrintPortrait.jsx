@@ -124,7 +124,7 @@ export default function EditorPrintPortrait() {
 
   function SizePills({ variants, value, onChange }) {
     return (
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="mt-2 flex flex-wrap gap-2 active:scale-[0.98] transition">
         {variants.map((v) => {
           const active = v.sku === value;
           return (
@@ -132,7 +132,7 @@ export default function EditorPrintPortrait() {
               key={v.sku}
               type="button"
               onClick={() => onChange(v.sku)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition active:scale-[0.99]
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition active:scale-[1.05]
                 ${active ? "bg-gray-900 text-white" : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"}`}
             >
               {v.size}
@@ -145,7 +145,7 @@ export default function EditorPrintPortrait() {
 
   function FrameTiles({ options, value, onChange }) {
     return (
-      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6">
+      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6 active:scale-[0.98] transition">
         {options.map((opt) => {
           const active = opt.id === value;
           return (
@@ -153,7 +153,7 @@ export default function EditorPrintPortrait() {
               key={opt.id}
               type="button"
               onClick={() => onChange(opt.id)}
-              className={`group rounded-2xl p-2 text-center transition active:scale-[0.99]
+              className={`group rounded-2xl p-2 text-center transition active:scale-[1.05]
                 ${active ? "ring-2 ring-emerald-400 bg-emerald-50" : "border border-gray-200 bg-white hover:bg-gray-50"}`}
             >
               <div className="mx-auto h-14 w-14 overflow-hidden rounded-full bg-gray-100">
@@ -175,7 +175,7 @@ export default function EditorPrintPortrait() {
 
   function MatTiles({ options, value, onChange }) {
     return (
-      <div className="mt-3 grid grid-cols-4 gap-3">
+      <div className="mt-3 grid grid-cols-4 gap-3 active:scale-[0.98] transition">
         {options.map((opt) => {
           const active = opt.id === value;
           const Icon = opt.Icon;
@@ -185,7 +185,7 @@ export default function EditorPrintPortrait() {
               key={opt.id}
               type="button"
               onClick={() => onChange(opt.id)}
-              className={`rounded-2xl p-3 text-center transition active:scale-[0.99]
+              className={`rounded-2xl p-3 text-center transition active:scale-[1.05]
                 ${
                   active
                     ? "ring-2 ring-emerald-400 bg-emerald-50"

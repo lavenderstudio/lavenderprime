@@ -31,7 +31,7 @@ export const FRAME_STYLES = {
 
 export const MAT_PADDING = {
   None: "0px",
-  Thin: "12px",
-  Classic: "24px",
-  Gallery: "40px",
+  Thin: "24px",
+  Classic: "48px",
+  Gallery: "96px",
 };
