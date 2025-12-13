@@ -72,8 +72,10 @@ export default function CheckoutPage() {
   return (
     <Page title="Checkout">
       <div className="flex items-center justify-between">
-        <Link to="/cart" className="text-sm text-blue-600 hover:underline">
-          ← Back to cart
+        <Link to="/cart">
+          <button className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
+            Back to cart
+          </button>
         </Link>
       </div>
 
@@ -186,13 +188,16 @@ export default function CheckoutPage() {
                   className="h-12 w-12 rounded-xl border border-gray-200 object-cover"
                 />
                 <div className="flex-1 text-sm text-gray-800">
-                  <div className="font-semibold">{item.config?.size}</div>
+                  <div className="font-semibold">{item.productSlug?.toUpperCase()}</div>
                   <div className="text-xs text-gray-600">
-                    {item.config?.mount} • Qty {item.config?.quantity}
+                    Frame: {item.config?.frame} | Mat: {item.config?.mat} | Size: {item.config?.size}
                   </div>
                 </div>
                 <div className="text-sm font-semibold text-gray-900">
                   {item.price?.total} {item.price?.currency}
+                  <div className="text-xs font-normal text-gray-600 text-end">
+                    Qty: {item.config?.quantity}
+                  </div>
                 </div>
               </div>
             ))}
