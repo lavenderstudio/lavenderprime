@@ -21,6 +21,8 @@ export default function EditorPrintPortrait() {
   const [mount, setMount] = useState("No Mount");
   const [frame, setFrame] = useState("Black Wood");
   const [mat, setMat] = useState("Classic");
+  const [selectedFrame, setSelectedFrame] = useState("Black Wood");
+  const [selectedMat, setSelectedMat] = useState("Classic");
   const [quantity, setQuantity] = useState(1);
   const [originalUrl, setOriginalUrl] = useState("");
   const [quote, setQuote] = useState(null);

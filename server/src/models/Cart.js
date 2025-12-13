@@ -15,6 +15,8 @@ const CartItemSchema = new mongoose.Schema(
       orientation: String,
       size: String,
       mount: String,
+      frame: String,
+      mat: String,
       quantity: { type: Number, default: 1 },
 
       // Crop + zoom metadata (critical for print accuracy)
