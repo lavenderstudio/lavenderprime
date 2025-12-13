@@ -10,6 +10,7 @@ import Page from "../components/Page.jsx";
 import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
 import FramePreview from "../components/FramePreview.jsx";
+import { FRAME_OPTIONS, MAT_OPTIONS } from "../lib/optionsUi.js";
 
 export default function EditorPrintPortrait() {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ export default function EditorPrintPortrait() {
   const [product, setProduct] = useState(null);
   const [variantSku, setVariantSku] = useState("");
   const [mount, setMount] = useState("No Mount");
+  const [frame, setFrame] = useState("Black Wood");
+  const [mat, setMat] = useState("None");
   const [quantity, setQuantity] = useState(1);
   const [originalUrl, setOriginalUrl] = useState("");
   const [quote, setQuote] = useState(null);
@@ -55,7 +58,11 @@ export default function EditorPrintPortrait() {
         const res = await api.post("/api/pricing/quote", {
           productSlug: "print",
           variantSku,
-          options: { mount },
+          options: { 
+            mount, 
+            frame, 
+            mat 
+          },
           quantity,
         });
         setQuote(res.data);
@@ -65,7 +72,7 @@ export default function EditorPrintPortrait() {
       }
     };
     getQuote();
-  }, [variantSku, mount, quantity]);
+  }, [variantSku, mount, frame, mat, quantity]);
 
   const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
 
@@ -88,6 +95,8 @@ export default function EditorPrintPortrait() {
             orientation: "portrait",
             size: selectedVariant.size,
             mount,
+            frame,
+            mat,
             quantity,
             transform: {
 							ratio: selectedRatio.id,
@@ -113,6 +122,93 @@ export default function EditorPrintPortrait() {
     }
   };
 
+  function SizePills({ variants, value, onChange }) {
+    return (
+      <div className="mt-2 flex flex-wrap gap-2">
+        {variants.map((v) => {
+          const active = v.sku === value;
+          return (
+            <button
+              key={v.sku}
+              type="button"
+              onClick={() => onChange(v.sku)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition active:scale-[0.99]
+                ${active ? "bg-gray-900 text-white" : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"}`}
+            >
+              {v.size}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function FrameTiles({ options, value, onChange }) {
+    return (
+      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6">
+        {options.map((opt) => {
+          const active = opt.id === value;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onChange(opt.id)}
+              className={`group rounded-2xl p-2 text-center transition active:scale-[0.99]
+                ${active ? "ring-2 ring-emerald-400 bg-emerald-50" : "border border-gray-200 bg-white hover:bg-gray-50"}`}
+            >
+              <div className="mx-auto h-14 w-14 overflow-hidden rounded-full bg-gray-100">
+                <img
+                  src={opt.img}
+                  alt={opt.id}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-gray-700">
+                {opt.id}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function MatTiles({ options, value, onChange }) {
+    return (
+      <div className="mt-3 grid grid-cols-4 gap-3">
+        {options.map((opt) => {
+          const active = opt.id === value;
+          const Icon = opt.Icon;
+
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onChange(opt.id)}
+              className={`rounded-2xl p-3 text-center transition active:scale-[0.99]
+                ${
+                  active
+                    ? "ring-2 ring-emerald-400 bg-emerald-50"
+                    : "border border-gray-200 bg-white hover:bg-gray-50"
+                }`}
+            >
+              <div className="mx-auto h-14 w-14">
+                <Icon />
+              </div>
+
+              <div className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-gray-700">
+                {opt.id}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+
+
+
   return (
     <Page title="Editor — Print Portrait">
       <div className="mb-3">
@@ -132,7 +228,7 @@ export default function EditorPrintPortrait() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
           {/* LEFT: Editor */}
-          <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-[#F3F4F6] shadow-sm">
 						<div className="p-5">
 							{!originalUrl ? (
 								<>
@@ -179,35 +275,55 @@ export default function EditorPrintPortrait() {
 
             {/* Size */}
             <div className="mt-4">
-              <label className="mb-2 block text-sm font-medium text-gray-800">Size</label>
-              <select
-                value={variantSku}
-                onChange={(e) => setVariantSku(e.target.value)}
-                className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm"
-              >
-                {portraitVariants.map((v) => (
-                  <option key={v.sku} value={v.sku}>
-                    {v.size} — {v.basePrice} AED
-                  </option>
-                ))}
-              </select>
+              <div className="mt-4">
+                <label className="block text-sm font-semibold text-gray-900">
+                  Total Frame Sizes (CM)
+                </label>
+
+                <SizePills
+                  variants={portraitVariants}
+                  value={variantSku}
+                  onChange={setVariantSku}
+                />
+
+                <div className="mt-2 text-xs text-gray-600">
+                  Print Size: <span className="font-semibold">{selectedVariant?.size || "-"}</span>
+                </div>
+              </div>
             </div>
 
             {/* Mount */}
             <div className="mt-4">
-              <label className="mb-2 block text-sm font-medium text-gray-800">Mount</label>
-              <select
-                value={mount}
-                onChange={(e) => setMount(e.target.value)}
-                className="w-full rounded-xl border border-gray-300 bg-white p-3 text-sm"
-              >
-                {mountOptions.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
+              <div className="mt-5">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-gray-900">Frames: {frame}</label>
+
+                  <div className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-900">
+                    Price: {quote ? `${quote.total} ${quote.currency}` : "—"}
+                  </div>
+                </div>
+
+                <FrameTiles options={FRAME_OPTIONS} value={frame} onChange={setFrame} />
+              </div>
             </div>
+
+            {/* MatTiles */}
+            <div className="mt-4">
+              <div className="mt-6">
+                <label className="text-sm font-semibold text-gray-900">Mat Width: 0.0cm</label>
+                <MatTiles options={MAT_OPTIONS} value={mat} onChange={setMat} />
+
+                <button
+                  type="button"
+                  className="mt-3 text-xs font-semibold text-blue-600 hover:underline"
+                  onClick={() => alert("Mat = mount spacing around the image (like a border).")}
+                >
+                  What is Mat?
+                </button>
+              </div>
+            </div>
+
+            
 
             {/* Quantity */}
             <div className="mt-4">
@@ -225,10 +341,17 @@ export default function EditorPrintPortrait() {
             <div className="mt-4 rounded-2xl bg-gray-50 p-3">
               <div className="text-sm text-gray-800">
                 <b>Selected:</b>{" "}
-                {selectedVariant ? `${selectedVariant.size} (${selectedVariant.sku})` : "-"}
+                {selectedVariant ? `${selectedVariant.size}` : "-"}
               </div>
               <div className="mt-1 text-sm text-gray-800">
-                <b>Mount:</b> {mount}
+                <b>SKU:</b>{" "}
+                {selectedVariant ? `${selectedVariant.sku}` : "-"}
+              </div>
+              <div className="mt-1 text-sm text-gray-800">
+                <b>Frame:</b> {frame}
+              </div>
+              <div className="mt-1 text-sm text-gray-800">
+                <b>Mat:</b> {mat}
               </div>
               <div className="mt-1 text-sm text-gray-800">
                 <b>Price:</b> {quote ? `${quote.total} ${quote.currency}` : "—"}

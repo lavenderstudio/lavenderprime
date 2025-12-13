@@ -2,7 +2,7 @@
 // ----------------------------------------------------
 // Shows image inside a "frame" overlay for reference.
 // ----------------------------------------------------
-
+import woodBlack from "../assets/frame-black.png";
 
 export default function FramePreview({ imageUrl, mount = true }) {
   return (
@@ -21,7 +21,7 @@ export default function FramePreview({ imageUrl, mount = true }) {
 
           {/* Frame overlay */}
           <img
-            src="/frame-black.png"
+            src={woodBlack}
             alt="frame overlay"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
           />

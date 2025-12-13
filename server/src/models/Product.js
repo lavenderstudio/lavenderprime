@@ -3,10 +3,19 @@
 // Product schema holds reference data:
 // - slug/name/type
 // - variants (sku, orientation, size, basePrice)
-// - options (mounts/frame colors etc. - we’ll expand later)
+// - options (mounts/frames/mats etc.)
 // ----------------------------------------------------
 
 import mongoose from "mongoose";
+
+// Reusable schema for add-on options (mount/frame/mat)
+const AddOnSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },  // e.g. "White Mount", "Black Wood", "Gallery"
+    price: { type: Number, required: true }, // add-on cost
+  },
+  { _id: false }
+);
 
 // Each variant is a purchasable option (like A4 portrait)
 const VariantSchema = new mongoose.Schema(
@@ -32,18 +41,19 @@ const ProductSchema = new mongoose.Schema(
     // Variants for different sizes/orientations
     variants: { type: [VariantSchema], default: [] },
 
-    // Configurable add-ons (keep empty for now)
+    // Configurable add-ons
     options: {
-      mounts: {
-        type: [
-          {
-            name: { type: String, required: true }, // "No Mount", "White Mount"
-            price: { type: Number, required: true }, // add-on cost
-          },
-        ],
-        default: [],
-      },
-      frameColors: { type: [String], default: [] }, // for Print&Frame later
+      // existing
+      mounts: { type: [AddOnSchema], default: [] },
+
+      // NEW: frame selection (Black Wood, Gold Metal, etc.)
+      frames: { type: [AddOnSchema], default: [] },
+
+      // NEW: mat width selection (None, Thin, Classic, Gallery)
+      mats: { type: [AddOnSchema], default: [] },
+
+      // keep your existing field for later (Print&Frame)
+      frameColors: { type: [String], default: [] },
     },
   },
   { timestamps: true }

@@ -73,9 +73,9 @@ function RatioCard({ ratio, selected, onClick }) {
         ${selected ? "border-emerald-400 bg-emerald-200" : "border-gray-200 bg-white hover:bg-gray-50"}`}
     >
       {/* Simple icon mock */}
-      <div className="flex h-16 w-20 items-center justify-center rounded-xl bg-[#00D492]">
+      <div className="flex h-16 w-20 items-center justify-center rounded-xl">
         <div
-          className="border border-gray-300 bg-white"
+          className="border border-gray-600 bg-white"
           style={{
             width: 40,
             height: Math.max(18, Math.round((40 * ratio.h) / ratio.w)),
@@ -154,10 +154,10 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete }) {
               <p className="text-center text-sm font-semibold text-gray-900">Ratio reference</p>
 
               {/* Ratio preview box */}
-              <div className="mx-auto mt-4 flex max-w-sm items-center justify-center bg-[#00D492] p-4 rounded-2xl">
+              <div className="mx-auto mt-4 flex max-w-sm items-center justify-center bg-white  p-4 rounded-2xl">
                 <div className="relative h-44 w-44 rounded-2xl ">
                   <div
-                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-white/90"
+                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-black"
                     style={{
                       width: 120,
                       height: Math.round((120 * selectedRatio.h) / selectedRatio.w),

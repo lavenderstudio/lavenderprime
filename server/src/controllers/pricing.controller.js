@@ -59,6 +59,23 @@ export const quotePrice = async (req, res) => {
       unit += mount.price;
     }
 
+    if (options.frame) {
+      const frame = product.options?.frames?.find((f) => f.name === options.frame);
+      if (!frame) {
+        return res.status(400).json({ message: "Invalid frame option" });
+      }
+      unit += frame.price;
+    }
+
+    // Add-on: mat (optional)
+    if (options.mat) {
+      const mat = product.options?.mats?.find((m) => m.name === options.mat);
+      if (!mat) {
+        return res.status(400).json({ message: "Invalid mat option" });
+      }
+      unit += mat.price;
+    }
+
     // Total
     const total = unit * qty;
 
