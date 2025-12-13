@@ -11,6 +11,7 @@ import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
 import FramePreview from "../components/FramePreview.jsx";
 import { FRAME_OPTIONS, MAT_OPTIONS } from "../lib/optionsUi.js";
+import { MAT_CM } from "../lib/matSizes.js";
 
 export default function EditorPrintPortrait() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function EditorPrintPortrait() {
   const [variantSku, setVariantSku] = useState("");
   const [mount, setMount] = useState("No Mount");
   const [frame, setFrame] = useState("Black Wood");
-  const [mat, setMat] = useState("None");
+  const [mat, setMat] = useState("Classic");
   const [quantity, setQuantity] = useState(1);
   const [originalUrl, setOriginalUrl] = useState("");
   const [quote, setQuote] = useState(null);
@@ -75,6 +76,14 @@ export default function EditorPrintPortrait() {
   }, [variantSku, mount, frame, mat, quantity]);
 
   const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
+  
+  const matCm = MAT_CM[mat] ?? 0;
+
+  const parsedPrint = parseCmSize(selectedVariant?.size);
+
+  const totalSize = parsedPrint
+    ? totalWithMat(parsedPrint.w, parsedPrint.h, matCm)
+    : null;
 
   const handleAddToCart = async () => {
     try {
@@ -124,7 +133,7 @@ export default function EditorPrintPortrait() {
 
   function SizePills({ variants, value, onChange }) {
     return (
-      <div className="mt-2 flex flex-wrap gap-2 active:scale-[0.98] transition">
+      <div className="mt-2 flex flex-wrap gap-2">
         {variants.map((v) => {
           const active = v.sku === value;
           return (
@@ -132,8 +141,12 @@ export default function EditorPrintPortrait() {
               key={v.sku}
               type="button"
               onClick={() => onChange(v.sku)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold transition active:scale-[1.05]
-                ${active ? "bg-gray-900 text-white" : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"}`}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition active:scale-[0.99]
+                ${
+                  active
+                    ? "bg-gray-900 text-white"
+                    : "bg-white text-gray-900 border border-gray-300 hover:bg-gray-50"
+                }`}
             >
               {v.size}
             </button>
@@ -142,6 +155,7 @@ export default function EditorPrintPortrait() {
       </div>
     );
   }
+
 
   function FrameTiles({ options, value, onChange }) {
     return (
@@ -207,6 +221,24 @@ export default function EditorPrintPortrait() {
   }
 
 
+  function parseCmSize(sizeStr) {
+    // Accepts "12x18" or "12x18cm" or "12×18"
+    if (!sizeStr) return null;
+
+    const cleaned = sizeStr.toLowerCase().replace("cm", "").replace("×", "x").trim();
+    const [w, h] = cleaned.split("x").map((n) => Number(n));
+
+    if (!Number.isFinite(w) || !Number.isFinite(h)) return null;
+    return { w, h };
+  }
+
+  function totalWithMat(printW, printH, matCm) {
+    return {
+      w: printW + matCm * 2,
+      h: printH + matCm * 2,
+    };
+  }
+
 
 
   return (
@@ -242,7 +274,7 @@ export default function EditorPrintPortrait() {
 									</button>
 
 									<p className="mt-3 text-xs text-gray-600">
-										You’ll choose a ratio first, then crop in Filestack, then see a framed preview.
+										You’ll choose a ratio first, then crop it, then see a framed preview.
 									</p>
 								</>
 							) : (
@@ -277,22 +309,33 @@ export default function EditorPrintPortrait() {
           <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900">Options</h3>
 
-            {/* Size */}
-            <div className="mt-4">
-              <div className="mt-4">
-                <label className="block text-sm font-semibold text-gray-900">
+            {/* Sizes */}
+            <div className="mt-6 pt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-900">
                   Total Frame Sizes (CM)
-                </label>
+                </span>
 
+                <span className="text-sm text-gray-700">
+                  Print Size:{" "}
+                  <b>
+                    {parsedPrint
+                      ? `${parsedPrint.w}x${parsedPrint.h}cm`
+                      : selectedVariant?.size || "-"}
+                  </b>
+                </span>
+              </div>
+
+              <div className="mt-2">
                 <SizePills
                   variants={portraitVariants}
                   value={variantSku}
                   onChange={setVariantSku}
                 />
+              </div>
 
-                <div className="mt-2 text-xs text-gray-600">
-                  Print Size: <span className="font-semibold">{selectedVariant?.size || "-"}</span>
-                </div>
+              <div className="mt-2 text-sm text-gray-900">
+                Total Size: <b>{totalSize ? `${totalSize.w}x${totalSize.h}cm` : "—"}</b>
               </div>
             </div>
 
@@ -314,18 +357,22 @@ export default function EditorPrintPortrait() {
             {/* MatTiles */}
             <div className="mt-4">
               <div className="mt-6">
-                <label className="text-sm font-semibold text-gray-900">Mat Width: 0.0cm</label>
+                <label className="text-sm font-semibold text-gray-900">
+                  Mat Width: {matCm}x{matCm}cm
+                </label>
                 <MatTiles options={MAT_OPTIONS} value={mat} onChange={setMat} />
 
                 <button
                   type="button"
                   className="mt-3 text-xs font-semibold text-blue-600 hover:underline"
-                  onClick={() => alert("Mat = mount spacing around the image (like a border).")}
+                  onClick={() => alert("A Mat refers to the card insert placed around your photo within a frame, serving as a surrounding border.")}
                 >
                   What is Mat?
                 </button>
               </div>
             </div>
+
+            
 
             
 
@@ -355,10 +402,16 @@ export default function EditorPrintPortrait() {
                 <b>Frame:</b> {frame}
               </div>
               <div className="mt-1 text-sm text-gray-800">
-                <b>Mat:</b> {mat}
+                <b>Mat:</b> {mat} {matCm}x{matCm}
               </div>
               <div className="mt-1 text-sm text-gray-800">
                 <b>Price:</b> {quote ? `${quote.total} ${quote.currency}` : "—"}
+              </div>
+              <div className="mt-1 text-sm text-gray-800">
+                <b>Total Print Size:{" "}</b>
+                <span>
+                  {totalSize ? `${totalSize.w}x${totalSize.h}cm` : "—"}
+                </span>
               </div>
             </div>
 
