@@ -14,13 +14,13 @@ export default function App() {
   return (
     <Routes>
         {/* Redirect home to print portrait for now */}
-        <Route path="/" element={<Navigate to="/print/portrait" replace />} />
+        <Route path="/" element={<Navigate to="/products" replace />} />
 
         {/* Print landing */}
-        <Route path="/print/portrait" element={<PrintPortrait />} />
+        <Route path="/products" element={<PrintPortrait />} />
 
         {/* Editor */}
-        <Route path="/editor/print/portrait" element={<EditorPrintPortrait />} />
+        <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
 
         {/* 404 */}
         <Route path="*" element={<div style={{ padding: 24 }}>404 - Not Found</div>} />

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 // client/src/pages/EditorPrintPortrait.jsx
 // Tailwind version: responsive editor UI
 // - Mobile: stacks editor + options
@@ -21,8 +22,6 @@ export default function EditorPrintPortrait() {
   const [mount, setMount] = useState("No Mount");
   const [frame, setFrame] = useState("Black Wood");
   const [mat, setMat] = useState("Classic");
-  const [selectedFrame, setSelectedFrame] = useState("Black Wood");
-  const [selectedMat, setSelectedMat] = useState("Classic");
   const [quantity, setQuantity] = useState(1);
   const [originalUrl, setOriginalUrl] = useState("");
   const [quote, setQuote] = useState(null);
@@ -50,9 +49,6 @@ export default function EditorPrintPortrait() {
     return (product?.variants || []).filter((v) => v.orientation === "portrait");
   }, [product]);
 
-  const mountOptions = useMemo(() => {
-    return product?.options?.mounts?.map((m) => m.name) || ["No Mount"];
-  }, [product]);
 
   useEffect(() => {
     const getQuote = async () => {
@@ -161,7 +157,7 @@ export default function EditorPrintPortrait() {
 
   function FrameTiles({ options, value, onChange }) {
     return (
-      <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6 active:scale-[0.98] transition">
+      <div className="mt-3 grid grid-cols-3 gap-3 xl:grid-cols-6 active:scale-[0.98] transition">
         {options.map((opt) => {
           const active = opt.id === value;
           return (
@@ -244,13 +240,7 @@ export default function EditorPrintPortrait() {
 
 
   return (
-    <Page title="Editor — Print Portrait">
-      <div className="mb-3">
-        <Link to="/print/portrait" className="text-sm text-blue-600 hover:underline">
-          ← Back
-        </Link>
-      </div>
-
+    <Page title="Editor — Print & Frame">
       {error && (
         <div className="rounded-xl bg-red-50 p-3 text-red-700 border border-red-200">
           <b>Error:</b> {error}
@@ -260,9 +250,9 @@ export default function EditorPrintPortrait() {
       {!product ? (
         <p className="text-gray-600">Loading product…</p>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-[1.6fr,1fr]">
+        <div className="grid gap-4 lg:grid-cols-12">
           {/* LEFT: Editor */}
-          <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-[#F3F4F6] shadow-sm">
+          <div className="relative overflow-hidden rounded-2xl lg:col-span-7 border border-gray-200 bg-[#F3F4F6] shadow-sm">
 						<div className="p-5">
 							{!originalUrl ? (
 								<>
@@ -308,7 +298,7 @@ export default function EditorPrintPortrait() {
 
 
           {/* RIGHT: Options */}
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+          <div className="rounded-2xl border border-gray-200 bg-white lg:col-span-5 p-4 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900">Options</h3>
 
             {/* Sizes */}
@@ -328,7 +318,7 @@ export default function EditorPrintPortrait() {
                 </span>
               </div>
 
-              <div className="mt-2">
+              <div className="mt-2">   
                 <SizePills
                   variants={portraitVariants}
                   value={variantSku}
@@ -452,6 +442,13 @@ export default function EditorPrintPortrait() {
 					setOriginalUrl(imageUrl);
 				}}
 			/>
+      <div className="mb-3">
+        <Link to="/products" className="text-sm text-blue-600 hover:underline">
+          <button type="button" className="mt-4 inline-block rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">&#8592;
+            Back to Products
+          </button>
+        </Link>
+      </div>
     </Page>
   );
 }

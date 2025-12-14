@@ -10,6 +10,7 @@ export default function FramePreview({ imageUrl, frame, mat }) {
   const safeFrame = FRAME_STYLES[frame] ? frame : "Black Wood";
   const frameStyle = FRAME_STYLES[safeFrame];
   const matPadding = MAT_PADDING[mat] ?? "0px";
+  const FALLBACK_BG = "#ffffff";
 
   const bg = frameStyle.background;
   const bgIsTexture = isUrlBackground(bg);
@@ -21,7 +22,7 @@ export default function FramePreview({ imageUrl, frame, mat }) {
         className="relative overflow-hidden rounded-sm"
         animate={{
           padding: frameStyle.border,
-          backgroundColor: bgIsTexture ? "transparent" : bg,
+          backgroundColor: bgIsTexture ? FALLBACK_BG : bg,
         }}
         transition={{ duration: 0.3, ease: "easeOut" }}
         style={{
@@ -58,7 +59,13 @@ export default function FramePreview({ imageUrl, frame, mat }) {
             transition={{ duration: 0.28, ease: "easeOut" }}
             style={{
               // INNER SHADOW (depth of frame edge)
-              boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.10)",
+              boxShadow: `
+                inset 0 0 6px rgba(0,0,0,0.22),
+                inset 0 1px 2px rgba(255,255,255,0.5),
+                inset 0 -3px 4px rgba(0,0,0,0.35),
+                inset 2px 0 3px rgba(0,0,0,0.25),
+                inset -2px 0 3px rgba(0,0,0,0.25)
+              `,
             }}
           >
             {/* IMAGE */}

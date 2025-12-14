@@ -131,7 +131,7 @@ export default function Cart() {
                       {previewImg ? (
                         <FramePreview imageUrl={previewImg} frame={frame} mat={mat} />
                       ) : (
-                        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-gray-100 text-sm text-gray-600">
+                        <div className="flex aspect-4/3 w-full items-center justify-center rounded-xl bg-gray-100 text-sm text-gray-600">
                           No image
                         </div>
                       )}
