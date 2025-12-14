@@ -11,7 +11,7 @@ const PRODUCTS = [
   {
     id: "print",
     name: "Print",
-    image: "/printandframe.png",
+    image: "/print.png",
     href: "/editor/print",
   },
   {
@@ -92,7 +92,7 @@ function ProductCard({ product, index, total }) {
             <img
               src={product.image}
               alt={product.name}
-              className="max-h-full max-w-full object-contain drop-shadow-sm transition group-hover:scale-[1.02]"
+              className="max-h-full max-w-full object-contain drop-shadow-sm transition group-hover:scale-[1.02] shadow-2xl"
               loading="lazy"
             />
           </div>
