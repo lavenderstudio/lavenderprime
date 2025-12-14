@@ -180,27 +180,75 @@ export default function CheckoutPage() {
           <h3 className="text-lg font-semibold text-gray-900">Order summary</h3>
 
           <div className="mt-3 space-y-3">
-            {(cart?.items || []).map((item) => (
-              <div key={item._id} className="flex items-center gap-3">
-                <img
-                  src={item.assets?.previewUrl || item.assets?.originalUrl}
-                  alt="preview"
-                  className="h-12 w-12 rounded-xl border border-gray-200 object-cover"
-                />
-                <div className="flex-1 text-sm text-gray-800">
-                  <div className="font-semibold">{item.productSlug?.toUpperCase()}</div>
-                  <div className="text-xs text-gray-600">
-                    Frame: {item.config?.frame} | Mat: {item.config?.mat} | Size: {item.config?.size}
+            {(cart?.items || []).map((item) => {
+              const cfg = item.config || {};
+
+              // Detect which fields exist (so we don’t show empty labels)
+              const material =
+                typeof cfg.material === "string" && cfg.material.length ? cfg.material : null;
+
+              const frame =
+                typeof cfg.frame === "string" && cfg.frame.length ? cfg.frame : null;
+
+              const mat =
+                typeof cfg.mat === "string" && cfg.mat.length ? cfg.mat : null;
+
+              const size =
+                typeof cfg.size === "string" && cfg.size.length ? cfg.size : "—";
+
+              const qty = Number(cfg.quantity || 1);
+
+              // Use previewUrl if you have it, else originalUrl
+              const thumb = item.assets?.previewUrl || item.assets?.originalUrl || "";
+
+              return (
+                <div key={item._id} className="flex items-center gap-3">
+                  <img
+                    src={thumb}
+                    alt="preview"
+                    className="h-12 w-12 rounded-xl border border-gray-200 object-cover"
+                  />
+
+                  <div className="flex-1 text-sm text-gray-800">
+                    <div className="font-semibold">{item.productSlug?.toUpperCase()}</div>
+
+                    {/* Only show the options that apply */}
+                    <div className="text-xs text-gray-600">
+                      {material && (
+                        <>
+                          Material: {material}
+                          {" | "}
+                        </>
+                      )}
+
+                      {frame && (
+                        <>
+                          Frame: {frame}
+                          {" | "}
+                        </>
+                      )}
+
+                      {mat && (
+                        <>
+                          Mat: {mat}
+                          {" | "}
+                        </>
+                      )}
+
+                      Size: {size}
+                    </div>
+                  </div>
+
+                  <div className="text-sm font-semibold text-gray-900">
+                    {item.price?.total} {item.price?.currency}
+                    <div className="text-xs font-normal text-gray-600 text-end">
+                      Qty: {qty}
+                    </div>
                   </div>
                 </div>
-                <div className="text-sm font-semibold text-gray-900">
-                  {item.price?.total} {item.price?.currency}
-                  <div className="text-xs font-normal text-gray-600 text-end">
-                    Qty: {item.config?.quantity}
-                  </div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
+
           </div>
 
           <div className="mt-4 rounded-xl bg-gray-50 p-3 text-sm text-gray-800">

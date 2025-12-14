@@ -113,12 +113,18 @@ export default function Cart() {
               // ✅ Filestack cropped result is your preview image
               const previewImg = assets.originalUrl || assets.previewUrl || "";
 
-              const frame = cfg.frame || "Black Wood";
-              const mat = cfg.mat || "None";
-              const matCm = MAT_CM[mat] ?? 0;
-
+              // Core values shared by all print-like items
               const print = parseCmSize(cfg.size);
-              const total = print ? totalWithMat(print.w, print.h, matCm) : null;
+              const hasFrame = typeof cfg.frame === "string" && cfg.frame.length > 0;
+              const hasMat = typeof cfg.mat === "string" && cfg.mat.length > 0;
+              const hasMaterial = typeof cfg.material === "string" && cfg.material.length > 0;
+
+              // Only compute mat-related totals when we actually have a mat
+              const frame = hasFrame ? cfg.frame : null;
+              const mat = hasMat ? cfg.mat : null;
+              const matCm = mat ? (MAT_CM[mat] ?? 0) : 0;
+
+              const total = print && mat ? totalWithMat(print.w, print.h, matCm) : null;
 
               return (
                 <div
@@ -129,7 +135,11 @@ export default function Cart() {
                     {/* Preview */}
                     <div>
                       {previewImg ? (
-                        <FramePreview imageUrl={previewImg} frame={frame} mat={mat} />
+                        <FramePreview
+                          imageUrl={previewImg}
+                          frame={frame || "White Wood"}
+                          mat={mat || "None"}
+                        />
                       ) : (
                         <div className="flex aspect-4/3 w-full items-center justify-center rounded-xl bg-gray-100 text-sm text-gray-600">
                           No image
@@ -150,24 +160,39 @@ export default function Cart() {
                               <b>Variant SKU:</b> {it.variantSku}
                             </div>
 
-                            <div>
-                              <b>Frame:</b> {frame}
-                            </div>
+                            {/* SIMPLE PRINT */}
+                            {hasMaterial && (
+                              <div>
+                                <b>Material:</b> {cfg.material}
+                              </div>
+                            )}
 
-                            <div>
-                              <b>Mat:</b> {mat} ({matCm}cm)
-                            </div>
+                            {/* PRINT & FRAME */}
+                            {frame && (
+                              <div>
+                                <b>Frame:</b> {frame}
+                              </div>
+                            )}
+
+                            {mat && (
+                              <div>
+                                <b>Mat:</b> {mat} ({matCm}cm)
+                              </div>
+                            )}
 
                             <div>
                               <b>Print Size:</b>{" "}
                               {print ? `${print.w}x${print.h}cm` : cfg.size || "—"}
                             </div>
 
-                            <div>
-                              <b>Total Size:</b>{" "}
-                              {total ? `${total.w}x${total.h}cm` : "—"}
-                            </div>
+                            {/* Only show Total Size if mat exists */}
+                            {mat && (
+                              <div>
+                                <b>Total Size:</b> {total ? `${total.w}x${total.h}cm` : "—"}
+                              </div>
+                            )}
                           </div>
+
                         </div>
 
                         <button

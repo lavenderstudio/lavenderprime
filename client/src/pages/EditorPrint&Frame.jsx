@@ -96,7 +96,7 @@ export default function EditorPrintPortrait() {
       await api.post("/api/cart/items", {
         sessionId,
         item: {
-          productSlug: "print",
+          productSlug: "print and frame",
           variantSku,
           config: {
             orientation: "portrait",

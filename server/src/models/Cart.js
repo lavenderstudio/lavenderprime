@@ -15,6 +15,7 @@ const CartItemSchema = new mongoose.Schema(
       orientation: String,
       size: String,
       mount: String,
+      material: String,
       frame: String,
       mat: String,
       quantity: { type: Number, default: 1 },
@@ -32,6 +33,9 @@ const CartItemSchema = new mongoose.Schema(
           width: Number,
           height: Number,
         },
+        ratio: String,
+        ratioW: Number,
+        ratioH: Number,
       },
     },
 
