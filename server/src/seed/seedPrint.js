@@ -25,36 +25,27 @@ async function run() {
       name: "Print",
       type: "PRINT",
       variants: [
-        { sku: "PRINT&FRAME_14x20", orientation: "portrait", size: "14x20", basePrice: 89 },
-        { sku: "PRINT&FRAME_22x32", orientation: "portrait", size: "22x32", basePrice: 139 },
-        { sku: "PRINT&FRAME_32x47", orientation: "portrait", size: "32x47", basePrice: 209 },
-        { sku: "PRINT&FRAME_42x62", orientation: "portrait", size: "42x62", basePrice: 289 },
-        { sku: "PRINT&FRAME_53x78", orientation: "portrait", size: "53x78", basePrice: 379 },
-        { sku: "PRINT&FRAME_63x93", orientation: "portrait", size: "63x93", basePrice: 489 },
+        { sku: "PRINT_12x18", orientation: "portrait", size: "12x18", basePrice: 29 },
+        { sku: "PRINT_20x30", orientation: "portrait", size: "20x30", basePrice: 39 },
+        { sku: "PRINT_30x45", orientation: "portrait", size: "30x45", basePrice: 59 },
+        { sku: "PRINT_40x60", orientation: "portrait", size: "40x60", basePrice: 79 },
+        { sku: "PRINT_50x75", orientation: "portrait", size: "50x75", basePrice: 99 },
+        { sku: "PRINT_60x90", orientation: "portrait", size: "60x90", basePrice: 169 },
       ],
       options: {
         // Mount options (existing)
-        mounts: [
-          { name: "No Mount", price: 0 },
-          { name: "White Mount", price: 20 },
-        ],
+        mounts: [],
 
         // NEW: Frame options (names MUST match your UI strings)
-        frames: [
-          { name: "Black Wood", price: 0 },
-          { name: "White Wood", price: 0 },
-          { name: "Walnut Wood", price: 0 },
-          { name: "Natural Wood", price: 0 },
-          { name: "Black Metal", price: 0 },
-          { name: "Gold Metal", price: 0 },
-        ],
+        frames: [],
 
         // NEW: Mat options (names MUST match your UI strings)
-        mats: [
-          { name: "None", price: 0 },
-          { name: "Thin", price: 30 },
-          { name: "Classic", price: 50 },
-          { name: "Gallery", price: 110 },
+        mats: [],
+
+        // NEW: Material options (names MUST match your UI strings)
+        materials: [
+          { name: "Matte", price: 0 },
+          { name: "Glossy", price: 0 },
         ],
 
         // keep for later

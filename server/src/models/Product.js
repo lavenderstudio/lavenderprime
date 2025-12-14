@@ -52,6 +52,9 @@ const ProductSchema = new mongoose.Schema(
       // NEW: mat width selection (None, Thin, Classic, Gallery)
       mats: { type: [AddOnSchema], default: [] },
 
+      // NEW: mat width selection (None, Thin, Classic, Gallery)
+      materials: { type: [AddOnSchema], default: [] },
+
       // keep your existing field for later (Print&Frame)
       frameColors: { type: [String], default: [] },
     },

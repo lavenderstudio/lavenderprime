@@ -4,8 +4,9 @@
 // ----------------------------------------------------
 
 import { Routes, Route, Navigate } from "react-router-dom";
-import PrintPortrait from "./pages/PrintPortrait.jsx";
-import EditorPrintPortrait from "./pages/EditorPrintPortrait.jsx";
+import ProductsPage from "./pages/ProductsPage.jsx";
+import EditorPrintPortrait from "./pages/EditorPrint&Frame.jsx";
+import EditorPrint from "./pages/EditorPrint.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrderSuccessPage from "./pages/OrderSuccessPage.jsx";
@@ -17,10 +18,13 @@ export default function App() {
         <Route path="/" element={<Navigate to="/products" replace />} />
 
         {/* Print landing */}
-        <Route path="/products" element={<PrintPortrait />} />
+        <Route path="/products" element={<ProductsPage />} />
 
-        {/* Editor */}
+        {/* Editor Print And Frame */}
         <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
+        
+        {/* Editor Print */}
+        <Route path="/editor/print" element={<EditorPrint />} />
 
         {/* 404 */}
         <Route path="*" element={<div style={{ padding: 24 }}>404 - Not Found</div>} />

@@ -10,18 +10,14 @@ import { Link, useNavigate } from "react-router-dom";
 import Page from "../components/Page.jsx";
 import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
-import FramePreview from "../components/FramePreview.jsx";
-import { FRAME_OPTIONS, MAT_OPTIONS } from "../lib/optionsUi.js";
-import { MAT_CM } from "../lib/matSizes.js";
+import PrintPreview from "../components/PrintPreview.jsx";
 
-export default function EditorPrintPortrait() {
+export default function EditorPrint() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [variantSku, setVariantSku] = useState("");
-  const [mount, setMount] = useState("No Mount");
-  const [frame, setFrame] = useState("Black Wood");
-  const [mat, setMat] = useState("Classic");
+  const [material, setMaterial] = useState("Matte");
   const [quantity, setQuantity] = useState(1);
   const [originalUrl, setOriginalUrl] = useState("");
   const [quote, setQuote] = useState(null);
@@ -36,14 +32,18 @@ export default function EditorPrintPortrait() {
         const res = await api.get("/api/products/print");
         setProduct(res.data);
 
-        const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
-        if (firstPortrait) setVariantSku(firstPortrait.sku);
+        const firstMaterial = res.data.options?.materials?.[0];
+        if (firstMaterial) setMaterial(firstMaterial.name);
       } catch (err) {
         setError(err?.response?.data?.message || err.message);
       }
     };
     load();
   }, []);
+
+	const materialOptions = useMemo(() => {
+		return product?.options?.materials || [];
+	}, [product]);
 
   const portraitVariants = useMemo(() => {
     return (product?.variants || []).filter((v) => v.orientation === "portrait");
@@ -57,10 +57,8 @@ export default function EditorPrintPortrait() {
         const res = await api.post("/api/pricing/quote", {
           productSlug: "print",
           variantSku,
-          options: { 
-            mount, 
-            frame, 
-            mat 
+          options: {
+            material,
           },
           quantity,
         });
@@ -71,17 +69,11 @@ export default function EditorPrintPortrait() {
       }
     };
     getQuote();
-  }, [variantSku, mount, frame, mat, quantity]);
+  }, [variantSku, material, quantity]);
 
   const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
-  
-  const matCm = MAT_CM[mat] ?? 0;
 
   const parsedPrint = parseCmSize(selectedVariant?.size);
-
-  const totalSize = parsedPrint
-    ? totalWithMat(parsedPrint.w, parsedPrint.h, matCm)
-    : null;
 
   const handleAddToCart = async () => {
     try {
@@ -101,9 +93,7 @@ export default function EditorPrintPortrait() {
           config: {
             orientation: "portrait",
             size: selectedVariant.size,
-            mount,
-            frame,
-            mat,
+            material,
             quantity,
             transform: {
 							ratio: selectedRatio.id,
@@ -154,69 +144,39 @@ export default function EditorPrintPortrait() {
     );
   }
 
+	function MaterialTiles({ options, value, onChange }) {
+		return (
+			<div className="mt-3 grid grid-cols-2 gap-3 transition">
+				{options.map((opt) => {
+					const active = opt.name === value;
 
-  function FrameTiles({ options, value, onChange }) {
-    return (
-      <div className="mt-3 grid grid-cols-3 gap-3 xl:grid-cols-6 active:scale-[0.98] transition">
-        {options.map((opt) => {
-          const active = opt.id === value;
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => onChange(opt.id)}
-              className={`group rounded-2xl p-2 text-center transition active:scale-[1.05]
-                ${active ? "ring-2 ring-emerald-400 bg-emerald-50" : "border border-gray-200 bg-white hover:bg-gray-50"}`}
-            >
-              <div className="mx-auto h-14 w-14 overflow-hidden rounded-full bg-gray-100">
-                <img
-                  src={opt.img}
-                  alt={opt.id}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-gray-700">
-                {opt.id}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
+					return (
+						<button
+							key={opt.name}
+							type="button"
+							onClick={() => onChange(opt.name)}
+							className={`rounded-2xl  p-3 text-center transition active:scale-[1.05]
+								${
+									active
+										? "ring-2 ring-emerald-400 bg-emerald-50"
+										: "border border-gray-200 bg-white hover:bg-gray-50"
+								}`}
+						>
+							<div className="text-sm font-semibold text-gray-900">
+								{opt.name}
+							</div>
 
-  function MatTiles({ options, value, onChange }) {
-    return (
-      <div className="mt-3 grid grid-cols-4 gap-3 active:scale-[0.98] transition">
-        {options.map((opt) => {
-          const active = opt.id === value;
-          const Icon = opt.Icon;
-
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => onChange(opt.id)}
-              className={`rounded-2xl p-3 text-center transition active:scale-[1.05]
-                ${
-                  active
-                    ? "ring-2 ring-emerald-400 bg-emerald-50"
-                    : "border border-gray-200 bg-white hover:bg-gray-50"
-                }`}
-            >
-              <div className="mx-auto h-14 w-14">
-                <Icon />
-              </div>
-
-              <div className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-gray-700">
-                {opt.id}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
+							{opt.price > 0 && (
+								<div className="mt-1 text-xs text-gray-500">
+									+{opt.price}
+								</div>
+							)}
+						</button>
+					);
+				})}
+			</div>
+		);
+	}
 
 
   function parseCmSize(sizeStr) {
@@ -228,13 +188,6 @@ export default function EditorPrintPortrait() {
 
     if (!Number.isFinite(w) || !Number.isFinite(h)) return null;
     return { w, h };
-  }
-
-  function totalWithMat(printW, printH, matCm) {
-    return {
-      w: printW + matCm * 2,
-      h: printH + matCm * 2,
-    };
   }
 
 
@@ -285,10 +238,8 @@ export default function EditorPrintPortrait() {
 									</div>
 
 									<div className="mt-4">
-										<FramePreview
+										<PrintPreview
                       imageUrl={originalUrl}
-                      frame={frame}
-                      mat={mat}
                     />
 									</div>
 								</>
@@ -325,42 +276,24 @@ export default function EditorPrintPortrait() {
                   onChange={setVariantSku}
                 />
               </div>
-
-              <div className="mt-2 text-sm text-gray-900">
-                Total Size: <b>{totalSize ? `${totalSize.w}x${totalSize.h}cm` : "—"}</b>
-              </div>
             </div>
 
             {/* Mount */}
             <div className="mt-4">
               <div className="mt-5">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-gray-900">Frames: {frame}</label>
+                  <label className="text-sm font-semibold text-gray-900">Material: {material}</label>
 
                   <div className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-900">
                     Price: {quote ? `${quote.total} ${quote.currency}` : "—"}
                   </div>
                 </div>
 
-                <FrameTiles options={FRAME_OPTIONS} value={frame} onChange={setFrame} />
-              </div>
-            </div>
-
-            {/* MatTiles */}
-            <div className="mt-4">
-              <div className="mt-6">
-                <label className="text-sm font-semibold text-gray-900">
-                  Mat Width: {matCm}x{matCm}cm
-                </label>
-                <MatTiles options={MAT_OPTIONS} value={mat} onChange={setMat} />
-
-                <button
-                  type="button"
-                  className="mt-3 text-xs font-semibold text-blue-600 hover:underline"
-                  onClick={() => alert("A Mat refers to the card insert placed around your photo within a frame, serving as a surrounding border.")}
-                >
-                  What is Mat?
-                </button>
+                <MaterialTiles
+									options={materialOptions}
+									value={material}
+									onChange={setMaterial}
+								/>
               </div>
             </div>
 
@@ -391,19 +324,10 @@ export default function EditorPrintPortrait() {
                 {selectedVariant ? `${selectedVariant.sku}` : "-"}
               </div>
               <div className="mt-1 text-sm text-gray-800">
-                <b>Frame:</b> {frame}
-              </div>
-              <div className="mt-1 text-sm text-gray-800">
-                <b>Mat:</b> {mat} {matCm}x{matCm}
+                <b>Material:</b> {material}
               </div>
               <div className="mt-1 text-sm text-gray-800">
                 <b>Price:</b> {quote ? `${quote.total} ${quote.currency}` : "—"}
-              </div>
-              <div className="mt-1 text-sm text-gray-800">
-                <b>Total Print Size:{" "}</b>
-                <span>
-                  {totalSize ? `${totalSize.w}x${totalSize.h}cm` : "—"}
-                </span>
               </div>
             </div>
 

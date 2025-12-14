@@ -12,7 +12,7 @@ const PRODUCTS = [
     id: "print",
     name: "Print",
     image: "/printandframe.png",
-    href: "/print/portrait",
+    href: "/editor/print",
   },
   {
     id: "print-frame",
@@ -52,7 +52,7 @@ const PRODUCTS = [
   },
 ];
 
-export default function Products() {
+export default function ProductsPage() {
   return (
     <Page>
       {/* Header */}

@@ -27,6 +27,10 @@ export const FRAME_STYLES = {
     border: "8px",
     background: "#DAA520",
   },
+  "Print Frame": {
+    border: "7px",
+    background: "#F3F3F3",
+  },
 };
 
 export const MAT_PADDING = {
