@@ -19,7 +19,6 @@ export default function EditorPrintPortrait() {
 
   const [product, setProduct] = useState(null);
   const [variantSku, setVariantSku] = useState("");
-  const [mount, setMount] = useState("No Mount");
   const [frame, setFrame] = useState("Black Wood");
   const [mat, setMat] = useState("Classic");
   const [quantity, setQuantity] = useState(1);
@@ -57,8 +56,7 @@ export default function EditorPrintPortrait() {
         const res = await api.post("/api/pricing/quote", {
           productSlug: "printandframe",
           variantSku,
-          options: { 
-            mount, 
+          options: {
             frame, 
             mat 
           },
@@ -71,7 +69,7 @@ export default function EditorPrintPortrait() {
       }
     };
     getQuote();
-  }, [variantSku, mount, frame, mat, quantity]);
+  }, [variantSku, frame, mat, quantity]);
 
   const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
   
@@ -101,7 +99,6 @@ export default function EditorPrintPortrait() {
           config: {
             orientation: "portrait",
             size: selectedVariant.size,
-            mount,
             frame,
             mat,
             quantity,
