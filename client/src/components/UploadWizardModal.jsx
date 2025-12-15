@@ -120,8 +120,27 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete }) {
 
   if (!isOpen) return null;
 
+  // Small mobile header: shows only the current step title + step count
+  function MobileStepHeader({ step }) {
+    const title =
+      step === 1 ? "Choose Orientation" : step === 2 ? "Choose Image" : "Preview";
+
+    return (
+      <div className="sm:hidden">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-gray-900">{title}</p>
+
+          <span className="rounded-full bg-gray-100 px-2 py-1 text-[11px] font-semibold text-gray-700">
+            Step {step}/3
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-6">
       {/* Backdrop */}
       <button
         type="button"
@@ -131,11 +150,19 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete }) {
       />
 
       {/* Modal */}
-      <div className="relative mx-auto mt-10 w-[95%] max-w-4xl rounded-2xl bg-white p-4 shadow-xl sm:p-6">
+      <div
+        className="relative w-full max-w-[420px] sm:max-w-4xl rounded-2xl bg-white shadow-xl max-h-[90svh] sm:max-h-[90vh] overflow-hidden flex flex-col"
+      >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="shrink-0 p-3 sm:p-6 flex items-start justify-between gap-3 border-b border-gray-100">
           <div className="w-full">
-            <Stepper step={step} />
+            {/* Mobile: show only current step */}
+            <MobileStepHeader step={step} />
+
+            {/* Desktop/tablet: show full stepper */}
+            <div className="hidden sm:block">
+              <Stepper step={step} />
+            </div>
           </div>
 
           <button
@@ -147,8 +174,9 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete }) {
           </button>
         </div>
 
+
         {/* Body */}
-        <div className="mt-6">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6">
           {step === 1 && (
             <div>
               <p className="text-center text-sm font-semibold text-gray-900">Ratio reference</p>
