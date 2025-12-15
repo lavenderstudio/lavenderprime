@@ -151,7 +151,7 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete }) {
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-[420px] sm:max-w-4xl rounded-2xl bg-white shadow-xl max-h-[90svh] sm:max-h-[90vh] overflow-hidden flex flex-col"
+        className="relative w-full max-w-105 sm:max-w-4xl rounded-2xl bg-white shadow-xl max-h-[90svh] sm:max-h-[90vh] overflow-hidden flex flex-col"
       >
         {/* Header */}
         <div className="shrink-0 p-3 sm:p-6 flex items-start justify-between gap-3 border-b border-gray-100">

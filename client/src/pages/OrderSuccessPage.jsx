@@ -27,7 +27,7 @@ export default function OrderSuccessPage() {
   }, [id]);
 
   return (
-    <Page title="Order confirmed">
+    <Page title="Order Confirmed">
       <Link to="/print/portrait" className="text-sm text-blue-600 hover:underline">
         ← Back to shop
       </Link>

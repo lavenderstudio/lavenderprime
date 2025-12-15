@@ -187,7 +187,7 @@ export default function EditorCanvas() {
 
 
   return (
-    <Page title="Editor — Print & Frame">
+    <Page title="Editor — Canvas">
       {error && (
         <div className="rounded-xl bg-red-50 p-3 text-red-700 border border-red-200">
           <b>Error:</b> {error}
