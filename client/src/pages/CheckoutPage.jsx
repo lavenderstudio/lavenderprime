@@ -36,7 +36,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get(`/api/cart/${sessionId}`);
+        const res = await api.get(`/cart/${sessionId}`);
         setCart(res.data);
 
         if (!res.data?.items?.length) {
@@ -57,7 +57,7 @@ export default function CheckoutPage() {
     setError("");
 
     try {
-      const res = await api.post("/api/orders/checkout", {
+      const res = await api.post("/orders/checkout", {
         sessionId,
         customer,
         shippingAddress,

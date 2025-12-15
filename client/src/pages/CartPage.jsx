@@ -42,7 +42,7 @@ export default function Cart() {
   const loadCart = async () => {
     try {
       setError("");
-      const res = await api.get(`/api/cart/${sessionId}`);
+      const res = await api.get(`/cart/${sessionId}`);
       setCart(res.data);
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
@@ -64,7 +64,7 @@ export default function Cart() {
   const handleRemove = async (itemId) => {
     try {
       setError("");
-      const res = await api.delete(`/api/cart/${sessionId}/items/${itemId}`);
+      const res = await api.delete(`/cart/${sessionId}/items/${itemId}`);
       setCart(res.data);
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
@@ -76,7 +76,7 @@ export default function Cart() {
       setError("");
       const qty = Math.max(1, Number(nextQty) || 1);
 
-      const res = await api.patch(`/api/cart/${sessionId}/items/${itemId}`, {
+      const res = await api.patch(`/cart/${sessionId}/items/${itemId}`, {
         quantity: qty,
       });
 

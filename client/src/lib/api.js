@@ -1,13 +1,16 @@
 // client/src/lib/api.js
 // ----------------------------------------------------
 // Axios instance for API calls.
-// Keeps baseURL in one place.
+// - Dev: hits local Express server
+// - Prod: hits same-origin (/api) on Render
 // ----------------------------------------------------
 
 import axios from "axios";
 
+const isProd = import.meta.env.PROD;
+
 const api = axios.create({
-  baseURL: "http://localhost:5000", // your Express server
+  baseURL: isProd ? "/api" : "http://localhost:5000/api",
   withCredentials: true,
 });
 

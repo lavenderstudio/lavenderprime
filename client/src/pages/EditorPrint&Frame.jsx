@@ -32,7 +32,7 @@ export default function EditorPrintPortrait() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get("/api/products/printandframe");
+        const res = await api.get("/products/printandframe");
         setProduct(res.data);
 
         const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
@@ -53,7 +53,7 @@ export default function EditorPrintPortrait() {
     const getQuote = async () => {
       if (!variantSku) return;
       try {
-        const res = await api.post("/api/pricing/quote", {
+        const res = await api.post("/pricing/quote", {
           productSlug: "printandframe",
           variantSku,
           options: {
@@ -91,7 +91,7 @@ export default function EditorPrintPortrait() {
 
       const sessionId = getSessionId();
 
-      await api.post("/api/cart/items", {
+      await api.post("/cart/items", {
         sessionId,
         item: {
           productSlug: "print and frame",

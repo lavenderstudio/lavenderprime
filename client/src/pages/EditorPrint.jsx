@@ -29,7 +29,7 @@ export default function EditorPrint() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get("/api/products/print");
+        const res = await api.get("/products/print");
         setProduct(res.data);
 
         const firstMaterial = res.data.options?.materials?.[0];
@@ -54,7 +54,7 @@ export default function EditorPrint() {
     const getQuote = async () => {
       if (!variantSku) return;
       try {
-        const res = await api.post("/api/pricing/quote", {
+        const res = await api.post("/pricing/quote", {
           productSlug: "print",
           variantSku,
           options: {
@@ -85,7 +85,7 @@ export default function EditorPrint() {
 
       const sessionId = getSessionId();
 
-      await api.post("/api/cart/items", {
+      await api.post("/cart/items", {
         sessionId,
         item: {
           productSlug: "print",

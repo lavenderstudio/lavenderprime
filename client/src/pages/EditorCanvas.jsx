@@ -30,7 +30,7 @@ export default function EditorCanvas() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get("/api/products/canvas");
+        const res = await api.get("/products/canvas");
         setProduct(res.data);
 
         const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
@@ -51,7 +51,7 @@ export default function EditorCanvas() {
     const getQuote = async () => {
       if (!variantSku) return;
       try {
-        const res = await api.post("/api/pricing/quote", {
+        const res = await api.post("/pricing/quote", {
           productSlug: "canvas",
           variantSku,
           options: {
@@ -82,7 +82,7 @@ export default function EditorCanvas() {
 
       const sessionId = getSessionId();
 
-      await api.post("/api/cart/items", {
+      await api.post("/cart/items", {
         sessionId,
         item: {
           productSlug: "canvas",

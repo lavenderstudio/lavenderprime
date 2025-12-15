@@ -17,7 +17,7 @@ export default function OrderSuccessPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get(`/api/orders/${id}`);
+        const res = await api.get(`/orders/${id}`);
         setOrder(res.data);
       } catch (err) {
         setError(err?.response?.data?.message || err.message);
