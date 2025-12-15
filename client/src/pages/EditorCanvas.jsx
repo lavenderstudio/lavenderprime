@@ -10,40 +10,37 @@ import { Link, useNavigate } from "react-router-dom";
 import Page from "../components/Page.jsx";
 import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
-import PrintPreview from "../components/PrintPreview.jsx";
+import FramePreview from "../components/FramePreview.jsx";
+import { CANVAS_OPTIONS } from "../lib/optionsUi.js";
+import Canvas3DPreview from "../components/CanvasStretchedPreview.jsx";
 
-export default function EditorPrint() {
+export default function EditorCanvas() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [variantSku, setVariantSku] = useState("");
-  const [material, setMaterial] = useState("Matte");
+  const [frame, setFrame] = useState("Black Wood");
   const [quantity, setQuantity] = useState(1);
   const [originalUrl, setOriginalUrl] = useState("");
   const [quote, setQuote] = useState(null);
   const [error, setError] = useState("");
-
 	const [isUploadWizardOpen, setIsUploadWizardOpen] = useState(false);
 	const [selectedRatio, setSelectedRatio] = useState(null); // {id,w,h,label}
 
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get("/api/products/print");
+        const res = await api.get("/api/products/canvas");
         setProduct(res.data);
 
-        const firstMaterial = res.data.options?.materials?.[0];
-        if (firstMaterial) setMaterial(firstMaterial.name);
+        const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
+        if (firstPortrait) setVariantSku(firstPortrait.sku);
       } catch (err) {
         setError(err?.response?.data?.message || err.message);
       }
     };
     load();
   }, []);
-
-	const materialOptions = useMemo(() => {
-		return product?.options?.materials || [];
-	}, [product]);
 
   const portraitVariants = useMemo(() => {
     return (product?.variants || []).filter((v) => v.orientation === "portrait");
@@ -55,10 +52,10 @@ export default function EditorPrint() {
       if (!variantSku) return;
       try {
         const res = await api.post("/api/pricing/quote", {
-          productSlug: "print",
+          productSlug: "canvas",
           variantSku,
           options: {
-            material,
+            frame, 
           },
           quantity,
         });
@@ -69,7 +66,7 @@ export default function EditorPrint() {
       }
     };
     getQuote();
-  }, [variantSku, material, quantity]);
+  }, [variantSku, frame, quantity]);
 
   const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
 
@@ -88,12 +85,12 @@ export default function EditorPrint() {
       await api.post("/api/cart/items", {
         sessionId,
         item: {
-          productSlug: "print",
+          productSlug: "canvas",
           variantSku,
           config: {
             orientation: "portrait",
             size: selectedVariant.size,
-            material,
+            frame,
             quantity,
             transform: {
 							ratio: selectedRatio.id,
@@ -144,39 +141,36 @@ export default function EditorPrint() {
     );
   }
 
-	function MaterialTiles({ options, value, onChange }) {
-		return (
-			<div className="mt-3 grid grid-cols-2 gap-3 transition">
-				{options.map((opt) => {
-					const active = opt.name === value;
 
-					return (
-						<button
-							key={opt.name}
-							type="button"
-							onClick={() => onChange(opt.name)}
-							className={`rounded-2xl  p-3 text-center transition active:scale-[1.05]
-								${
-									active
-										? "ring-2 ring-emerald-400 bg-emerald-50"
-										: "border border-gray-200 bg-white hover:bg-gray-50"
-								}`}
-						>
-							<div className="text-sm font-semibold text-gray-900">
-								{opt.name}
-							</div>
-
-							{opt.price > 0 && (
-								<div className="mt-1 text-xs text-gray-500">
-									+{opt.price}
-								</div>
-							)}
-						</button>
-					);
-				})}
-			</div>
-		);
-	}
+  function FrameTiles({ options, value, onChange }) {
+    return (
+      <div className="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-4 active:scale-[0.98] transition">
+        {options.map((opt) => {
+          const active = opt.id === value;
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onChange(opt.id)}
+              className={`group rounded-2xl p-2 text-center transition active:scale-[1.05]
+                ${active ? "ring-2 ring-emerald-400 bg-emerald-50" : "border border-gray-200 bg-white hover:bg-gray-50"}`}
+            >
+              <div className="mx-auto h-14 w-14 overflow-hidden rounded-full bg-gray-100">
+                <img
+                  src={opt.img}
+                  alt={opt.id}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-gray-700">
+                {opt.id}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
 
   function parseCmSize(sizeStr) {
@@ -205,7 +199,7 @@ export default function EditorPrint() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-12">
           {/* LEFT: Editor */}
-          <div className="relative overflow-hidden rounded-2xl lg:col-span-7 border border-gray-200 bg-[#F3F4F6] shadow-sm">
+          <div className="relative overflow-visible rounded-2xl lg:col-span-7 border border-gray-200 bg-[#F3F4F6] shadow-sm">
 						<div className="p-5">
 							{!originalUrl ? (
                 <div className="flex flex-col items-center justify-center">
@@ -286,10 +280,12 @@ export default function EditorPrint() {
 									</div>
 
 									<div className="mt-4">
-										<PrintPreview
-                      imageUrl={originalUrl}
-                    />
-									</div>
+                    {frame === "Stretched" ? (
+                      <Canvas3DPreview imageUrl={originalUrl} />
+                    ) : (
+                      <FramePreview imageUrl={originalUrl} frame={frame} />
+                    )}
+                  </div>
 								</>
 							)}
 						</div>
@@ -326,27 +322,20 @@ export default function EditorPrint() {
               </div>
             </div>
 
-            {/* Mount */}
+            {/* Frames */}
             <div className="mt-4">
               <div className="mt-5">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-gray-900">Material: {material}</label>
+                  <label className="text-sm font-semibold text-gray-900">Frames: {frame}</label>
 
                   <div className="rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-900">
                     Price: {quote ? `${quote.total} ${quote.currency}` : "—"}
                   </div>
                 </div>
 
-                <MaterialTiles
-									options={materialOptions}
-									value={material}
-									onChange={setMaterial}
-								/>
+                <FrameTiles options={CANVAS_OPTIONS} value={frame} onChange={setFrame} />
               </div>
             </div>
-
-            
-
             
 
             {/* Quantity */}
@@ -372,7 +361,7 @@ export default function EditorPrint() {
                 {selectedVariant ? `${selectedVariant.sku}` : "-"}
               </div>
               <div className="mt-1 text-sm text-gray-800">
-                <b>Material:</b> {material}
+                <b>Frame:</b> {frame}
               </div>
               <div className="mt-1 text-sm text-gray-800">
                 <b>Price:</b> {quote ? `${quote.total} ${quote.currency}` : "—"}

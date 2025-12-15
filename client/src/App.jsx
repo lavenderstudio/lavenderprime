@@ -7,6 +7,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import ProductsPage from "./pages/ProductsPage.jsx";
 import EditorPrintPortrait from "./pages/EditorPrint&Frame.jsx";
 import EditorPrint from "./pages/EditorPrint.jsx";
+import EditorCanvas from "./pages/EditorCanvas.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrderSuccessPage from "./pages/OrderSuccessPage.jsx";
@@ -25,6 +26,9 @@ export default function App() {
         
         {/* Editor Print */}
         <Route path="/editor/print" element={<EditorPrint />} />
+
+        {/* Editor Canvas */}
+        <Route path="/editor/canvas" element={<EditorCanvas />} />
 
         {/* 404 */}
         <Route path="*" element={<div style={{ padding: 24 }}>404 - Not Found</div>} />

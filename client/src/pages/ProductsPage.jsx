@@ -23,8 +23,8 @@ const PRODUCTS = [
   {
     id: "canvas",
     name: "Canvas",
-    image: "/printandframe.png",
-    href: "/canvas",
+    image: "/canvas.png",
+    href: "/editor/canvas",
   },
   {
     id: "poster",
@@ -87,7 +87,7 @@ function ProductCard({ product, index, total }) {
     >
       {/* Clickable tile */}
       <Link to={product.href} className="group block">
-        <div className="mx-auto flex h-95 w-full max-w-115 items-center justify-center rounded-[36px] bg-[#F4F1F2] shadow-[0_20px_45px_rgba(0,0,0,0.08)] transition group-hover:shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
+        <div className="mx-auto flex h-95 w-full py-7 px-7 max-w-115 items-center justify-center rounded-[36px] bg-[#F2F0F1] shadow-[0_20px_45px_rgba(0,0,0,0.08)] transition group-hover:shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
           <div className="flex h-full w-full items-center justify-center">
             <img
               src={product.image}
