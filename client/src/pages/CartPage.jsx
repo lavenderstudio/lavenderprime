@@ -16,6 +16,7 @@ import { getSessionId } from "../lib/session.js";
 import FramePreview from "../components/FramePreview.jsx";
 import { MAT_CM } from "../lib/matSizes.js";
 import { Link } from "react-router-dom";
+import Canvas3DPreview from "../components/CanvasStretchedPreview.jsx";
 
 // Parse "63x93" or "63x93cm"
 function parseCmSize(sizeStr) {
@@ -135,11 +136,13 @@ export default function Cart() {
                     {/* Preview */}
                     <div>
                       {previewImg ? (
-                        <FramePreview
-                          imageUrl={previewImg}
-                          frame={frame || "White Wood"}
-                          mat={mat || "None"}
-                        />
+                        <>
+                          {frame === "Stretched" ? (
+                            <Canvas3DPreview imageUrl={previewImg} />
+                          ) : (
+                            <FramePreview imageUrl={previewImg} frame={frame || "White Wood"} mat={mat || "None"} />
+                          )}
+                        </>
                       ) : (
                         <div className="flex aspect-4/3 w-full items-center justify-center rounded-xl bg-gray-100 text-sm text-gray-600">
                           No image

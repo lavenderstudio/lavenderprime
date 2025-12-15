@@ -3,6 +3,10 @@ import zoomWalnut from "../assets/zoom_walnut.png";
 import zoomNatural from "../assets/zoom_natural.png";
 
 export const FRAME_STYLES = {
+  "Stretched": {
+    border: "0px",
+    background: "#ffffff",
+  },
   "Black Wood": {
     border: "18px",
     background: "#0B0A0A",

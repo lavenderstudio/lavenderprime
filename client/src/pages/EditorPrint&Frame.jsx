@@ -252,21 +252,69 @@ export default function EditorPrintPortrait() {
           <div className="relative overflow-hidden rounded-2xl lg:col-span-7 border border-gray-200 bg-[#F3F4F6] shadow-sm">
 						<div className="p-5">
 							{!originalUrl ? (
-								<>
-									<p className="text-gray-700">Upload a photo to start editing.</p>
+                <div className="flex flex-col items-center justify-center">
+                  {/* Frame-style upload card */}
+                  <button
+                    type="button"
+                    onClick={() => setIsUploadWizardOpen(true)}
+                    className="group relative w-full max-w-md rounded-2xl bg-[#E9ECEF] p-6 shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition active:scale-[0.99]"
+                    aria-label="Upload image"
+                  >
+                    {/* Inner “paper” area */}
+                    <div className="relative rounded-xl bg-white p-4">
+                      {/* Inner border (like a mount) */}
+                      <div className="rounded-lg border-2 border-gray-200 bg-white">
+                        <div className="flex aspect-square items-center justify-center">
+                          <div className="text-center">
+                            {/* Upload icon */}
+                            <svg
+                              className="mx-auto h-10 w-10 text-gray-700 transition group-hover:scale-[1.03]"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path
+                                d="M12 3v10"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                              />
+                              <path
+                                d="M8 7l4-4 4 4"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M4 14v4a3 3 0 003 3h10a3 3 0 003-3v-4"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                              />
+                            </svg>
 
-									<button
-										onClick={() => setIsUploadWizardOpen(true)}
-										className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]"
-									>
-										Upload Image
-									</button>
+                            <div className="mt-3 text-sm font-semibold text-gray-800">
+                              (tap here to upload)
+                            </div>
 
-									<p className="mt-3 text-xs text-gray-600">
-										You’ll choose a ratio first, then crop it, then see a framed preview.
-									</p>
-								</>
-							) : (
+                            <div className="mt-2 text-xs text-gray-500">
+                              Choose ratio → crop → preview
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Small “status dot” like your screenshot */}
+                      <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-sky-500 shadow" />
+                    </div>
+                  </button>
+
+                  {/* Optional helper text under */}
+                  <p className="mt-4 text-xs text-gray-600 text-center max-w-md">
+                    You’ll choose a ratio first, then crop it, then see a preview.
+                  </p>
+                </div>
+              ) : (
 								<>
 									<div className="flex items-center justify-between">
 										<div className="text-sm text-gray-700">
