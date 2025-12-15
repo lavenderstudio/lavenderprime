@@ -26,30 +26,30 @@ const PRODUCTS = [
     image: "/canvas.png",
     href: "/editor/canvas",
   },
-  {
-    id: "poster",
-    name: "Poster",
-    image: "/printandframe.png",
-    href: "/poster",
-  },
-  {
-    id: "collage",
-    name: "Collage",
-    image: "/printandframe.png",
-    href: "/collage",
-  },
-  {
-    id: "frame-set",
-    name: "Frame Set",
-    image: "/printandframe.png",
-    href: "/frame-set",
-  },
-  {
-    id: "wedding-print",
-    name: "Wedding Print",
-    image: "/printandframe.png",
-    href: "/wedding-print",
-  },
+  // {
+  //   id: "poster",
+  //   name: "Poster",
+  //   image: "/printandframe.png",
+  //   href: "/poster",
+  // },
+  // {
+  //   id: "collage",
+  //   name: "Collage",
+  //   image: "/printandframe.png",
+  //   href: "/collage",
+  // },
+  // {
+  //   id: "frame-set",
+  //   name: "Frame Set",
+  //   image: "/printandframe.png",
+  //   href: "/frame-set",
+  // },
+  // {
+  //   id: "wedding-print",
+  //   name: "Wedding Print",
+  //   image: "/printandframe.png",
+  //   href: "/wedding-print",
+  // },
 ];
 
 export default function ProductsPage() {
