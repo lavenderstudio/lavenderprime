@@ -2,7 +2,7 @@ import express from "express";
 import Stripe from "stripe";
 import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
-import { sendOrderConfirmation } from "../utils/mailer.js";
+import { sendOrderConfirmation } from "../utils/brevoMailer.js";
 
 const router = express.Router();
 
@@ -50,23 +50,11 @@ router.post(
               try {
                 await sendOrderConfirmation(order);
 
-                order.email = {
-                  ...(order.email || {}),
-                  confirmationSent: true,
-                  confirmationSentAt: new Date(),
-                };
-
-                await order.save(); // ✅ save email flags
-              } catch (emailErr) {
-                console.error("Email send failed:", emailErr.message);
-
-                // Optional: store error for debugging
-                order.email = {
-                  ...(order.email || {}),
-                  confirmationSent: false,
-                  lastError: emailErr.message, // (add this field if you want)
-                };
+                order.email.confirmationSent = true;
+                order.email.confirmationSentAt = new Date();
                 await order.save();
+              } catch (err) {
+                console.error("Brevo email failed:", err.response?.data || err.message);
               }
             }
 
