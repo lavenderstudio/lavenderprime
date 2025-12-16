@@ -9,7 +9,6 @@ router.post(
   "/webhook",
   express.raw({ type: "application/json" }),
   async (req, res) => {
-    console.log("🔔 Stripe webhook received");
     try {
       const key = process.env.STRIPE_SECRET_KEY;
       if (!key) throw new Error("STRIPE_SECRET_KEY missing (dotenv not loaded)");
