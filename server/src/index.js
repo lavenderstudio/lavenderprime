@@ -6,12 +6,16 @@ import productsRouter from "./routes/products.js";
 import pricingRouter from "./routes/pricing.js";
 import cartRouter from "./routes/cart.js";
 import ordersRouter from "./routes/order.js";
+import paymentsRouter from "./routes/payments.js";
+import stripeWebhookRoutes from "./routes/stripeWebhook.js";
 import path from "path";
 
 dotenv.config();
 
 const app = express();
 const __dirname = path.resolve();
+
+app.use("/api/stripe", stripeWebhookRoutes);
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -35,6 +39,7 @@ app.use("/api/products", productsRouter);
 app.use("/api/pricing", pricingRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/payments", paymentsRouter);
 
 // Start server only after DB is connected
 const PORT = process.env.PORT || 5000;

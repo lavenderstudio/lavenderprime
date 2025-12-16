@@ -33,7 +33,7 @@ function totalWithMat(w, h, matCm) {
   return { w: w + matCm * 2, h: h + matCm * 2 };
 }
 
-export default function Cart() {
+export default function CartPage() {
   const [cart, setCart] = useState(null);
   const [error, setError] = useState("");
 
@@ -251,7 +251,7 @@ export default function Cart() {
             </div>
 
             <Link to="/checkout">
-              <button className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
+              <button disabled={!cart?.items?.length} className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
                   Proceed to Checkout
               </button>
             </Link>

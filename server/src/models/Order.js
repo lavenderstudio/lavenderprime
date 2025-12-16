@@ -34,7 +34,7 @@ const OrderItemSchema = new mongoose.Schema(
       currency: String,
     },
   },
-  { _id: false }
+  { _id: false } // ✅ fine for orders; items are immutable snapshots
 );
 
 const OrderSchema = new mongoose.Schema(
@@ -56,17 +56,50 @@ const OrderSchema = new mongoose.Schema(
       country: { type: String, required: true },
     },
 
+    // (Optional but useful) store chosen shipping method
+    shippingMethod: {
+      type: String,
+      default: "standard",
+    },
+
     items: { type: [OrderItemSchema], default: [] },
 
     totals: {
+      // ✅ keep subtotal as you have it
       subtotal: { type: Number, required: true },
+
+      // ✅ add these now (even if you keep them 0 for MVP)
+      shipping: { type: Number, default: 0 },
+      tax: { type: Number, default: 0 },
+      discount: { type: Number, default: 0 },
+
+      // ✅ what Stripe should actually charge
+      grandTotal: { type: Number, required: true },
+
       currency: { type: String, required: true },
     },
 
+    // ✅ Stripe reconciliation fields
+    stripe: {
+      paymentIntentId: { type: String, default: "" },
+      status: { type: String, default: "" }, // e.g. "requires_payment_method", "succeeded"
+      amount: { type: Number, default: 0 }, // amount you charged (major units or smallest units - be consistent)
+      currency: { type: String, default: "" },
+    },
+
+    paidAt: { type: Date, default: null },
+
+    // ✅ physical fulfilment tracking (optional but useful)
+    carrier: { type: String, default: "" },
+    trackingNumber: { type: String, default: "" },
+    shippedAt: { type: Date, default: null },
+    deliveredAt: { type: Date, default: null },
+
     status: {
       type: String,
-      enum: ["pending", "paid", "processing", "shipped", "completed", "cancelled"],
-      default: "pending",
+      // ✅ "requires_payment" makes the flow unambiguous
+      enum: ["requires_payment", "paid", "processing", "shipped", "completed", "cancelled", "refunded"],
+      default: "requires_payment",
     },
   },
   { timestamps: true }

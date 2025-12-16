@@ -9,43 +9,57 @@
 import Cart from "../models/Cart.js";
 import Order from "../models/Order.js";
 
-/**
- * POST /api/orders/checkout
- * Body: { sessionId, customer, shippingAddress }
- */
+
 export const checkout = async (req, res) => {
   try {
-    const { sessionId, customer, shippingAddress } = req.body;
+    const { sessionId, customer, shippingAddress, shippingMethod } = req.body;
 
     if (!sessionId) {
       return res.status(400).json({ message: "sessionId is required" });
     }
 
-    // Basic customer validation
     if (!customer?.fullName || !customer?.email) {
-      return res.status(400).json({ message: "customer.fullName and customer.email are required" });
+      return res.status(400).json({
+        message: "customer.fullName and customer.email are required",
+      });
     }
 
-    // Basic address validation
-    if (!shippingAddress?.line1 || !shippingAddress?.city || !shippingAddress?.postcode || !shippingAddress?.country) {
-      return res.status(400).json({ message: "shippingAddress line1, city, postcode, country are required" });
+    if (
+      !shippingAddress?.line1 ||
+      !shippingAddress?.city ||
+      !shippingAddress?.postcode ||
+      !shippingAddress?.country
+    ) {
+      return res.status(400).json({
+        message: "shippingAddress line1, city, postcode, country are required",
+      });
     }
 
-    // Get cart
     const cart = await Cart.findOne({ sessionId });
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
-
-    // Calculate subtotal from snapshot totals (do NOT recalc from product DB)
+    
     const subtotal = cart.items.reduce((sum, item) => sum + (item.price?.total || 0), 0);
     const currency = cart.items[0]?.price?.currency || "AED";
 
-    // Create order snapshot
+    // ✅ MVP totals (you can plug real shipping/tax rules later)
+    // Note: keep these in MAJOR units (e.g. 10.99 AED), since your cart uses major units
+    const shipping = 0;
+    const tax = 0;
+    const discount = 0;
+
+    const grandTotal = subtotal + shipping + tax - discount;
+
+    if (!Number.isFinite(grandTotal) || grandTotal <= 0) {
+      return res.status(400).json({ message: "Invalid order total" });
+    }
+
     const order = await Order.create({
       sessionId,
       customer,
       shippingAddress,
+      shippingMethod: shippingMethod || "standard", // optional
       items: cart.items.map((it) => ({
         productSlug: it.productSlug,
         variantSku: it.variantSku,
@@ -53,19 +67,23 @@ export const checkout = async (req, res) => {
         assets: it.assets,
         price: it.price,
       })),
-      totals: { subtotal, currency },
-      status: "pending",
+      totals: {
+        subtotal,
+        shipping,
+        tax,
+        discount,
+        grandTotal,
+        currency,
+      },
+      status: "requires_payment",
     });
-
-    // Clear cart after successful order creation
-    cart.items = [];
-    await cart.save();
 
     return res.status(201).json(order);
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }
 };
+
 
 /**
  * GET /api/orders/:id

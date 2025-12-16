@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^5.4.1",
+    "@stripe/stripe-js": "^8.6.0",
     "axios": "^1.13.2",
     "filestack-js": "^4.3.4",
     "framer-motion": "^12.23.26",
