@@ -180,7 +180,9 @@ export default function AdminOrdersPage() {
                       <a href={it.assets.originalUrl} target="_blank" className="text-blue-500">PREVIEW IMAGE</a>
                     </div>
                     <div className="text-gray-800">
-                      <b>{it.productSlug.toUpperCase()}</b> • {it.variantSku} • Qty {it.config?.quantity || 1}
+                      <b>{it.productSlug.toUpperCase()}</b> • {it.variantSku} 
+                      {it.config?.size ? ` • Size: ${it.config.size} ` : ""}
+                      • Qty {it.config?.quantity || 1}
                       {it.config?.frame ? ` • Frame: ${it.config.frame}` : ""}
                       {it.config?.mat ? ` • Mat: ${it.config.mat}` : ""}
 											{it.config?.material ? ` • Material: ${it.config.material}` : ""}
