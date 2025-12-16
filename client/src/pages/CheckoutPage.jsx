@@ -119,7 +119,7 @@ export default function CheckoutPage() {
     line2: "",
     city: "",
     postcode: "",
-    country: "United Kingdom",
+    country: "United Arab Emirates",
   });
 
   useEffect(() => {
