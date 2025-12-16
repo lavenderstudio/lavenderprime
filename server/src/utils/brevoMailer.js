@@ -19,10 +19,11 @@ export async function sendOrderConfirmation(order) {
     .map(
       (it) => `
         <li>
-          <b>${it.productSlug}</b> (${it.variantSku})<br/>
+          <b>${it.productSlug.toUpperCase()}</b> (${it.variantSku})<br/>
           Qty: ${it.config?.quantity || 1}
           ${it.config?.frame ? ` • Frame: ${it.config.frame}` : ""}
           ${it.config?.mat ? ` • Mat: ${it.config.mat}` : ""}
+          ${it.config?.material ? ` • Material: ${it.config.material}` : ""}
         </li>
       `
     )
@@ -39,6 +40,14 @@ export async function sendOrderConfirmation(order) {
 
     <h3>Total</h3>
     <p><b>${order.totals.grandTotal} ${order.totals.currency}</b></p>
+
+    <h3>Shipping Address</h3>
+		<p>
+			${order.shippingAddress?.line1 || ""}<br/>
+			${order.shippingAddress?.line2 ? `${order.shippingAddress.line2}<br/>` : ""}
+			${order.shippingAddress?.city || ""}, ${order.shippingAddress?.postcode || ""}<br/>
+			${order.shippingAddress?.country || ""}
+		</p>
 
     <p>We’ll notify you once your order is fulfilled.</p>
   `;
