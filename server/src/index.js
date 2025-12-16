@@ -38,42 +38,68 @@ app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is running ✅" });
 });
 
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms)
+    ),
+  ]);
+}
+
 app.get("/api/debug-email", async (req, res) => {
   try {
-    // ✅ Log env presence (NOT values) to avoid leaking secrets
-    console.log("SMTP_HOST?", !!process.env.SMTP_HOST);
-    console.log("SMTP_PORT?", !!process.env.SMTP_PORT);
-    console.log("SMTP_USER?", !!process.env.SMTP_USER);
-    console.log("SMTP_PASS?", !!process.env.SMTP_PASS);
-    console.log("FROM_EMAIL?", !!process.env.FROM_EMAIL);
+    console.log("DEBUG EMAIL: start");
+
+    // ✅ sanity (don’t log secrets)
+    console.log("SMTP_HOST present?", !!process.env.SMTP_HOST);
+    console.log("SMTP_PORT present?", !!process.env.SMTP_PORT);
+    console.log("SMTP_USER present?", !!process.env.SMTP_USER);
+    console.log("SMTP_PASS present?", !!process.env.SMTP_PASS);
+    console.log("FROM_EMAIL present?", !!process.env.FROM_EMAIL);
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT || 587),
-      secure: false, // 587 = STARTTLS
+      secure: false, // 587 STARTTLS
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+
+      // ✅ hard timeouts so it never hangs
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 10_000,
+
+      // ✅ sometimes helps on hosted envs
+      tls: {
+        minVersion: "TLSv1.2",
+      },
     });
 
-    // ✅ Verify SMTP connection (super useful!)
-    await transporter.verify();
+    console.log("DEBUG EMAIL: verifying transport...");
+    await withTimeout(transporter.verify(), 10_000, "SMTP verify");
 
-    const info = await transporter.sendMail({
-      from: process.env.FROM_EMAIL, // MUST match your verified sender in Brevo
-      to: "fazeelk2004@gmail.com",
-      subject: "Brevo SMTP test (Render)",
-      html: "<b>Email works 🎉</b>",
-    });
+    console.log("DEBUG EMAIL: sending...");
+    const info = await withTimeout(
+      transporter.sendMail({
+        from: process.env.FROM_EMAIL, // must match Brevo verified sender
+        to: "fazeelk2004@gmail.com",
+        subject: "Brevo SMTP test (Render)",
+        html: "<b>Email works 🎉</b>",
+      }),
+      10_000,
+      "SMTP sendMail"
+    );
 
+    console.log("DEBUG EMAIL: sent", info.messageId);
     return res.json({ ok: true, messageId: info.messageId });
   } catch (err) {
-    console.error("EMAIL ERROR:", err);
+    console.error("DEBUG EMAIL ERROR:", err);
     return res.status(500).json({
       ok: false,
       error: err.message,
-      // nodemailer often provides a useful code
       code: err.code || null,
       response: err.response || null,
     });
