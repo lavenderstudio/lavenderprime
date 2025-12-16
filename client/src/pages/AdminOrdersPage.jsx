@@ -134,7 +134,7 @@ export default function AdminOrdersPage() {
                     Order: <span className="font-mono">{o._id}</span>
                   </div>
                   <div className="text-xs text-gray-600">
-                    {new Date(o.createdAt).toLocaleString()} • {o.customer?.fullName} • {o.customer?.email}
+                    {new Date(o.createdAt).toLocaleString()} • {o.customer?.fullName} • {o.customer?.email} • {o.customer?.phone}
                   </div>
                 </div>
 
@@ -168,13 +168,17 @@ export default function AdminOrdersPage() {
               </div>
 
               <div className="mt-3 border-t pt-3 text-sm text-gray-800">
-                <b>Shipping:</b> {o.shippingAddress?.line1}, {o.shippingAddress?.city},{" "}
+                <b>Shipping:</b> {o.shippingAddress?.line1}, {o.shippingAddress?.line2}, {o.shippingAddress?.city},{" "}
                 {o.shippingAddress?.postcode}, {o.shippingAddress?.country}
               </div>
 
               <div className="mt-3 space-y-2">
                 {(o.items || []).map((it, idx) => (
                   <div key={idx} className="flex items-center justify-between text-sm">
+                    <div className="flex flex-col gap-2 items-center">
+                      <img src={it.assets.originalUrl} alt={it.productSlug} className="mr-3 h-16 w-16 rounded-lg object-cover border border-gray-200" />
+                      <a href={it.assets.originalUrl} target="_blank" className="text-blue-500">PREVIEW IMAGE</a>
+                    </div>
                     <div className="text-gray-800">
                       <b>{it.productSlug.toUpperCase()}</b> • {it.variantSku} • Qty {it.config?.quantity || 1}
                       {it.config?.frame ? ` • Frame: ${it.config.frame}` : ""}
