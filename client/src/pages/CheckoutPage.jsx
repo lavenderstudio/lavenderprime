@@ -222,8 +222,9 @@ export default function CheckoutPage() {
               />
               <input
                 className="w-full rounded-xl border border-gray-300 p-3 text-sm sm:col-span-2"
-                placeholder="Phone (optional)"
+                placeholder="Phone"
                 value={customer.phone}
+                required
                 onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
                 disabled={!!clientSecret}
               />
