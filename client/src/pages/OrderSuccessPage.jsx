@@ -119,7 +119,9 @@ export default function OrderSuccessPage() {
   return (
     <Page title={isPaid ? "Order Confirmed" : "Order Status"}>
       <Link to="/products" className="text-sm text-blue-600 hover:underline">
-        ← Back to shop
+        <button type="button" className="mt-4 inline-block rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">&#8592;
+          Back to Products
+        </button>
       </Link>
 
       {error && (
@@ -205,9 +207,12 @@ export default function OrderSuccessPage() {
                       className="h-12 w-12 rounded-xl border border-gray-200 object-cover"
                     />
                     <div className="flex-1 text-sm text-gray-800">
-                      <div className="font-semibold">{item.config?.size || "Custom Print"}</div>
+                      <div className="font-semibold">{item.productSlug?.toUpperCase() || "Custom Print"}</div>
                       <div className="text-xs text-gray-600">
-                        {item.config?.mount ? `${item.config.mount} • ` : ""}
+                        {item.config?.size ? `Size: ${item.config.size} • ` : ""}
+                        {item.config?.frame ? `Frame: ${item.config.frame} • ` : ""}
+                        {item.config?.mat ? `Mat: ${item.config.mat} • ` : ""}
+                        {item.config?.material ? `Material: ${item.config.material} • ` : ""}
                         Qty {item.config?.quantity || 1}
                       </div>
                     </div>

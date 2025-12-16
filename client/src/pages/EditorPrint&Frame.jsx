@@ -464,18 +464,6 @@ export default function EditorPrintPortrait() {
             >
               Add to Cart
             </button>
-
-            {/* In-page preview fallback
-            {previewUrl && (
-              <div className="mt-4">
-                <p className="text-sm font-semibold text-gray-900">Preview</p>
-                <img
-                  src={previewUrl}
-                  alt="Cropped preview"
-                  className="mt-2 w-full rounded-2xl border border-gray-200"
-                />
-              </div>
-            )} */}
           </div>
         </div>
       )}
