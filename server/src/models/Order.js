@@ -86,6 +86,13 @@ const OrderSchema = new mongoose.Schema(
       currency: { type: String, default: "" },
     },
 
+    email: {
+      confirmationSent: { type: Boolean, default: false },
+      confirmationSentAt: { type: Date, default: null },
+      fulfillmentSent: { type: Boolean, default: false },
+      fulfillmentSentAt: { type: Date, default: null },
+    },
+
     paidAt: { type: Date, default: null },
 
     carrier: { type: String, default: "" },

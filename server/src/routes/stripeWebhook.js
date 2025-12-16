@@ -2,6 +2,7 @@ import express from "express";
 import Stripe from "stripe";
 import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
+import { sendOrderConfirmation } from "../utils/mailer.js";
 
 const router = express.Router();
 
@@ -42,7 +43,16 @@ router.post(
               amount: paymentIntent.amount,
             };
 
-            await order.save();
+            if (!order.email?.confirmationSent) {
+              await sendOrderConfirmation(order);
+
+              order.email = {
+                confirmationSent: true,
+                confirmationSentAt: new Date(),
+              };
+
+              await order.save();
+            }
 
             await Cart.updateOne(
               { sessionId: order.sessionId },
