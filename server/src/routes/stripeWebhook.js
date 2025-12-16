@@ -43,15 +43,31 @@ router.post(
               amount: paymentIntent.amount,
             };
 
+            await order.save();
+
+            // Send confirmation email
             if (!order.email?.confirmationSent) {
-              await sendOrderConfirmation(order);
+              try {
+                await sendOrderConfirmation(order);
 
-              order.email = {
-                confirmationSent: true,
-                confirmationSentAt: new Date(),
-              };
+                order.email = {
+                  ...(order.email || {}),
+                  confirmationSent: true,
+                  confirmationSentAt: new Date(),
+                };
 
-              await order.save();
+                await order.save(); // ✅ save email flags
+              } catch (emailErr) {
+                console.error("Email send failed:", emailErr.message);
+
+                // Optional: store error for debugging
+                order.email = {
+                  ...(order.email || {}),
+                  confirmationSent: false,
+                  lastError: emailErr.message, // (add this field if you want)
+                };
+                await order.save();
+              }
             }
 
             await Cart.updateOne(

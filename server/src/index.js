@@ -10,6 +10,8 @@ import paymentsRouter from "./routes/payments.js";
 import stripeWebhookRoutes from "./routes/stripeWebhook.js";
 import adminRouter from "./routes/admin.js";
 import path from "path";
+import nodemailer from "nodemailer";
+
 
 dotenv.config();
 
@@ -35,6 +37,34 @@ if (process.env.NODE_ENV !== "production") {
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is running ✅" });
 });
+
+// Debug email route
+app.get("/api/debug-email", async (req, res) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    const info = await transporter.sendMail({
+      from: process.env.FROM_EMAIL,
+      to: "fazeelk2004@gmail.com",
+      subject: "Brevo SMTP test",
+      html: "<b>Email works 🎉</b>",
+    });
+
+    res.json({ ok: true, info });
+  } catch (err) {
+    console.error("EMAIL ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 app.use("/api/products", productsRouter);
 app.use("/api/pricing", pricingRouter);
