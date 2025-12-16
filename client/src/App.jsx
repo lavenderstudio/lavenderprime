@@ -11,6 +11,7 @@ import EditorCanvas from "./pages/EditorCanvas.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrderSuccessPage from "./pages/OrderSuccessPage.jsx";
+import AdminOrdersPage from "./pages/AdminOrdersPage.jsx";
 
 export default function App() {
   return (
@@ -18,7 +19,6 @@ export default function App() {
         {/* Redirect home to print portrait for now */}
         <Route path="/" element={<Navigate to="/products" replace />} />
 
-        {/* Print landing */}
         <Route path="/products" element={<ProductsPage />} />
 
         {/* Editor Print And Frame */}
@@ -38,6 +38,9 @@ export default function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
 
         <Route path="/order/:id" element={<OrderSuccessPage />} />
+
+        <Route path="/admin" element={<AdminOrdersPage />} />
+
     </Routes>
   );
 }

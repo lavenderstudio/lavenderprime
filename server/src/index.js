@@ -8,6 +8,7 @@ import cartRouter from "./routes/cart.js";
 import ordersRouter from "./routes/order.js";
 import paymentsRouter from "./routes/payments.js";
 import stripeWebhookRoutes from "./routes/stripeWebhook.js";
+import adminRouter from "./routes/admin.js";
 import path from "path";
 
 dotenv.config();
@@ -40,6 +41,7 @@ app.use("/api/pricing", pricingRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/payments", paymentsRouter);
+app.use("/api/admin", adminRouter);
 
 // Start server only after DB is connected
 const PORT = process.env.PORT || 5000;
