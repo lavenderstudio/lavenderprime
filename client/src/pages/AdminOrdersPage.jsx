@@ -168,15 +168,15 @@ export default function AdminOrdersPage() {
   // Authed view
   return (
     <Page title="Admin — Paid Orders">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-wrap items-end gap-3">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <div className="flex flex-col">
             <label className="text-xs font-semibold text-gray-600">From</label>
             <input
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="rounded-xl border border-gray-300 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm sm:w-auto"
             />
           </div>
 
@@ -193,7 +193,7 @@ export default function AdminOrdersPage() {
           <button
             onClick={() => fetchOrders(activeStatus)}
             disabled={loading}
-            className="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+            className="w-full rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60 sm:w-auto"
           >
             {loading ? "Loading..." : "Apply"}
           </button>
@@ -204,44 +204,32 @@ export default function AdminOrdersPage() {
               setToDate("");
               fetchOrders(activeStatus);
             }}
-            className="rounded-2xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50 active:scale-[0.99]"
+            className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50 active:scale-[0.99] sm:w-auto"
           >
-            Clear dates
+            Clear Dates
           </button>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
-            onClick={() => { setActiveView("orders"); fetchOrders("paid"); }}
-            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
+            onClick={() => { setError(""); setActiveView("orders"); fetchOrders("paid"); }}
+            className="w-full sm:w-auto rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
           >
             Paid Orders
           </button>
 
           <button
-            onClick={() => { setActiveView("orders"); fetchOrders("completed"); }}
-            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
+            onClick={() => { setError(""); setActiveView("orders"); fetchOrders("completed"); }}
+            className="w-full sm:w-auto rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
           >
             Fulfilled Orders
           </button>
 
           <button
             onClick={fetchUsers}
-            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
+            className="w-full sm:w-auto rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
           >
             Users
-          </button>
-
-          <button
-            onClick={() => {
-              setOrders([]);
-              setError("");
-              setFromDate("");
-              setToDate("");
-            }}
-            className="rounded-2xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50"
-          >
-            Log out
           </button>
         </div>
       </div>
@@ -255,7 +243,7 @@ export default function AdminOrdersPage() {
             {users.map((u) => (
               <div
                 key={u._id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+                className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
                   <div className="text-sm font-semibold text-gray-900">
@@ -264,7 +252,7 @@ export default function AdminOrdersPage() {
                   <div className="text-xs text-gray-600">{u.email}</div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <div className="text-xs font-semibold text-gray-700">
                     Role: <span className="font-mono">{u.role}</span>
                   </div>
@@ -274,7 +262,7 @@ export default function AdminOrdersPage() {
                       value={u.role}
                       onChange={(e) => updateUserRole(u._id, e.target.value)}
                       disabled={loading}
-                      className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm"
+                      className="w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm sm:w-auto"
                     >
                       <option value="user">user</option>
                       <option value="manager">manager</option>
@@ -300,7 +288,7 @@ export default function AdminOrdersPage() {
                 key={o._id}
                 className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
               >
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="text-sm font-semibold text-gray-900">
                       Order:{" "}
@@ -314,7 +302,7 @@ export default function AdminOrdersPage() {
                     </div>
                   </div>
 
-                  <div className="text-right">
+                  <div className="sm:text-right">
                     <div className="text-sm font-semibold text-gray-900">
                       {(o.totals?.grandTotal ?? o.totals?.subtotal)} {o.totals?.currency}
                     </div>
@@ -347,12 +335,15 @@ export default function AdminOrdersPage() {
 
                 <div className="flex flex-col mt-3 space-y-2 gap-5">
                   {(o.items || []).map((it, idx) => (
-                    <div key={idx} className="flex border-b items-center justify-between text-sm">
-                      <div className="flex flex-col gap-2 items-center mb-4">
+                    <div
+                      key={idx}
+                      className="flex flex-col gap-3 border-b py-3 text-sm sm:flex-row sm:items-start sm:justify-between"
+                    >
+                      <div className="flex flex-col items-center gap-2 sm:items-start">
                         <img
                           src={it.assets.originalUrl}
                           alt={it.productSlug}
-                          className="mr-3 h-16 w-16 rounded-lg object-cover border border-gray-200"
+                          className="h-20 w-20 rounded-lg border border-gray-200 object-cover sm:h-16 sm:w-16"
                         />
 
                         <a
@@ -374,7 +365,7 @@ export default function AdminOrdersPage() {
                         </button>
                       </div>
 
-                      <div className="text-gray-800">
+                      <div className="text-gray-800 sm:flex-1">
                         <b>{it.productSlug.toUpperCase()}</b> • {it.variantSku}
                         {it.config?.size ? ` • Size: ${it.config.size}` : ""}
                         {it.config?.frame ? ` • Frame: ${it.config.frame}` : ""}
@@ -383,7 +374,7 @@ export default function AdminOrdersPage() {
                         • Qty {it.config?.quantity || 1}
                       </div>
 
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-gray-900 sm:text-right">
                         {it.price?.total} {it.price?.currency}
                       </div>
                     </div>
