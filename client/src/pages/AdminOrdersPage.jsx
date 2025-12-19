@@ -21,6 +21,8 @@ export default function AdminOrdersPage() {
   const [fromDate, setFromDate] = useState(""); // "YYYY-MM-DD"
   const [toDate, setToDate] = useState("");     // "YYYY-MM-DD"
   const [activeStatus, setActiveStatus] = useState("paid"); // "paid" | "completed"
+  const [activeView, setActiveView] = useState("orders"); // "orders" | "users"
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     const check = async () => {
@@ -72,6 +74,40 @@ export default function AdminOrdersPage() {
       setActiveStatus(status); // ✅ remember current tab
     } catch (err) {
       setOrders([]);
+      setError(err?.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setError("");
+      setLoading(true);
+
+      const res = await api.get("/admin/users");
+      setUsers(res.data.users || []);
+      setActiveView("users");
+    } catch (err) {
+      setUsers([]);
+      setError(err?.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateUserRole = async (userId, role) => {
+    try {
+      setError("");
+      setLoading(true);
+
+      const res = await api.patch(`/admin/users/${userId}/role`, { role });
+
+      // ✅ update user in list without refetch
+      setUsers((prev) =>
+        prev.map((u) => (u._id === userId ? { ...u, role: res.data.user.role } : u))
+      );
+    } catch (err) {
       setError(err?.response?.data?.message || err.message);
     } finally {
       setLoading(false);
@@ -176,17 +212,24 @@ export default function AdminOrdersPage() {
 
         <div className="flex gap-3">
           <button
-            onClick={() => fetchOrders("paid")}
+            onClick={() => { setActiveView("orders"); fetchOrders("paid"); }}
             className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
           >
             Paid Orders
           </button>
 
           <button
-            onClick={() => fetchOrders("completed")}
+            onClick={() => { setActiveView("orders"); fetchOrders("completed"); }}
             className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
           >
             Fulfilled Orders
+          </button>
+
+          <button
+            onClick={fetchUsers}
+            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
+          >
+            Users
           </button>
 
           <button
@@ -204,96 +247,152 @@ export default function AdminOrdersPage() {
       </div>
 
 
-      {orders.length === 0 ? (
-        <p className="text-gray-600">No paid orders found.</p>
-      ) : (
-        <div className="space-y-3">
-          {orders.map((o) => (
-            <div key={o._id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+      {activeView === "users" ? (
+        users.length === 0 ? (
+          <p className="text-gray-600">No users found.</p>
+        ) : (
+          <div className="space-y-2">
+            {users.map((u) => (
+              <div
+                key={u._id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+              >
                 <div>
                   <div className="text-sm font-semibold text-gray-900">
-                    Order:{" "}
-                    <span className="font-mono">
-                      #{String(o.orderNumber ?? "").padStart(6, "0")}
-                    </span>
+                    {u.fullName || "—"}
                   </div>
-                  <div className="text-xs text-gray-600">
-                    {new Date(o.createdAt).toLocaleString()} • {o.customer?.fullName} • {o.customer?.email} • {o.customer?.phone}
-                  </div>
+                  <div className="text-xs text-gray-600">{u.email}</div>
                 </div>
 
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-gray-900">
-                    {(o.totals?.grandTotal ?? o.totals?.subtotal)} {o.totals?.currency}
+                <div className="flex items-center gap-3">
+                  <div className="text-xs font-semibold text-gray-700">
+                    Role: <span className="font-mono">{u.role}</span>
                   </div>
-                  <div className="text-xs font-semibold text-green-700">{o.status.toUpperCase()}</div>
-									{/* { o.status === "paid" && (
-										<button
-											onClick={() => updateStatus(o._id, "processing")}
-											className="rounded-2xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-										>
-											Mark as Processing
-										</button>
-									)} */}
-									{ o.status === "paid" && (
-										<button
-											onClick={() => markFulfilled(o._id)}
-											className="mt-3 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 active:scale-[0.98]"
-										>
-											Mark as Fulfilled
-										</button>
-									)}
-									{ o.status === "completed" && (
-										<div className="mt-3 inline-block rounded-xl bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-											Fulfilled ✓
-										</div>
-									)}
+
+                  {me?.role === "admin" ? (
+                    <select
+                      value={u.role}
+                      onChange={(e) => updateUserRole(u._id, e.target.value)}
+                      disabled={loading}
+                      className="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm"
+                    >
+                      <option value="user">user</option>
+                      <option value="manager">manager</option>
+                      <option value="admin">admin</option>
+                    </select>
+                  ) : (
+                    <div className="rounded-xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700">
+                      Admin only
+                    </div>
+                  )}
                 </div>
               </div>
+            ))}
+          </div>
+        )
+      ) : (
+        orders.length === 0 ? (
+          <p className="text-gray-600">No orders found.</p>
+        ) : (
+          <div className="space-y-3">
+            {orders.map((o) => (
+              <div
+                key={o._id}
+                className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">
+                      Order:{" "}
+                      <span className="font-mono">
+                        #{String(o.orderNumber ?? "").padStart(6, "0")}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      {new Date(o.createdAt).toLocaleString()} • {o.customer?.fullName} •{" "}
+                      {o.customer?.email} • {o.customer?.phone}
+                    </div>
+                  </div>
 
-              <div className="mt-3 border-t pt-3 text-sm text-gray-800">
-                <b>Shipping:</b> {o.shippingAddress?.line1}, {o.shippingAddress?.line2}, {o.shippingAddress?.city},{" "}
-                {o.shippingAddress?.postcode}, {o.shippingAddress?.country}
-              </div>
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-gray-900">
+                      {(o.totals?.grandTotal ?? o.totals?.subtotal)} {o.totals?.currency}
+                    </div>
+                    <div className="text-xs font-semibold text-green-700">
+                      {o.status.toUpperCase()}
+                    </div>
 
-              <div className="flex flex-col mt-3 space-y-2 gap-5">
-                {(o.items || []).map((it, idx) => (
-                  <div key={idx} className="flex border-b items-center justify-between text-sm">
-                    <div className="flex flex-col gap-2 items-center mb-4">
-                      <img src={it.assets.originalUrl} alt={it.productSlug} className="mr-3 h-16 w-16 rounded-lg object-cover border border-gray-200" />
-                      <a href={it.assets.originalUrl} className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 active:scale-[0.98]" target="_blank">
-                        View Image
-                      </a>
+                    {o.status === "paid" && (
                       <button
-                        onClick={() =>
-                          downloadImage(
-                            it.assets.originalUrl,
-                            `${o._id}-${it.productSlug}.jpg`
-                          )
-                        }
-                        className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 active:scale-[0.98]"
+                        onClick={() => markFulfilled(o._id)}
+                        className="mt-3 rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 active:scale-[0.98]"
                       >
-                        Download Image
+                        Mark as Fulfilled
                       </button>
-                    </div>
-                    <div className="text-gray-800">
-                      <b>{it.productSlug.toUpperCase()}</b> • {it.variantSku} 
-                      {it.config?.size ? ` • Size: ${it.config.size}` : ""}
-                      {it.config?.frame ? ` • Frame: ${it.config.frame}` : ""}
-                      {it.config?.mat ? ` • Mat: ${it.config.mat} ` : ""}
-											{it.config?.material ? ` • Material: ${it.config.material} ` : ""}
-                      • Qty {it.config?.quantity || 1}
-                    </div>
-                    <div className="font-semibold text-gray-900">
-                      {it.price?.total} {it.price?.currency}
-                    </div>
+                    )}
+
+                    {o.status === "completed" && (
+                      <div className="mt-3 inline-block rounded-xl bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                        Fulfilled ✓
+                      </div>
+                    )}
                   </div>
-                ))}
+                </div>
+
+                <div className="mt-3 border-t pt-3 text-sm text-gray-800">
+                  <b>Shipping:</b> {o.shippingAddress?.line1}, {o.shippingAddress?.line2},{" "}
+                  {o.shippingAddress?.city}, {o.shippingAddress?.postcode},{" "}
+                  {o.shippingAddress?.country}
+                </div>
+
+                <div className="flex flex-col mt-3 space-y-2 gap-5">
+                  {(o.items || []).map((it, idx) => (
+                    <div key={idx} className="flex border-b items-center justify-between text-sm">
+                      <div className="flex flex-col gap-2 items-center mb-4">
+                        <img
+                          src={it.assets.originalUrl}
+                          alt={it.productSlug}
+                          className="mr-3 h-16 w-16 rounded-lg object-cover border border-gray-200"
+                        />
+
+                        <a
+                          href={it.assets.originalUrl}
+                          className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 active:scale-[0.98]"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          View Image
+                        </a>
+
+                        <button
+                          onClick={() =>
+                            downloadImage(it.assets.originalUrl, `${o._id}-${it.productSlug}.jpg`)
+                          }
+                          className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 active:scale-[0.98]"
+                        >
+                          Download Image
+                        </button>
+                      </div>
+
+                      <div className="text-gray-800">
+                        <b>{it.productSlug.toUpperCase()}</b> • {it.variantSku}
+                        {it.config?.size ? ` • Size: ${it.config.size}` : ""}
+                        {it.config?.frame ? ` • Frame: ${it.config.frame}` : ""}
+                        {it.config?.mat ? ` • Mat: ${it.config.mat}` : ""}
+                        {it.config?.material ? ` • Material: ${it.config.material}` : ""}
+                        • Qty {it.config?.quantity || 1}
+                      </div>
+
+                      <div className="font-semibold text-gray-900">
+                        {it.price?.total} {it.price?.currency}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
       )}
     </Page>
   );
