@@ -260,10 +260,9 @@ export default function CheckoutPage() {
                 />
                 <input
                   className="w-full rounded-xl border border-gray-300 p-3 text-sm"
-                  placeholder="Postcode *"
+                  placeholder="Postcode * (Optional)"
                   value={shippingAddress.postcode}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, postcode: e.target.value })}
-                  required
                   disabled={!!clientSecret}
                 />
               </div>
