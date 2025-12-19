@@ -39,6 +39,28 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const fetchFulfilledOrders = async () => {
+    try {
+      setError("");
+      setLoading(true);
+
+      const res = await api.get("/admin/orders?status=completed", {
+        headers: {
+          "x-admin-token": token, // ✅ send user-entered token
+        },
+      });
+
+      setOrders(res.data.orders || []);
+      setAuthed(true); // ✅ token worked
+    } catch (err) {
+      setAuthed(false);
+      setOrders([]);
+      setError(err?.response?.data?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // If not authed yet, show login-style prompt
   if (!authed) {
     return (
@@ -97,13 +119,48 @@ export default function AdminOrdersPage() {
 		}
 	};
 
+    const downloadImage = async (url, filename = "image.jpg") => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = blobUrl;
+      link.download = filename;
+
+      document.body.appendChild(link);
+      link.click();
+
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("Image download failed", err);
+    }
+  };
+
   // Authed view
   return (
     <Page title="Admin — Paid Orders">
       <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex gap-4">
+          <button
+            onClick={fetchPaidOrders}
+            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]"
+          >
+            Paid Orders
+          </button>
+          
+          <button
+            onClick={fetchFulfilledOrders}
+            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]"
+          >
+            Fullfilled Orders
+          </button>
+        </div>
         <button
           onClick={() => {
-            // ✅ force re-auth on next visit if you want
             setAuthed(false);
             setToken("");
             setOrders([]);
@@ -112,13 +169,6 @@ export default function AdminOrdersPage() {
           className="rounded-2xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50 active:scale-[0.99]"
         >
           Log out
-        </button>
-
-        <button
-          onClick={fetchPaidOrders}
-          className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]"
-        >
-          Refresh
         </button>
       </div>
 
@@ -177,15 +227,28 @@ export default function AdminOrdersPage() {
                   <div key={idx} className="flex items-center justify-between text-sm">
                     <div className="flex flex-col gap-2 items-center">
                       <img src={it.assets.originalUrl} alt={it.productSlug} className="mr-3 h-16 w-16 rounded-lg object-cover border border-gray-200" />
-                      <a href={it.assets.originalUrl} target="_blank" className="text-blue-500">PREVIEW IMAGE</a>
+                      <a href={it.assets.originalUrl} className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 active:scale-[0.98]" target="_blank">
+                        View Image
+                      </a>
+                      <button
+                        onClick={() =>
+                          downloadImage(
+                            it.assets.originalUrl,
+                            `${o._id}-${it.productSlug}.jpg`
+                          )
+                        }
+                        className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 active:scale-[0.98]"
+                      >
+                        Download Image
+                      </button>
                     </div>
                     <div className="text-gray-800">
                       <b>{it.productSlug.toUpperCase()}</b> • {it.variantSku} 
-                      {it.config?.size ? ` • Size: ${it.config.size} ` : ""}
-                      • Qty {it.config?.quantity || 1}
+                      {it.config?.size ? ` • Size: ${it.config.size}` : ""}
                       {it.config?.frame ? ` • Frame: ${it.config.frame}` : ""}
-                      {it.config?.mat ? ` • Mat: ${it.config.mat}` : ""}
-											{it.config?.material ? ` • Material: ${it.config.material}` : ""}
+                      {it.config?.mat ? ` • Mat: ${it.config.mat} ` : ""}
+											{it.config?.material ? ` • Material: ${it.config.material} ` : ""}
+                      • Qty {it.config?.quantity || 1}
                     </div>
                     <div className="font-semibold text-gray-900">
                       {it.price?.total} {it.price?.currency}
