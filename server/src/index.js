@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import productsRouter from "./routes/products.js";
 import pricingRouter from "./routes/pricing.js";
@@ -9,8 +11,8 @@ import ordersRouter from "./routes/order.js";
 import paymentsRouter from "./routes/payments.js";
 import stripeWebhookRoutes from "./routes/stripeWebhook.js";
 import adminRouter from "./routes/admin.js";
-import path from "path";
-import nodemailer from "nodemailer";
+import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/users.js";
 
 
 dotenv.config();
@@ -33,11 +35,12 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
+app.use(cookieParser());
+
 // Health check route
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, message: "Server is running ✅" });
 });
-
 
 app.use("/api/products", productsRouter);
 app.use("/api/pricing", pricingRouter);
@@ -45,6 +48,8 @@ app.use("/api/cart", cartRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/payments", paymentsRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 // Start server only after DB is connected
 const PORT = process.env.PORT || 5000;

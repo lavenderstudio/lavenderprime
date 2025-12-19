@@ -1,15 +1,17 @@
-// server/src/routes/orders.js
+// server/src/routes/auth.js
 // ----------------------------------------------------
-// Order routes
+// Auth routes
 // ----------------------------------------------------
 
 import express from "express";
-import { checkout, getOrderById } from "../controllers/order.controller.js";
+import { register, login, me, logout } from "../controllers/auth.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = express.Router();
 
-router.post("/checkout", requireAuth, checkout);
-router.get("/:id", getOrderById);
+router.post("/register", register);
+router.post("/login", login);
+router.get("/me", requireAuth, me);
+router.post("/logout", logout);
 
 export default router;

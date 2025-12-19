@@ -107,6 +107,7 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [creating, setCreating] = useState(false);
+  const [saveAddress, setSaveAddress] = useState(true);
 
   const [customer, setCustomer] = useState({
     fullName: "",
@@ -121,6 +122,35 @@ export default function CheckoutPage() {
     postcode: "",
     country: "United Arab Emirates",
   });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        // ✅ if logged in, this returns saved address/phone/name
+        const res = await api.get("/users/me");
+        const u = res.data?.user;
+
+        if (u?.fullName) setCustomer((prev) => ({ ...prev, fullName: u.fullName }));
+        if (u?.email) setCustomer((prev) => ({ ...prev, email: u.email }));
+        if (u?.phone) setCustomer((prev) => ({ ...prev, phone: u.phone }));
+
+        if (u?.shippingAddress) {
+          setShippingAddress((prev) => ({
+            ...prev,
+            ...u.shippingAddress,
+            // keep default country if saved one is empty
+            country: u.shippingAddress.country || prev.country,
+          }));
+        }
+      } catch (err) {
+        // If not logged in, /users/me will 401. But you already protect checkout.
+        // We silently ignore here.
+      }
+    };
+
+    loadProfile();
+  }, []);
+
 
   useEffect(() => {
     const load = async () => {
@@ -153,6 +183,14 @@ export default function CheckoutPage() {
 
     try {
       setCreating(true);
+
+      if (saveAddress) {
+        await api.patch("/users/me", {
+          fullName: customer.fullName,
+          phone: customer.phone,
+          shippingAddress,
+        });
+      }
 
       // 1) Create Order
       const orderRes = await api.post("/orders/checkout", {
@@ -276,6 +314,16 @@ export default function CheckoutPage() {
                 disabled={!!clientSecret}
               />
             </div>
+            <label className="mt-3 flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={saveAddress}
+                onChange={(e) => setSaveAddress(e.target.checked)}
+                disabled={!!clientSecret}
+                className="h-4 w-4 rounded-2xl border-gray-300 text-gray-900 focus:ring-gray-900"
+              />
+              Save this address for next time
+            </label>
 
             <button
               type="submit"

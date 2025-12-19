@@ -12,12 +12,19 @@ import CartPage from "./pages/CartPage.jsx";
 import CheckoutPage from "./pages/CheckoutPage.jsx";
 import OrderSuccessPage from "./pages/OrderSuccessPage.jsx";
 import AdminOrdersPage from "./pages/AdminOrdersPage.jsx";
+import LoginPage from "./pages/Login.jsx";
+import SignupPage from "./pages/Signup.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
 
 export default function App() {
   return (
     <Routes>
         {/* Redirect home to print portrait for now */}
         <Route path="/" element={<Navigate to="/products" replace />} />
+
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route path="/signup" element={<SignupPage />} />
 
         <Route path="/products" element={<ProductsPage />} />
 
@@ -35,7 +42,13 @@ export default function App() {
 
         <Route path="/cart" element={<CartPage />} />
 
-        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/checkout"
+          element={
+            <RequireAuth>
+              <CheckoutPage />
+            </RequireAuth>
+          }
+        />
 
         <Route path="/order/:id" element={<OrderSuccessPage />} />
 
