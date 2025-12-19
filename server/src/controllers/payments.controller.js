@@ -18,10 +18,10 @@ export const createPaymentIntent = async (req, res) => {
     const stripe = getStripe(); // ✅ created only when route is called
 
     const { orderId } = req.body;
-    if (!orderId) return res.status(400).json({ message: "orderId is required" });
+    if (!orderId) return res.status(400).json({ message: "OrderID Is Required" });
 
     const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (!order) return res.status(404).json({ message: "Order Not Found" });
 
     const amount = Math.round(Number(order.totals.subtotal) * 100);
 

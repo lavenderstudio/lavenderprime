@@ -15,29 +15,54 @@ export const checkout = async (req, res) => {
     const { sessionId, customer, shippingAddress, shippingMethod } = req.body;
 
     if (!sessionId) {
-      return res.status(400).json({ message: "sessionId is required" });
+      return res.status(400).json({ message: "SessionID is Required" });
     }
 
-    if (!customer?.fullName || !customer?.email) {
+    if (!customer?.fullName) {
       return res.status(400).json({
-        message: "customer.fullName and customer.email are required",
+        message: "Customer Full Name Is Required",
+      });
+    }
+
+    if (!customer?.email) {
+      return res.status(400).json({
+        message: "Customer Email Is Required",
+      });
+    }
+
+    if (!customer?.phone) {
+      return res.status(400).json({
+        message: "Customer Phone Number Is Required",
       });
     }
 
     if (
-      !shippingAddress?.line1 ||
-      !shippingAddress?.city ||
-      !shippingAddress?.postcode ||
+      !shippingAddress?.line1
+    ) {
+      return res.status(400).json({
+        message: "Shipping Address Line 1 Is Required",
+      });
+    }
+
+    if (
+      !shippingAddress?.city
+    ) {
+      return res.status(400).json({
+        message: "City Is Required",
+      });
+    }
+
+    if (
       !shippingAddress?.country
     ) {
       return res.status(400).json({
-        message: "shippingAddress line1, city, postcode, country are required",
+        message: "Country Is Required",
       });
     }
 
     const cart = await Cart.findOne({ sessionId });
     if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ message: "Cart is empty" });
+      return res.status(400).json({ message: "Cart Is Empty" });
     }
     
     const subtotal = cart.items.reduce((sum, item) => sum + (item.price?.total || 0), 0);
@@ -52,7 +77,7 @@ export const checkout = async (req, res) => {
     const grandTotal = subtotal + shipping + tax - discount;
 
     if (!Number.isFinite(grandTotal) || grandTotal <= 0) {
-      return res.status(400).json({ message: "Invalid order total" });
+      return res.status(400).json({ message: "Invalid Order Total" });
     }
 
     const order = await Order.create({
@@ -94,7 +119,7 @@ export const getOrderById = async (req, res) => {
     const { id } = req.params;
 
     const order = await Order.findById(id);
-    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (!order) return res.status(404).json({ message: "Order Not Found" });
 
     return res.json(order);
   } catch (err) {

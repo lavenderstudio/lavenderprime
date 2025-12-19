@@ -14,7 +14,7 @@ export const addToCart = async (req, res) => {
     const { sessionId, item } = req.body;
 
     if (!sessionId || !item) {
-      return res.status(400).json({ message: "sessionId and item are required" });
+      return res.status(400).json({ message: "SessionID And Item Are Required" });
     }
 
     let cart = await Cart.findOne({ sessionId });
@@ -59,7 +59,7 @@ export const removeCartItem = async (req, res) => {
     const { sessionId, itemId } = req.params;
 
     const cart = await Cart.findOne({ sessionId });
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
+    if (!cart) return res.status(404).json({ message: "Cart Not Found" });
 
     // Filter out the item
     cart.items = cart.items.filter((it) => it._id.toString() !== itemId);
@@ -83,14 +83,13 @@ export const updateCartItemQuantity = async (req, res) => {
 
     const qty = Number(quantity);
     if (!Number.isFinite(qty) || qty < 1) {
-      return res.status(400).json({ message: "quantity must be a number >= 1" });
+      return res.status(400).json({ message: "Quantity Must Be A Number >= 1" });
     }
 
     const cart = await Cart.findOne({ sessionId });
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
-
+    if (!cart) return res.status(404).json({ message: "Cart Not Found" });
     const item = cart.items.id(itemId);
-    if (!item) return res.status(404).json({ message: "Item not found" });
+    if (!item) return res.status(404).json({ message: "Item Not Found" });
 
     // Update quantity
     item.config.quantity = qty;
