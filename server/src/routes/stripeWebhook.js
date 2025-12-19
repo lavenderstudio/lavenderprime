@@ -44,18 +44,16 @@ router.post(
             };
 
             await order.save();
-            if (process.env.NODE_ENV === "production") {
-              // Send confirmation email
-              if (!order.email?.confirmationSent) {
-                try {
-                  await sendOrderConfirmation(order);
+            // Send confirmation email
+            if (!order.email?.confirmationSent) {
+              try {
+                await sendOrderConfirmation(order);
 
-                  order.email.confirmationSent = true;
-                  order.email.confirmationSentAt = new Date();
-                  await order.save();
-                } catch (err) {
-                  console.error("Brevo email failed:", err.response?.data || err.message);
-                }
+                order.email.confirmationSent = true;
+                order.email.confirmationSentAt = new Date();
+                await order.save();
+              } catch (err) {
+                console.error("Brevo email failed:", err.response?.data || err.message);
               }
             }
 
