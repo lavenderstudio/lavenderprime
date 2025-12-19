@@ -187,8 +187,9 @@ export default function OrderSuccessPage() {
               ) : null}
             </div>
 
-            <div className="mt-2 text-xs opacity-80">
-              <b>Order ID:</b> {order._id}
+            <div className="flex flex-col mt-2 text-xs opacity-80">
+              <span><b>Order ID:</b> {order._id}</span>
+              <span><b>Order Number:</b> #{String(order.orderNumber ?? "").padStart(6, "0")}</span>
             </div>
           </div>
 

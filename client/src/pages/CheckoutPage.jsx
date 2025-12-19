@@ -308,7 +308,7 @@ export default function CheckoutPage() {
 
         {/* RIGHT: Summary (unchanged) */}
         <div className="h-fit rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">Order summary</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Order Summary</h3>
 
           <div className="mt-3 space-y-3">
             {(cart?.items || []).map((item) => {

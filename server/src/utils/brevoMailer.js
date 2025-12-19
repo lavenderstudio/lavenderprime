@@ -34,6 +34,7 @@ export async function sendOrderConfirmation(order) {
     <p>Your payment has been confirmed.</p>
 
     <p><b>Order ID:</b> ${order._id}</p>
+    <p><b>Order Number:</b> ${String(order.orderNumber ?? "").padStart(6, "0")}</p>
 
     <h3>Items</h3>
     <ul>${itemsHtml}</ul>

@@ -51,6 +51,7 @@ const OrderItemSchema = new mongoose.Schema(
 const OrderSchema = new mongoose.Schema(
   {
     sessionId: { type: String, required: true },
+    orderNumber: { type: Number, unique: true, index: true },
 
     customer: {
       fullName: { type: String, required: true },

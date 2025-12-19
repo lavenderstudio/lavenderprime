@@ -8,6 +8,19 @@
 
 import Cart from "../models/Cart.js";
 import Order from "../models/Order.js";
+import Counter from "../models/Counter.js";
+
+
+async function getNextOrderNumber() {
+  const counter = await Counter.findOneAndUpdate(
+    { name: "order" },                 // one counter for orders
+    { $inc: { seq: 1 } },              // increment by 1
+    { new: true, upsert: true }        // create if missing, return updated doc
+  );
+
+  return counter.seq;
+}
+
 
 
 export const checkout = async (req, res) => {
@@ -80,8 +93,11 @@ export const checkout = async (req, res) => {
       return res.status(400).json({ message: "Invalid Order Total" });
     }
 
+    const nextOrderNumber = await getNextOrderNumber();
+
     const order = await Order.create({
       sessionId,
+      orderNumber: nextOrderNumber,
       customer,
       shippingAddress,
       shippingMethod: shippingMethod || "standard", // optional

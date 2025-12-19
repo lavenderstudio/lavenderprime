@@ -235,7 +235,10 @@ export default function AdminOrdersPage() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div className="text-sm font-semibold text-gray-900">
-                    Order: <span className="font-mono">{o._id}</span>
+                    Order:{" "}
+                    <span className="font-mono">
+                      #{String(o.orderNumber ?? "").padStart(6, "0")}
+                    </span>
                   </div>
                   <div className="text-xs text-gray-600">
                     {new Date(o.createdAt).toLocaleString()} • {o.customer?.fullName} • {o.customer?.email} • {o.customer?.phone}
