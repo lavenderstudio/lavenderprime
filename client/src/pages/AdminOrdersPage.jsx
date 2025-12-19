@@ -6,13 +6,15 @@
 // - Backend validates against process.env.ADMIN_TOKEN
 // ----------------------------------------------------
 
-import { useState } from "react";
 import Page from "../components/Page.jsx";
 import api from "../lib/api.js";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminOrdersPage() {
-  const [token, setToken] = useState("");        // user enters token each visit
-  const [authed, setAuthed] = useState(false);   // set true only after successful request
+  const navigate = useNavigate();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [me, setMe] = useState(null);
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,6 +22,38 @@ export default function AdminOrdersPage() {
   const [toDate, setToDate] = useState("");     // "YYYY-MM-DD"
   const [activeStatus, setActiveStatus] = useState("paid"); // "paid" | "completed"
 
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const res = await api.get("/auth/me"); // ✅ cookie-based auth
+        const user = res.data?.user;
+
+        // ✅ allow only admin/manager
+        if (!user || !["admin", "manager"].includes(user.role)) {
+          setError("Forbidden: Admin or Manager only.");
+          setCheckingAuth(false);
+          return;
+        }
+
+        setMe(user);
+        setCheckingAuth(false);
+
+        // Optional: load paid orders immediately
+        fetchOrders("paid");
+      } catch (err) {
+        // Not logged in → go login
+        if (err.response?.status === 401) {
+          navigate("/login", { state: { from: "/admin/orders" }, replace: true });
+          return;
+        }
+        setError(err?.response?.data?.message || err.message);
+        setCheckingAuth(false);
+      }
+    };
+
+    check();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchOrders = async (status = activeStatus) => {
     try {
@@ -32,14 +66,11 @@ export default function AdminOrdersPage() {
           ...(fromDate ? { from: fromDate } : {}),
           ...(toDate ? { to: toDate } : {}),
         },
-        headers: { "x-admin-token": token },
       });
 
       setOrders(res.data.orders || []);
-      setAuthed(true);
       setActiveStatus(status); // ✅ remember current tab
     } catch (err) {
-      setAuthed(false);
       setOrders([]);
       setError(err?.response?.data?.message || err.message);
     } finally {
@@ -47,61 +78,19 @@ export default function AdminOrdersPage() {
     }
   };
 
-
-  const fetchPaidOrders = async () => {
-    try {
-      setError("");
-      setLoading(true);
-
-      const res = await api.get("/admin/orders?status=paid", {
-        headers: {
-          "x-admin-token": token, // ✅ send user-entered token
-        },
-      });
-
-      setOrders(res.data.orders || []);
-      setAuthed(true); // ✅ token worked
-    } catch (err) {
-      setAuthed(false);
-      setOrders([]);
-      setError(err?.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // If not authed yet, show login-style prompt
-  if (!authed) {
+  if (checkingAuth) {
     return (
-      <Page title="Admin — Login">
-        <div className="mx-auto max-w-md rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">Owner access</h3>
-          <p className="mt-1 text-sm text-gray-600">
-            Enter your admin token to view paid orders.
-          </p>
+      <Page title="Admin — Orders">
+        <p className="text-gray-600">Checking access…</p>
+      </Page>
+    );
+  }
 
-          {error && (
-            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-red-700">
-              <b>Error:</b> {error}
-            </div>
-          )}
-
-          <input
-            type="password"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Admin token"
-            className="mt-4 w-full rounded-xl border border-gray-300 p-3 text-sm"
-          />
-
-          <button
-            onClick={fetchPaidOrders}
-            disabled={!token || loading}
-            className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99]"
-          >
-            {loading ? "Checking..." : "Enter admin"}
-          </button>
-
+  if (error && !me) {
+    return (
+      <Page title="Admin — Orders">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-red-700">
+          <b>Error:</b> {error}
         </div>
       </Page>
     );
@@ -111,18 +100,9 @@ export default function AdminOrdersPage() {
 		try {
 			setError("");
 
-			await api.patch(
-				`/admin/orders/${orderId}/fulfill`,
-				{},
-				{
-					headers: {
-						"x-admin-token": token,
-					},
-				}
-			);
-
+			await api.patch(`/admin/orders/${orderId}/fulfill`, {});
 			// ✅ Refresh orders after update
-			fetchPaidOrders(activeStatus);
+			fetchOrders(activeStatus);
 		} catch (err) {
 			setError(err?.response?.data?.message || err.message);
 		}
@@ -211,8 +191,6 @@ export default function AdminOrdersPage() {
 
           <button
             onClick={() => {
-              setAuthed(false);
-              setToken("");
               setOrders([]);
               setError("");
               setFromDate("");
