@@ -4,13 +4,13 @@
 // ----------------------------------------------------
 
 import express from "express";
-import { requireAdmin } from "../middleware/adminAuth.js";
+import { requireAuth, requireRole } from "../middleware/requireAuth.js";
 import { listOrders, fulfillOrder } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
-router.get("/orders", requireAdmin, listOrders);
+router.get("/orders", requireAuth, requireRole("admin", "manager"), listOrders);
 
-router.patch("/orders/:id/fulfill", requireAdmin, fulfillOrder);
+router.patch("/orders/:id/fulfill", requireAuth, requireRole("admin", "manager"), fulfillOrder);
 
 export default router;
