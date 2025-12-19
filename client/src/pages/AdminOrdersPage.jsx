@@ -276,10 +276,10 @@ export default function AdminOrdersPage() {
                 {o.shippingAddress?.postcode}, {o.shippingAddress?.country}
               </div>
 
-              <div className="mt-3 space-y-2">
+              <div className="flex flex-col mt-3 space-y-2 gap-5">
                 {(o.items || []).map((it, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-sm">
-                    <div className="flex flex-col gap-2 items-center">
+                  <div key={idx} className="flex border-b items-center justify-between text-sm">
+                    <div className="flex flex-col gap-2 items-center mb-4">
                       <img src={it.assets.originalUrl} alt={it.productSlug} className="mr-3 h-16 w-16 rounded-lg object-cover border border-gray-200" />
                       <a href={it.assets.originalUrl} className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700 active:scale-[0.98]" target="_blank">
                         View Image
