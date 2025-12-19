@@ -95,8 +95,13 @@ export const checkout = async (req, res) => {
 
     const nextOrderNumber = await getNextOrderNumber();
 
+    if (!req.user?.id) {
+      return res.status(401).json({ message: "Please Login To Checkout Your Order." });
+    }
+
     const order = await Order.create({
       sessionId,
+      userId: req.user.id,
       orderNumber: nextOrderNumber,
       customer,
       shippingAddress,

@@ -17,6 +17,7 @@ import FramePreview from "../components/FramePreview.jsx";
 import { MAT_CM } from "../lib/matSizes.js";
 import { Link } from "react-router-dom";
 import Canvas3DPreview from "../components/CanvasStretchedPreview.jsx";
+import { useNavigate } from "react-router-dom";
 
 // Parse "63x93" or "63x93cm"
 function parseCmSize(sizeStr) {
@@ -36,8 +37,28 @@ function totalWithMat(w, h, matCm) {
 export default function CartPage() {
   const [cart, setCart] = useState(null);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const sessionId = useMemo(() => getSessionId(), []);
+
+  const handleProceedToCheckout = async () => {
+    try {
+      // ✅ Check if user is logged in
+      await api.get("/auth/me");
+
+      // ✅ Logged in → go to checkout
+      navigate("/checkout");
+    } catch (err) {
+      if (err.response?.status === 401) {
+        // ❌ Not logged in → redirect to login
+        navigate("/login", {
+          state: { from: "/checkout" }, // optional: redirect back after login
+        });
+      } else {
+        setError(err.message);
+      }
+    }
+  };
 
   const loadCart = async () => {
     try {
@@ -251,8 +272,12 @@ export default function CartPage() {
             </div>
 
             <Link to="/checkout">
-              <button disabled={!cart?.items?.length} className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
-                  Proceed to Checkout
+              <button
+                onClick={handleProceedToCheckout}
+                disabled={!cart?.items?.length}
+                className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99] disabled:opacity-60"
+              >
+                Proceed to Checkout
               </button>
             </Link>
             <p className="mt-2 text-xs text-gray-500">

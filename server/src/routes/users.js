@@ -1,15 +1,15 @@
-// server/src/routes/orders.js
+// server/src/routes/users.js
 // ----------------------------------------------------
-// Order routes
+// User profile routes
 // ----------------------------------------------------
 
 import express from "express";
-import { checkout, getOrderById } from "../controllers/order.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { getMeProfile, updateMeProfile } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
-router.post("/checkout", requireAuth, checkout);
-router.get("/:id", getOrderById);
+router.get("/me", requireAuth, getMeProfile);
+router.patch("/me", requireAuth, updateMeProfile);
 
 export default router;
