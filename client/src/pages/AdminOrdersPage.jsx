@@ -16,20 +16,28 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fromDate, setFromDate] = useState(""); // "YYYY-MM-DD"
+  const [toDate, setToDate] = useState("");     // "YYYY-MM-DD"
+  const [activeStatus, setActiveStatus] = useState("paid"); // "paid" | "completed"
 
-  const fetchPaidOrders = async () => {
+
+  const fetchOrders = async (status = activeStatus) => {
     try {
       setError("");
       setLoading(true);
 
-      const res = await api.get("/admin/orders?status=paid", {
-        headers: {
-          "x-admin-token": token, // ✅ send user-entered token
+      const res = await api.get("/admin/orders", {
+        params: {
+          status,
+          ...(fromDate ? { from: fromDate } : {}),
+          ...(toDate ? { to: toDate } : {}),
         },
+        headers: { "x-admin-token": token },
       });
 
       setOrders(res.data.orders || []);
-      setAuthed(true); // ✅ token worked
+      setAuthed(true);
+      setActiveStatus(status); // ✅ remember current tab
     } catch (err) {
       setAuthed(false);
       setOrders([]);
@@ -39,12 +47,13 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const fetchFulfilledOrders = async () => {
+
+  const fetchPaidOrders = async () => {
     try {
       setError("");
       setLoading(true);
 
-      const res = await api.get("/admin/orders?status=completed", {
+      const res = await api.get("/admin/orders?status=paid", {
         headers: {
           "x-admin-token": token, // ✅ send user-entered token
         },
@@ -113,7 +122,7 @@ export default function AdminOrdersPage() {
 			);
 
 			// ✅ Refresh orders after update
-			fetchPaidOrders();
+			fetchPaidOrders(activeStatus);
 		} catch (err) {
 			setError(err?.response?.data?.message || err.message);
 		}
@@ -143,34 +152,79 @@ export default function AdminOrdersPage() {
   // Authed view
   return (
     <Page title="Admin — Paid Orders">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex gap-4">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-col">
+            <label className="text-xs font-semibold text-gray-600">From</label>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="rounded-xl border border-gray-300 px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-xs font-semibold text-gray-600">To</label>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="rounded-xl border border-gray-300 px-3 py-2 text-sm"
+            />
+          </div>
+
           <button
-            onClick={fetchPaidOrders}
-            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]"
+            onClick={() => fetchOrders(activeStatus)}
+            disabled={loading}
+            className="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+          >
+            {loading ? "Loading..." : "Apply"}
+          </button>
+
+          <button
+            onClick={() => {
+              setFromDate("");
+              setToDate("");
+              fetchOrders(activeStatus);
+            }}
+            className="rounded-2xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50 active:scale-[0.99]"
+          >
+            Clear dates
+          </button>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => fetchOrders("paid")}
+            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
           >
             Paid Orders
           </button>
-          
+
           <button
-            onClick={fetchFulfilledOrders}
-            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]"
+            onClick={() => fetchOrders("completed")}
+            className="rounded-2xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black"
           >
-            Fullfilled Orders
+            Fulfilled Orders
+          </button>
+
+          <button
+            onClick={() => {
+              setAuthed(false);
+              setToken("");
+              setOrders([]);
+              setError("");
+              setFromDate("");
+              setToDate("");
+            }}
+            className="rounded-2xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50"
+          >
+            Log out
           </button>
         </div>
-        <button
-          onClick={() => {
-            setAuthed(false);
-            setToken("");
-            setOrders([]);
-            setError("");
-          }}
-          className="rounded-2xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold hover:bg-gray-50 active:scale-[0.99]"
-        >
-          Log out
-        </button>
       </div>
+
 
       {orders.length === 0 ? (
         <p className="text-gray-600">No paid orders found.</p>
