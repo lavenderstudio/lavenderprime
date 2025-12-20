@@ -17,8 +17,11 @@ import SignupPage from "./pages/Signup.jsx";
 import UserOrdersPage from "./pages/UserOrdersPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
+import ContactPage from "./pages/ContactPage.jsx";
+import AboutPage from "./pages/AboutPage.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
 import GuestRoute from "./components/GuestRoute.jsx";
 
 
@@ -68,8 +71,11 @@ export default function App() {
         <Route path="/order/success" element={<OrderSuccessPage />} />
         <Route path="/orders" element={<UserOrdersPage />} />
         <Route path="/admin" element={<AdminOrdersPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<div>404</div>} />
       </Routes>
+      <Footer />
     </>
   );
 }
