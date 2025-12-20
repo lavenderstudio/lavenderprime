@@ -219,13 +219,11 @@ export default function CheckoutPage() {
 
   return (
     <Page title="Checkout">
-      <div className="flex items-center justify-between">
-        <Link to="/cart">
-          <button className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
-            Back to cart
-          </button>
-        </Link>
-      </div>
+      <Link to="/cart">
+        <button className="w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
+          Back to cart
+        </button>
+      </Link>
 
       {error && (
         <div className="mt-4 rounded-xl bg-red-50 p-3 text-red-700 border border-red-200">
