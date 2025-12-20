@@ -67,7 +67,7 @@ export default function SignupPage() {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="Areez Khan"
+              placeholder="Username"
               className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
             />
           </div>
@@ -90,7 +90,7 @@ export default function SignupPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min 8 characters"
+              placeholder="Min 8 Characters"
               className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
               required
             />

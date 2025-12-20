@@ -16,47 +16,34 @@ import LoginPage from "./pages/Login.jsx";
 import SignupPage from "./pages/Signup.jsx";
 import UserOrdersPage from "./pages/UserOrdersPage.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
+import Navbar from "./components/Navbar.jsx";
 
 export default function App() {
   return (
-    <Routes>
-        {/* Redirect home to print portrait for now */}
+    <>
+      <Navbar />   {/* 👈 always visible */}
+      <Routes>
         <Route path="/" element={<Navigate to="/products" replace />} />
-
         <Route path="/login" element={<LoginPage />} />
-
         <Route path="/signup" element={<SignupPage />} />
-
         <Route path="/products" element={<ProductsPage />} />
-
-        {/* Editor Print And Frame */}
-        <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
-        
-        {/* Editor Print */}
-        <Route path="/editor/print" element={<EditorPrint />} />
-
-        {/* Editor Canvas */}
-        <Route path="/editor/canvas" element={<EditorCanvas />} />
-
-        {/* 404 */}
-        <Route path="*" element={<div style={{ padding: 24 }}>404 - Not Found</div>} />
-
         <Route path="/cart" element={<CartPage />} />
-
-        <Route path="/checkout"
+        <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
+        <Route path="/editor/print" element={<EditorPrint />} />
+        <Route path="/editor/canvas" element={<EditorCanvas />} />
+        <Route
+          path="/checkout"
           element={
             <RequireAuth>
               <CheckoutPage />
             </RequireAuth>
           }
         />
-
-        <Route path="/order/:id" element={<OrderSuccessPage />} />
-
-        <Route path="/admin" element={<AdminOrdersPage />} />
-
+        <Route path="/order/success" element={<OrderSuccessPage />} />
         <Route path="/orders" element={<UserOrdersPage />} />
-
-    </Routes>
+        <Route path="/admin" element={<AdminOrdersPage />} />
+        <Route path="*" element={<div>404</div>} />
+      </Routes>
+    </>
   );
 }

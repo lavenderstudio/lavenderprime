@@ -3,6 +3,7 @@
 // Login page
 // - Calls POST /api/auth/login
 // - Uses httpOnly cookie auth (axios withCredentials already enabled)
+// - After login, fetches /auth/me and updates global auth state (Navbar updates instantly)
 // - Redirects to previous page if provided (location.state.from)
 // ----------------------------------------------------
 
@@ -10,6 +11,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Page from "../components/Page.jsx";
 import api from "../lib/api.js";
+import { useAuth } from "../context/AuthContext.jsx"; // ✅ NEW
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -17,6 +19,8 @@ export default function LoginPage() {
 
   // If user was redirected here, we store where they wanted to go (e.g. /checkout)
   const redirectTo = location.state?.from || "/";
+
+  const { setUser } = useAuth(); // ✅ NEW
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,15 +35,20 @@ export default function LoginPage() {
       setError("");
       setLoading(true);
 
-      // ✅ Backend should set httpOnly cookie "token"
+      // ✅ Backend sets httpOnly cookie
       await api.post("/auth/login", {
         email,
         password,
       });
 
-      // ✅ Go back to where user intended (checkout), or home
+      // ✅ SAFEST: cookie is set, now ask server who we are
+      const meRes = await api.get("/auth/me");
+      setUser(meRes.data?.user || null); // ✅ Navbar updates instantly
+
+      // ✅ Go back to intended page (checkout), or home
       navigate(redirectTo, { replace: true });
     } catch (err) {
+      setUser(null); // ✅ keep state clean if login fails
       setError(err?.response?.data?.message || err.message);
     } finally {
       setLoading(false);
@@ -70,6 +79,7 @@ export default function LoginPage() {
               placeholder="you@example.com"
               className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
               required
+              autoComplete="email"
             />
           </div>
 
@@ -82,6 +92,7 @@ export default function LoginPage() {
               placeholder="••••••••"
               className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
               required
+              autoComplete="current-password"
             />
           </div>
 

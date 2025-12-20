@@ -167,7 +167,7 @@ export default function AdminOrdersPage() {
 
   // Authed view
   return (
-    <Page title="Admin — Paid Orders">
+    <Page title="Admin">
       <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <div className="flex flex-col">
