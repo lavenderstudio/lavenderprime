@@ -15,8 +15,10 @@ import AdminOrdersPage from "./pages/AdminOrdersPage.jsx";
 import LoginPage from "./pages/Login.jsx";
 import SignupPage from "./pages/Signup.jsx";
 import UserOrdersPage from "./pages/UserOrdersPage.jsx";
+import AccountPage from "./pages/AccountPage.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import Navbar from "./components/Navbar.jsx";
+
 
 export default function App() {
   return (
@@ -26,6 +28,14 @@ export default function App() {
         <Route path="/" element={<Navigate to="/products" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route
+          path="/account"
+          element={
+            <RequireAuth>
+              <AccountPage />
+            </RequireAuth>
+          }
+        />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
