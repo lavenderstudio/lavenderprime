@@ -16,6 +16,7 @@ import LoginPage from "./pages/Login.jsx";
 import SignupPage from "./pages/Signup.jsx";
 import UserOrdersPage from "./pages/UserOrdersPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
+import HomePage from "./pages/HomePage.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import Navbar from "./components/Navbar.jsx";
 
@@ -25,7 +26,7 @@ export default function App() {
     <>
       <Navbar />   {/* 👈 always visible */}
       <Routes>
-        <Route path="/" element={<Navigate to="/products" replace />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route
