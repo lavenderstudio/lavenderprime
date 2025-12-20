@@ -14,6 +14,7 @@ import OrderSuccessPage from "./pages/OrderSuccessPage.jsx";
 import AdminOrdersPage from "./pages/AdminOrdersPage.jsx";
 import LoginPage from "./pages/Login.jsx";
 import SignupPage from "./pages/Signup.jsx";
+import UserOrdersPage from "./pages/UserOrdersPage.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 
 export default function App() {
@@ -53,6 +54,8 @@ export default function App() {
         <Route path="/order/:id" element={<OrderSuccessPage />} />
 
         <Route path="/admin" element={<AdminOrdersPage />} />
+
+        <Route path="/orders" element={<UserOrdersPage />} />
 
     </Routes>
   );

@@ -131,10 +131,6 @@ export const checkout = async (req, res) => {
 };
 
 
-/**
- * GET /api/orders/:id
- * Fetch order by id
- */
 export const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -142,7 +138,35 @@ export const getOrderById = async (req, res) => {
     const order = await Order.findById(id);
     if (!order) return res.status(404).json({ message: "Order Not Found" });
 
+    const isOwner = String(order.userId) === String(req.user.id);
+    const isStaff = ["admin", "manager"].includes(req.user.role);
+
+    if (!isOwner && !isStaff) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
     return res.json(order);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+
+export const getMyOrders = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Recommended: show paid+ pipeline orders only
+    const visibleStatuses = ["paid", "processing", "shipped", "completed"];
+
+    const orders = await Order.find({
+      userId, // ✅ IMPORTANT (was user)
+      status: { $in: visibleStatuses },
+    })
+      .sort({ createdAt: -1 })
+      .limit(200);
+
+    return res.json({ count: orders.length, orders });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

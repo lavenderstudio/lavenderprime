@@ -4,12 +4,13 @@
 // ----------------------------------------------------
 
 import express from "express";
-import { checkout, getOrderById } from "../controllers/order.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { checkout, getMyOrders, getOrderById } from "../controllers/order.controller.js";
 
 const router = express.Router();
 
 router.post("/checkout", requireAuth, checkout);
-router.get("/:id", getOrderById);
+router.get("/my", requireAuth, getMyOrders);
+router.get("/:id", requireAuth, getOrderById);
 
 export default router;

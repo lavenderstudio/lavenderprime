@@ -54,12 +54,7 @@ const PRODUCTS = [
 
 export default function ProductsPage() {
   return (
-    <Page>
-      {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-2xl font-bold text-gray-900">All Products</h1>
-        <div className="mx-auto mt-2 h-0.75 w-8 rounded-full bg-gray-900" />
-      </div>
+    <Page title="Products">
 
       {/* Product Grid */}
       <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
