@@ -25,7 +25,8 @@ export default function Navbar() {
 
   // Dropdown state
   const [accountOpen, setAccountOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const desktopDropdownRef = useRef(null);
+  const mobileDropdownRef = useRef(null);
 
   // Cart item count
   const [cartCount, setCartCount] = useState(0);
@@ -63,8 +64,12 @@ export default function Navbar() {
   // Close dropdown on click outside + ESC
   useEffect(() => {
     const onDocClick = (e) => {
-      if (!dropdownRef.current) return;
-      if (!dropdownRef.current.contains(e.target)) {
+      const inDesktop =
+        desktopDropdownRef.current?.contains(e.target) ?? false;
+      const inMobile =
+        mobileDropdownRef.current?.contains(e.target) ?? false;
+
+      if (!inDesktop && !inMobile) {
         setAccountOpen(false);
       }
     };
@@ -73,14 +78,15 @@ export default function Navbar() {
       if (e.key === "Escape") setAccountOpen(false);
     };
 
-    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("click", onDocClick);
     document.addEventListener("keydown", onKey);
 
     return () => {
-      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("click", onDocClick);
       document.removeEventListener("keydown", onKey);
     };
   }, []);
+
 
   const navLinkClass = (path) =>
     `text-sm font-semibold transition ${
@@ -184,7 +190,7 @@ export default function Navbar() {
 								Login
 							</Link>
             ) : (
-              <div ref={dropdownRef} className="relative">
+              <div ref={desktopDropdownRef} className="relative">
                 <button
                   onClick={() => {
 										setAccountOpen((v) => !v);
@@ -257,7 +263,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile right actions: cart + login/avatar */}
-          <div className="flex items-center gap-2 lg:hidden">
+          <div ref={mobileDropdownRef} className="flex items-center gap-2 lg:hidden">
             {!me ? (
               <Link
 								to="/login"
@@ -291,7 +297,7 @@ export default function Navbar() {
 
 				{/* Mobile account dropdown (only on mobile) */}
 				{me && accountOpen && (
-					<div className="lg:hidden">
+					<div className="lg:hidden" onClick={(e) => e.stopPropagation()}>
 						
 						<div className="mt-2 rounded-2xl border border-gray-200 bg-white p-2 shadow-lg">
 							<button

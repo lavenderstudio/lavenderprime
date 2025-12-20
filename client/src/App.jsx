@@ -19,6 +19,7 @@ import AccountPage from "./pages/AccountPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import Navbar from "./components/Navbar.jsx";
+import GuestRoute from "./components/GuestRoute.jsx";
 
 
 export default function App() {
@@ -27,8 +28,22 @@ export default function App() {
       <Navbar />   {/* 👈 always visible */}
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route
+          path="/login"
+          element={
+            <GuestRoute>
+              <LoginPage />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <GuestRoute>
+              <SignupPage />
+            </GuestRoute>
+          }
+        />
         <Route
           path="/account"
           element={
