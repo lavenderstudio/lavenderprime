@@ -8,7 +8,6 @@
 // - Smooth reveal animations (Framer Motion wrappers)
 // ----------------------------------------------------
 
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -108,30 +107,8 @@ export default function About() {
     },
   ];
 
-  // SEO-friendly JSON-LD (Organization + WebSite)
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Golden Art Frames",
-    url: "https://goldenartframes.onrender.com",
-    logo: "https://goldenartframes.onrender.com/logo.png",
-    sameAs: [],
-    description:
-      "Golden Art Frames creates premium prints and frames from your photos and artwork, with safe packaging and doorstep delivery.",
-  };
-
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <Helmet>
-        <title>About Golden Art Frames | Custom Prints, Frames & Doorstep Delivery</title>
-        <meta
-          name="description"
-          content="Learn about Golden Art Frames: premium printing, high-quality frames, custom sizes, protective packaging and doorstep delivery. Create wall art from photos and artwork."
-        />
-        <link rel="canonical" href="https://goldenartframes.onrender.com/about" />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Helmet>
-
       {/* Hero */}
       <section className="relative overflow-hidden bg-linear-to-b from-amber-50 via-white to-white">
         <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-amber-100/40 blur-3xl" />
