@@ -315,37 +315,6 @@ export default function Delivery() {
               <InfoCard key={d.title} icon={d.icon} title={d.title} text={d.text} />
             ))}
           </Stagger>
-
-          <FadeUp>
-            <div className="mt-10 rounded-3xl border bg-linear-to-r from-rose-50 via-white to-amber-50 p-6 shadow-sm sm:p-8">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className={`text-sm font-extrabold ${ACCENT}`}>Need tracking?</p>
-                  <p className="mt-1 text-xl font-extrabold text-slate-900">
-                    Track your order anytime
-                  </p>
-                  <p className="mt-2 text-sm text-slate-600">
-                    Enter your order reference on the tracking page to see latest updates.
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    to="/track"
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
-                  >
-                    Track Order <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50"
-                  >
-                    Contact Support <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </FadeUp>
         </Container>
       </section>
 
