@@ -4,27 +4,14 @@
 // ----------------------------------------------------
 
 import { useMemo } from "react";
-import Topbar from "../components/home/Topbar.jsx";
-import Header from "../components/home/Header.jsx";
 import Hero from "../components/home/Hero.jsx";
 import AboutSection from "../components/home/AboutSection.jsx";
 import FeaturedProducts from "../components/home/FeaturedProducts.jsx";
 import Testimonials from "../components/home/Testimonials.jsx";
 import BlogPreview from "../components/home/BlogPreview.jsx";
 import Newsletter from "../components/home/Newsletter.jsx";
-import Footer from "../components/home/Footer.jsx";
 
 export default function Home() {
-  // const nav = useMemo(
-  //   () => [
-  //     { label: "Home", href: "/" },
-  //     { label: "Products", href: "/shop" },
-  //     { label: "Custom Print", href: "/custom" },
-  //     { label: "Track Order", href: "/track" },
-  //     { label: "Contact", href: "/contact" },
-  //   ],
-  //   []
-  // );
 
   const promos = useMemo(
     () => [
@@ -157,8 +144,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      {/* <Topbar />
-      <Header nav={nav} /> */}
 
       <Hero promos={promos} />
 
@@ -169,7 +154,6 @@ export default function Home() {
       <BlogPreview blogs={blogs} />
 
       <Newsletter />
-      <Footer />
     </div>
   );
 }
