@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // client/src/pages/CheckoutPage.jsx
 // ----------------------------------------------------
 // Checkout Page (Guest)
@@ -78,7 +79,7 @@ function PaymentStep({ orderId, onPaid }) {
       <button
         type="submit"
         disabled={!stripe || !elements || loading}
-        className="mt-4 w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99]"
+        className="mt-4 w-full rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99]"
       >
         {loading ? "Processing..." : "Pay now"}
       </button>
@@ -220,7 +221,7 @@ export default function CheckoutPage() {
   return (
     <Page title="Checkout">
       <Link to="/cart">
-        <button className="w-full rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]">
+        <button className="w-full rounded-2xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white hover:bg-amber-700 active:scale-[0.99]">
           Back to cart
         </button>
       </Link>
@@ -231,24 +232,30 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-[1.6fr,1fr]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-12 lg:items-start">
         {/* LEFT: Form + Payment */}
-        <div>
+        <div className="lg:col-span-8">
           {/* Form */}
-          <form onSubmit={onSubmit} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900">Customer details</h3>
+          <form
+            onSubmit={onSubmit}
+            className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <h3 className="text-lg font-extrabold text-slate-900">Customer details</h3>
+            <p className="mt-1 text-sm font-semibold text-slate-600">
+              We’ll use this to send updates about your Golden Art Frames order.
+            </p>
 
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <input
-                className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                 placeholder="Full name *"
                 value={customer.fullName}
                 onChange={(e) => setCustomer({ ...customer, fullName: e.target.value })}
                 required
-                disabled={!!clientSecret} // ✅ lock after payment step starts
+                disabled={!!clientSecret}
               />
               <input
-                className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                 placeholder="Email *"
                 type="email"
                 value={customer.email}
@@ -257,8 +264,8 @@ export default function CheckoutPage() {
                 disabled={!!clientSecret}
               />
               <input
-                className="w-full rounded-xl border border-gray-300 p-3 text-sm sm:col-span-2"
-                placeholder="Phone"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 sm:col-span-2"
+                placeholder="Phone *"
                 value={customer.phone}
                 required
                 onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
@@ -266,11 +273,14 @@ export default function CheckoutPage() {
               />
             </div>
 
-            <h3 className="mt-6 text-lg font-semibold text-gray-900">Shipping address</h3>
+            <h3 className="mt-8 text-lg font-extrabold text-slate-900">Shipping address</h3>
+            <p className="mt-1 text-sm font-semibold text-slate-600">
+              We package your Golden Art Frames order securely and deliver to your doorstep.
+            </p>
 
-            <div className="mt-3 grid gap-3">
+            <div className="mt-4 grid gap-3">
               <input
-                className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                 placeholder="Address line 1 *"
                 value={shippingAddress.line1}
                 onChange={(e) => setShippingAddress({ ...shippingAddress, line1: e.target.value })}
@@ -278,7 +288,7 @@ export default function CheckoutPage() {
                 disabled={!!clientSecret}
               />
               <input
-                className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                 placeholder="Address line 2 (optional)"
                 value={shippingAddress.line2}
                 onChange={(e) => setShippingAddress({ ...shippingAddress, line2: e.target.value })}
@@ -287,7 +297,7 @@ export default function CheckoutPage() {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <input
-                  className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                   placeholder="City *"
                   value={shippingAddress.city}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
@@ -295,8 +305,8 @@ export default function CheckoutPage() {
                   disabled={!!clientSecret}
                 />
                 <input
-                  className="w-full rounded-xl border border-gray-300 p-3 text-sm"
-                  placeholder="Postcode * (Optional)"
+                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                  placeholder="Postcode (optional)"
                   value={shippingAddress.postcode}
                   onChange={(e) => setShippingAddress({ ...shippingAddress, postcode: e.target.value })}
                   disabled={!!clientSecret}
@@ -304,7 +314,7 @@ export default function CheckoutPage() {
               </div>
 
               <input
-                className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                 placeholder="Country *"
                 value={shippingAddress.country}
                 onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
@@ -312,13 +322,14 @@ export default function CheckoutPage() {
                 disabled={!!clientSecret}
               />
             </div>
-            <label className="mt-3 flex items-center gap-2 text-sm text-gray-700">
+
+            <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
               <input
                 type="checkbox"
                 checked={saveAddress}
                 onChange={(e) => setSaveAddress(e.target.checked)}
                 disabled={!!clientSecret}
-                className="h-4 w-4 rounded-2xl border-gray-300 text-gray-900 focus:ring-gray-900"
+                className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
               />
               Save this address for next time
             </label>
@@ -326,80 +337,113 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={!cart?.items?.length || creating || !!clientSecret}
-              className={`mt-6 w-full rounded-2xl border px-4 py-3 font-semibold shadow-sm transition active:scale-[0.99]
+              className={`mt-6 w-full rounded-2xl px-4 py-3 text-sm font-extrabold shadow-sm transition active:scale-[0.99]
                 ${
                   !cart?.items?.length || creating || !!clientSecret
-                    ? "cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500"
-                    : "border-gray-300 bg-white text-gray-900 hover:bg-gray-50"
+                    ? "cursor-not-allowed bg-slate-100 text-slate-500"
+                    : "bg-amber-700 text-white hover:bg-amber-800"
                 }`}
             >
-              {creating ? "Creating secure checkout..." : clientSecret ? "Checkout created ✅" : "Continue to payment"}
+              {creating
+                ? "Creating secure checkout..."
+                : clientSecret
+                ? "Checkout created ✅"
+                : "Continue to payment"}
             </button>
 
-            <p className="mt-3 text-xs text-gray-600">
+            <p className="mt-3 text-xs font-semibold text-slate-600">
               We’ll create your order first, then take payment securely via Stripe.
             </p>
           </form>
 
           {/* Payment step (only after clientSecret exists) */}
           {clientSecret && (
-            <Elements stripe={stripePromise} options={{ clientSecret }}>
-              <PaymentStep
-                orderId={orderId}
-                onPaid={() => navigate(`/order/${orderId}`)}
-              />
-            </Elements>
+            <div className="mt-5">
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <PaymentStep orderId={orderId} onPaid={() => navigate(`/order/${orderId}`)} />
+              </Elements>
+            </div>
           )}
         </div>
 
-        {/* RIGHT: Summary (unchanged) */}
-        <div className="h-fit rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">Order Summary</h3>
+        {/* RIGHT: Summary (sticky) */}
+        <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
+          <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-amber-50 via-white to-white p-5 shadow-sm">
+            <h3 className="text-lg font-extrabold text-slate-900">Order Summary</h3>
 
-          <div className="mt-3 space-y-3">
-            {(cart?.items || []).map((item) => {
-              const cfg = item.config || {};
-              const material = typeof cfg.material === "string" && cfg.material.length ? cfg.material : null;
-              const frame = typeof cfg.frame === "string" && cfg.frame.length ? cfg.frame : null;
-              const mat = typeof cfg.mat === "string" && cfg.mat.length ? cfg.mat : null;
-              const size = typeof cfg.size === "string" && cfg.size.length ? cfg.size : "—";
-              const qty = Number(cfg.quantity || 1);
-              const thumb = item.assets?.previewUrl || item.assets?.originalUrl || "";
+            <div className="mt-4 space-y-3">
+              {(cart?.items || []).map((item) => {
+                const cfg = item.config || {};
+                const material =
+                  typeof cfg.material === "string" && cfg.material.length ? cfg.material : null;
+                const frame =
+                  typeof cfg.frame === "string" && cfg.frame.length ? cfg.frame : null;
+                const mat = typeof cfg.mat === "string" && cfg.mat.length ? cfg.mat : null;
+                const size = typeof cfg.size === "string" && cfg.size.length ? cfg.size : "—";
+                const qty = Number(cfg.quantity || 1);
+                const thumb = item.assets?.previewUrl || item.assets?.originalUrl || "";
 
-              return (
-                <div key={item._id} className="flex items-center gap-3">
-                  <img
-                    src={thumb}
-                    alt="preview"
-                    className="h-12 w-12 rounded-xl border border-gray-200 object-cover"
-                  />
+                return (
+                  <div
+                    key={item._id}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"
+                  >
+                    <img
+                      src={thumb}
+                      alt="preview"
+                      className="h-12 w-12 rounded-xl border border-slate-200 object-cover"
+                    />
 
-                  <div className="flex-1 text-sm text-gray-800">
-                    <div className="font-semibold">{item.productSlug?.toUpperCase()}</div>
-                    <div className="text-xs text-gray-600">
-                      {material && <>Material: {material}{" | "}</>}
-                      {frame && <>Frame: {frame}{" | "}</>}
-                      {mat && <>Mat: {mat}{" | "}</>}
-                      Size: {size}
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-extrabold text-slate-900">
+                        {item.productSlug?.toUpperCase()}
+                      </div>
+                      <div className="mt-0.5 text-xs font-semibold text-slate-600">
+                        {material && <>Material: {material}{" • "}</>}
+                        {frame && <>Frame: {frame}{" • "}</>}
+                        {mat && <>Mat: {mat}{" • "}</>}
+                        Size: {size}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-sm font-extrabold text-slate-900">
+                        {item.price?.total} {item.price?.currency}
+                      </div>
+                      <div className="text-xs font-semibold text-slate-600">Qty: {qty}</div>
                     </div>
                   </div>
-
-                  <div className="text-sm font-semibold text-gray-900">
-                    {item.price?.total} {item.price?.currency}
-                    <div className="text-xs font-normal text-gray-600 text-end">Qty: {qty}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 rounded-xl bg-gray-50 p-3 text-sm text-gray-800">
-            <div className="flex items-center justify-between">
-              <span>Subtotal</span>
-              <span className="font-semibold">
-                {subtotal} {currency}
-              </span>
+                );
+              })}
             </div>
+
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center justify-between text-sm text-slate-700">
+                <span className="font-semibold">Subtotal</span>
+                <span className="font-extrabold text-slate-900">
+                  {subtotal} {currency}
+                </span>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
+                <span className="font-semibold">Delivery</span>
+                <span className="text-slate-500">Calculated at checkout</span>
+              </div>
+
+              <div className="my-3 h-px bg-slate-200" />
+
+              <div className="flex items-center justify-between text-base">
+                <span className="font-extrabold text-slate-900">Total</span>
+                <span className="font-extrabold text-slate-900">
+                  {subtotal} {currency}
+                </span>
+              </div>
+            </div>
+
+            <p className="mt-3 text-xs font-semibold text-slate-600">
+              Secure checkout • Premium packaging • Doorstep delivery
+            </p>
+            <p className="mt-2 text-xs text-slate-500">Preview is for reference only.</p>
           </div>
         </div>
       </div>
