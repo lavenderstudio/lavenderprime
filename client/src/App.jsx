@@ -19,6 +19,7 @@ import AccountPage from "./pages/AccountPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
+import Delivery from "./pages/Delivery.jsx";
 import RequireAuth from "./components/RequireAuth.jsx";
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
@@ -68,12 +69,13 @@ export default function App() {
             </RequireAuth>
           }
         />
-        <Route path="/order/success" element={<OrderSuccessPage />} />
+        <Route path="/order/:id" element={<OrderSuccessPage />} />
         <Route path="/orders" element={<UserOrdersPage />} />
         <Route path="/admin" element={<AdminOrdersPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<div>404</div>} />
+        <Route path="/delivery" element={<Delivery />} />
       </Routes>
       <Footer />
     </>
