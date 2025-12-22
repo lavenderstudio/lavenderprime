@@ -72,10 +72,10 @@ export default function Hero({ promos }) {
             </div>
 
             <FadeUp>
-              <h1 className="mt-4 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl lg:text-5xl">
-                Print your memories and{" "}
+              <h1 className="mt-4 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-3xl">
+                Luxury framing for modern living.{" "}
                 <span className={`${ACCENT} underline decoration-amber-500/60 underline-offset-8`}>
-                  frame them beautifully
+                  Crafted in UAE.
                 </span>
               </h1>
 
@@ -83,7 +83,7 @@ export default function Hero({ promos }) {
                 Upload a photo, choose the size, frame and finish — we print, frame and deliver to your door.
               </p>
             </FadeUp>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-6 flex gap-3 sm:items-center">
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link
                   to="/products"
