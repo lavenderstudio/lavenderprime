@@ -147,8 +147,8 @@ export default function Home() {
 
       <Hero promos={promos} />
 
-      <AboutSection />
       <FeaturedProducts products={products} />
+      <AboutSection />
 
       <Testimonials testimonials={testimonials} />
       <BlogPreview blogs={blogs} />
