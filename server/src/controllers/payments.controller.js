@@ -23,7 +23,13 @@ export const createPaymentIntent = async (req, res) => {
     const order = await Order.findById(orderId);
     if (!order) return res.status(404).json({ message: "Order Not Found" });
 
-    const amount = Math.round(Number(order.totals.subtotal) * 100);
+    const grandTotal = Number(order?.totals?.grandTotal);
+
+    const amount = Math.round(grandTotal * 100);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ message: "Invalid payment amount" });
+    }
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount,

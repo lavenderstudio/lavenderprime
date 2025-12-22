@@ -6,9 +6,21 @@
 // - Allows user to save fullName, phone, and shipping address
 // ----------------------------------------------------
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Page from "../components/Page.jsx";
 import api from "../lib/api.js";
+
+const UAE_CITIES = [
+  "Abu Dhabi",
+  "Dubai",
+  "Sharjah",
+  "Ajman",
+  "Ras Al Khaimah",
+  "Fujairah",
+  "Umm Al Quwain",
+  "Al Ain",
+  "Khorfakkan",
+];
 
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
@@ -111,6 +123,16 @@ export default function AccountPage() {
     }
   };
 
+  const isUAE = useMemo(() => {
+    const c = String(form.shippingAddress?.country || "").toLowerCase();
+    return (
+      c === "united arab emirates" ||
+      c === "uae" ||
+      c === "u.a.e" ||
+      c.includes("emirates")
+    );
+  }, [form.shippingAddress?.country]);
+
   return (
     <Page title="My Account">
       {loading ? (
@@ -197,25 +219,53 @@ export default function AccountPage() {
                   />
 
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <input
-                      value={form.shippingAddress.city}
-                      onChange={(e) => updateAddr("city", e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 p-3 text-sm"
-                      placeholder="City"
-                    />
-                    <input
-                      value={form.shippingAddress.postcode}
-                      onChange={(e) => updateAddr("postcode", e.target.value)}
-                      className="w-full rounded-xl border border-gray-300 p-3 text-sm"
-                      placeholder="Postcode"
-                    />
+                    {/* ✅ City */}
+                    <div>
+                      <label className="text-sm font-semibold text-gray-700">City</label>
+
+                      {isUAE ? (
+                        <select
+                          className="mt-1 w-full rounded-xl border border-gray-300 bg-white p-3 text-sm"
+                          value={form.shippingAddress.city}
+                          onChange={(e) => updateAddr("city", e.target.value)}
+                          required
+                        >
+                          <option value="">Select city *</option>
+                          {UAE_CITIES.map((city) => (
+                            <option key={city} value={city}>
+                              {city}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          value={form.shippingAddress.city}
+                          onChange={(e) => updateAddr("city", e.target.value)}
+                          className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
+                          placeholder="City"
+                          required
+                        />
+                      )}
+                    </div>
+
+                    {/* ✅ Postcode */}
+                    <div>
+                      <label className="text-sm font-semibold text-gray-700">Postcode</label>
+                      <input
+                        value={form.shippingAddress.postcode}
+                        onChange={(e) => updateAddr("postcode", e.target.value)}
+                        className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
+                        placeholder="Postcode"
+                      />
+                    </div>
                   </div>
 
                   <input
                     value={form.shippingAddress.country}
                     onChange={(e) => updateAddr("country", e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                    className="w-full rounded-xl border border-gray-300 p-3 text-sm bg-slate-100 text-slate-700"
                     placeholder="Country"
+                    disabled
                   />
                 </div>
               </div>

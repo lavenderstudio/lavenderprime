@@ -22,6 +22,19 @@ async function getNextOrderNumber() {
 }
 
 
+function calcShippingFee({ country, currency }) {
+  const c = String(country || "").trim().toLowerCase();
+  const cur = String(currency || "AED").trim().toUpperCase();
+
+  if (cur !== "AED") {
+    return 0;
+  }
+
+  if (c === "united arab emirates" || c === "uae") return 50;
+
+  return 100;
+}
+
 
 export const checkout = async (req, res) => {
   try {
@@ -80,10 +93,10 @@ export const checkout = async (req, res) => {
     
     const subtotal = cart.items.reduce((sum, item) => sum + (item.price?.total || 0), 0);
     const currency = cart.items[0]?.price?.currency || "AED";
-
-    // ✅ MVP totals (you can plug real shipping/tax rules later)
-    // Note: keep these in MAJOR units (e.g. 10.99 AED), since your cart uses major units
-    const shipping = 0;
+    const shipping = calcShippingFee({
+      country: shippingAddress.country,
+      currency,
+    });
     const tax = 0;
     const discount = 0;
 

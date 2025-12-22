@@ -19,6 +19,18 @@ import Page from "../components/Page.jsx";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 
+const UAE_CITIES = [
+  "Abu Dhabi",
+  "Dubai",
+  "Sharjah",
+  "Ajman",
+  "Ras Al Khaimah",
+  "Fujairah",
+  "Umm Al Quwain",
+  "Al Ain",
+  "Khorfakkan",
+];
+
 // ✅ Publishable key comes from Vite env
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -109,6 +121,9 @@ export default function CheckoutPage() {
   const [clientSecret, setClientSecret] = useState("");
   const [creating, setCreating] = useState(false);
   const [saveAddress, setSaveAddress] = useState(true);
+  const [orderTotals, setOrderTotals] = useState(null);
+  const [emailLocked, setEmailLocked] = useState(false);
+  const [countryLocked, setCountryLocked] = useState(false);
 
   const [customer, setCustomer] = useState({
     fullName: "",
@@ -132,8 +147,32 @@ export default function CheckoutPage() {
         const u = res.data?.user;
 
         if (u?.fullName) setCustomer((prev) => ({ ...prev, fullName: u.fullName }));
-        if (u?.email) setCustomer((prev) => ({ ...prev, email: u.email }));
+
+        // ✅ Email from profile → set + lock
+        if (u?.email) {
+          setCustomer((prev) => ({ ...prev, email: u.email }));
+          setEmailLocked(true);
+        }
+
         if (u?.phone) setCustomer((prev) => ({ ...prev, phone: u.phone }));
+
+        // ✅ Country from profile → set + lock
+        const profileCountry = u?.shippingAddress?.country;
+        if (profileCountry) {
+          setShippingAddress((prev) => ({
+            ...prev,
+            ...u.shippingAddress,
+            country: profileCountry,
+          }));
+          setCountryLocked(true);
+        } else if (u?.shippingAddress) {
+          // If they have address but no country saved, still merge address
+          setShippingAddress((prev) => ({
+            ...prev,
+            ...u.shippingAddress,
+            country: prev.country, // keep default
+          }));
+        }
 
         if (u?.shippingAddress) {
           setShippingAddress((prev) => ({
@@ -171,6 +210,7 @@ export default function CheckoutPage() {
 
   const subtotal = cart?.items?.reduce((sum, item) => sum + (item.price?.total || 0), 0) || 0;
   const currency = cart?.items?.[0]?.price?.currency || "AED";
+  const shipping = cart?.items?.[0]?.shipping
 
   /**
    * Step: Create order + payment intent, then show payment form.
@@ -202,6 +242,7 @@ export default function CheckoutPage() {
 
       const createdOrderId = orderRes.data._id;
       setOrderId(createdOrderId);
+      setOrderTotals(orderRes.data.totals);
 
       // 2) Create PaymentIntent
       const piRes = await api.post("/payments/create-intent", {
@@ -217,6 +258,48 @@ export default function CheckoutPage() {
       setCreating(false);
     }
   };
+
+  const displayTotals = orderTotals || {
+    subtotal,
+    shipping: 0,
+    grandTotal: subtotal,
+    currency,
+  };
+
+  // ✅ Estimated delivery (frontend only)
+  // This is just for display before the order is created.
+  // Final delivery comes from backend (orderTotals.shipping).
+  const estimatedDelivery = useMemo(() => {
+    const c = String(shippingAddress?.country || "").trim().toLowerCase();
+
+    const isUAE =
+      c === "united arab emirates" ||
+      c === "uae" ||
+      c === "u.a.e"
+
+    return isUAE ? 50 : 100;
+  }, [shippingAddress?.country]);
+
+  // ✅ Before checkout: show estimate. After checkout: show backend-confirmed delivery.
+  const deliveryToShow =
+    typeof displayTotals?.shipping === "number" && orderTotals
+      ? displayTotals.shipping
+      : estimatedDelivery;
+
+  // ✅ Total to show (estimate before checkout, real total after checkout)
+  const totalToShow =
+    orderTotals ? displayTotals.grandTotal : subtotal + estimatedDelivery;
+
+  const isUAE = useMemo(() => {
+    const c = String(shippingAddress.country || "").toLowerCase();
+    return (
+      c === "united arab emirates" ||
+      c === "uae" ||
+      c === "u.a.e" ||
+      c.includes("emirates")
+    );
+  }, [shippingAddress.country]);
+
 
   return (
     <Page title="Checkout">
@@ -255,13 +338,13 @@ export default function CheckoutPage() {
                 disabled={!!clientSecret}
               />
               <input
-                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 disabled:bg-slate-50 disabled:text-slate-600"
                 placeholder="Email *"
                 type="email"
                 value={customer.email}
                 onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
                 required
-                disabled={!!clientSecret}
+                disabled={emailLocked || !!clientSecret}
               />
               <input
                 className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 sm:col-span-2"
@@ -296,14 +379,35 @@ export default function CheckoutPage() {
               />
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <input
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                  placeholder="City *"
-                  value={shippingAddress.city}
-                  onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
-                  required
-                  disabled={!!clientSecret}
-                />
+                {isUAE ? (
+                  <select
+                    className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                    value={shippingAddress.city}
+                    onChange={(e) =>
+                      setShippingAddress({ ...shippingAddress, city: e.target.value })
+                    }
+                    required
+                    disabled={!!clientSecret}
+                  >
+                    <option value="">Select City *</option>
+                    {UAE_CITIES.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                    placeholder="City *"
+                    value={shippingAddress.city}
+                    onChange={(e) =>
+                      setShippingAddress({ ...shippingAddress, city: e.target.value })
+                    }
+                    required
+                    disabled={!!clientSecret}
+                  />
+                )}
                 <input
                   className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                   placeholder="Postcode (optional)"
@@ -314,12 +418,12 @@ export default function CheckoutPage() {
               </div>
 
               <input
-                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+                className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10 disabled:bg-slate-50 disabled:text-slate-600"
                 placeholder="Country *"
                 value={shippingAddress.country}
                 onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
                 required
-                disabled={!!clientSecret}
+                disabled={countryLocked || !!clientSecret}
               />
             </div>
 
@@ -374,15 +478,12 @@ export default function CheckoutPage() {
             <div className="mt-4 space-y-3">
               {(cart?.items || []).map((item) => {
                 const cfg = item.config || {};
-                const material =
-                  typeof cfg.material === "string" && cfg.material.length ? cfg.material : null;
-                const frame =
-                  typeof cfg.frame === "string" && cfg.frame.length ? cfg.frame : null;
+                const material = typeof cfg.material === "string" && cfg.material.length ? cfg.material : null;
+                const frame = typeof cfg.frame === "string" && cfg.frame.length ? cfg.frame : null;
                 const mat = typeof cfg.mat === "string" && cfg.mat.length ? cfg.mat : null;
                 const size = typeof cfg.size === "string" && cfg.size.length ? cfg.size : "—";
                 const qty = Number(cfg.quantity || 1);
                 const thumb = item.assets?.previewUrl || item.assets?.originalUrl || "";
-
                 return (
                   <div
                     key={item._id}
@@ -421,13 +522,17 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between text-sm text-slate-700">
                 <span className="font-semibold">Subtotal</span>
                 <span className="font-extrabold text-slate-900">
-                  {subtotal} {currency}
+                  {displayTotals.subtotal} {displayTotals.currency}
                 </span>
               </div>
 
               <div className="mt-2 flex items-center justify-between text-sm text-slate-700">
-                <span className="font-semibold">Delivery</span>
-                <span className="text-slate-500">Calculated at checkout</span>
+                <span className="font-semibold">
+                  {orderTotals ? "Delivery" : "Estimated delivery"}
+                </span>
+                <span className="font-extrabold text-slate-900">
+                  {deliveryToShow} {currency}
+                </span>
               </div>
 
               <div className="my-3 h-px bg-slate-200" />
@@ -435,9 +540,10 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between text-base">
                 <span className="font-extrabold text-slate-900">Total</span>
                 <span className="font-extrabold text-slate-900">
-                  {subtotal} {currency}
+                  {totalToShow} {currency}
                 </span>
               </div>
+
             </div>
 
             <p className="mt-3 text-xs font-semibold text-slate-600">

@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema(
 			line2: { type: String, default: "" },
 			city: { type: String, default: "" },
 			postcode: { type: String, default: "" },
-			country: { type: String, default: "" },
+			country: { type: String, default: "United Arab Emirates" },
 		},
 
 		phone: { type: String, default: "" },
