@@ -60,8 +60,8 @@ function PromoCard({ title, subtitle, cta, href, imageUrl }) {
 export default function Hero({ promos }) {
   return (
     <section className="relative overflow-hidden bg-linear-to-b from bg-amber-700/80 via-white to-white">
-      <div className="hidden sm:block absolute -top-24 right-0 h-64 w-64 rounded-full bg-amber-100/40 blur-2xl opacity-45" />
-      <div className="hidden sm:block absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-amber-200/40 blur-2xl opacity-45" />
+      <div className="hidden sm:block absolute -top-24 right-0 h-64 w-64 rounded-full bg-amber-100/40 blur-xl opacity-45" />
+      <div className="hidden sm:block absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-amber-200/40 blur-xl opacity-45" />
 
       <Container className="py-10 sm:py-14">
         <div className="grid items-center gap-10 lg:grid-cols-2">
@@ -82,27 +82,27 @@ export default function Hero({ promos }) {
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
                 Upload a photo, choose the size, frame and finish — we print, frame and deliver to your door.
               </p>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <motion.div whileTap={{ scale: 0.98 }}>
-                  <Link
-                    to="/products"
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
-                  >
-                    Start Designing
-                  </Link>
-                </motion.div>
-
-                <motion.div whileTap={{ scale: 0.98 }}>
-                  <Link
-                    to="/contact"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50"
-                  >
-                    Contact Us
-                  </Link>
-                </motion.div>
-              </div>
             </FadeUp>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Link
+                  to="/products"
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
+                >
+                  Start Designing
+                </Link>
+              </motion.div>
+
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50"
+                >
+                  Contact Us
+                </Link>
+              </motion.div>
+            </div>
+          
 
             <div className="mt-6 flex flex-wrap gap-2">
               <Badge icon={Truck} label="Fast Delivery" />
@@ -115,7 +115,7 @@ export default function Hero({ promos }) {
           <div className="relative">
             <div className="aspect-4/3 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm">
               <img
-                src="https://images.unsplash.com/photo-1676327679378-1a3ca1040924?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src="./hero-img.avif"
                 alt="Framed print in interior"
                 className="h-full w-full object-cover"
                 loading="lazy"

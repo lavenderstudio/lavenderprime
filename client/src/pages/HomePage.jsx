@@ -34,7 +34,7 @@ export default function Home() {
         cta: "Start Designing",
         href: "/products",
         imageUrl:
-          "https://images.unsplash.com/photo-1594335034276-470bb3d7ceac",
+          "./promo1.jfif",
       },
       {
         title: "Premium Canvas Prints",
@@ -42,7 +42,7 @@ export default function Home() {
         cta: "Shop Canvas",
         href: "/editor/canvas",
         imageUrl:
-          "https://images.unsplash.com/photo-1568448705245-1250489bcd66",
+          "./promo2.jfif",
       },
       {
         title: "Fast Delivery, Safe Packaging",
@@ -50,7 +50,7 @@ export default function Home() {
         cta: "How Delivery Works",
         href: "/delivery",
         imageUrl:
-          "https://images.unsplash.com/photo-1624137527136-66e631bdaa0e",
+          "./promo3.jfif",
       },
     ],
     []
@@ -64,7 +64,7 @@ export default function Home() {
         rating: 4.9,
         tag: "Popular",
         imageUrl:
-          "https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=1600&q=80&auto=format&fit=crop",
+          "./feature1.avif",
         href: "/editor/print-frame",
       },
       {
@@ -73,7 +73,7 @@ export default function Home() {
         rating: 4.8,
         tag: "Premium",
         imageUrl:
-          "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=1600&q=80&auto=format&fit=crop",
+          "./feature2.avif",
         href: "/editor/print",
       },
       {
@@ -82,7 +82,7 @@ export default function Home() {
         rating: 4.7,
         tag: "Best seller",
         imageUrl:
-          "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=1600&q=80&auto=format&fit=crop",
+          "./feature3.jfif",
         href: "/editor/canvas",
       },
       {
@@ -91,7 +91,7 @@ export default function Home() {
         rating: 4.6,
         tag: "Value",
         imageUrl:
-          "https://images.unsplash.com/photo-1522770179533-24471fcdba45?w=1600&q=80&auto=format&fit=crop",
+          "./feature1.avif",
         href: "/editor/poster",
       },
     ],
@@ -133,7 +133,7 @@ export default function Home() {
         excerpt:
           "A quick guide for picking frame sizes, mounts, and orientations for your wall space.",
         imageUrl:
-          "https://images.unsplash.com/photo-1493666438817-866a91353ca9?w=1600&q=80&auto=format&fit=crop",
+          "./blog1.avif",
       },
       {
         title: "Canvas vs poster: what’s best for you?",
@@ -141,7 +141,7 @@ export default function Home() {
         excerpt:
           "We break down durability, finish, and style to help you choose confidently.",
         imageUrl:
-          "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=1600&q=80&auto=format&fit=crop",
+          "./blog2.avif",
       },
       {
         title: "How we pack frames for safe delivery",
@@ -149,7 +149,7 @@ export default function Home() {
         excerpt:
           "Behind the scenes: corner protection, wrap layers, and courier handling tips.",
         imageUrl:
-          "https://images.unsplash.com/photo-1607082350899-7e105aa886ae?w=1600&q=80&auto=format&fit=crop",
+          "./blog3.avif",
       },
     ],
     []
