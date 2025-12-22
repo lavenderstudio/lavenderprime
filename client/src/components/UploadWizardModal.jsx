@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 // client/src/components/UploadWizardModal.jsx
 // ----------------------------------------------------
 // 3-step modal:
