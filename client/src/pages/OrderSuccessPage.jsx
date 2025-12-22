@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // client/src/pages/OrderSuccessPage.jsx
 // ----------------------------------------------------
 // Order confirmation / status page
@@ -337,7 +338,7 @@ export default function OrderSuccessPage() {
 
               {/* RIGHT: Summary (sticky) */}
               <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
-                <div className="rounded-3xl border border-slate-200 bg-gradient-to-b from-amber-50 via-white to-white p-5 shadow-sm">
+                <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-amber-50 via-white to-white p-5 shadow-sm">
                   <h3 className="text-lg font-extrabold text-slate-900">Summary</h3>
 
                   <div className="mt-4 space-y-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-800">
