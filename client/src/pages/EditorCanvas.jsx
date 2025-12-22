@@ -207,7 +207,7 @@ export default function EditorCanvas() {
         ) : (
           <div className="mt-4 grid gap-6 lg:grid-cols-12">
             {/* LEFT: Editor */}
-            <div className="relative overflow-visible rounded-3xl lg:col-span-7 border border-slate-200 bg-gradient-to-b from-amber-50 via-white to-white shadow-sm">
+            <div className="relative overflow-visible rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-amber-50 via-white to-white shadow-sm">
               <div className="p-5">
                 {!originalUrl ? (
                   <div className="flex flex-col items-center justify-center">
