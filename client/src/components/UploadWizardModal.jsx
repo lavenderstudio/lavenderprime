@@ -22,12 +22,12 @@ function Stepper({ step }) {
       <div className="flex items-center gap-2">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold ${
-            step === 1 ? "border-amber-500 text-amber-900" : "border-gray-300 text-gray-600"
+            step === 1 ? "border-blue-500 text-blue-700" : "border-gray-300 text-gray-600"
           }`}
         >
           1
         </div>
-        <span className={step === 1 ? "font-semibold text-amber-600" : "text-gray-600"}>
+        <span className={step === 1 ? "font-semibold text-blue-600" : "text-gray-600"}>
           Choose Orientation
         </span>
       </div>
@@ -37,12 +37,12 @@ function Stepper({ step }) {
       <div className="flex items-center gap-2">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold ${
-            step === 2 ? "border-amber-500 text-amber-900" : "border-gray-300 text-gray-600"
+            step === 2 ? "border-blue-500 text-blue-700" : "border-gray-300 text-gray-600"
           }`}
         >
           2
         </div>
-        <span className={step === 2 ? "font-semibold text-amber-600" : "text-gray-600"}>
+        <span className={step === 2 ? "font-semibold text-blue-600" : "text-gray-600"}>
           Choose Image
         </span>
       </div>
@@ -52,12 +52,12 @@ function Stepper({ step }) {
       <div className="flex items-center gap-2">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold ${
-            step === 3 ? "border-amber-500 text-amber-900" : "border-gray-300 text-gray-600"
+            step === 3 ? "border-blue-500 text-blue-700" : "border-gray-300 text-gray-600"
           }`}
         >
           3
         </div>
-        <span className={step === 3 ? "font-semibold text-amber-600" : "text-gray-600"}>
+        <span className={step === 3 ? "font-semibold text-blue-600" : "text-gray-600"}>
           Preview
         </span>
       </div>
@@ -71,7 +71,7 @@ function RatioCard({ ratio, selected, onClick }) {
       type="button"
       onClick={onClick}
       className={`group flex flex-col items-center justify-center rounded-2xl border p-3 transition active:scale-[0.99]
-        ${selected ? "border-amber-400 bg-amber-200" : "border-gray-200 bg-white hover:bg-gray-50"}`}
+        ${selected ? "border-blue-400 bg-blue-100" : "border-gray-200 bg-white hover:bg-gray-50"}`}
     >
       {/* Simple icon mock */}
       <div className="flex h-16 w-20 items-center justify-center rounded-xl">
@@ -86,7 +86,7 @@ function RatioCard({ ratio, selected, onClick }) {
 
       <span
         className={`mt-2 rounded-full px-3 py-1 text-xs font-semibold ${
-          selected ? "bg-amber-400 text-amber-900" : "bg-gray-100 text-gray-700"
+          selected ? "bg-blue-400 text-white" : "bg-gray-100 text-gray-700"
         }`}
       >
         {ratio.label}
@@ -214,7 +214,7 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete }) {
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="rounded-2xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white hover:bg-black active:scale-[0.99]"
+                  className="rounded-2xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800 active:scale-[0.99]"
                 >
                   Next →
                 </button>
