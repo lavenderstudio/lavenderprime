@@ -139,6 +139,34 @@ export default function CheckoutPage() {
     country: "United Arab Emirates",
   });
 
+  // ------------------------------
+  // Assets helpers (single + multi)
+  // ------------------------------
+  function isMultiAssets(assets) {
+    return !!assets && Array.isArray(assets.items) && assets.items.length > 0;
+  }
+
+  function getThumbUrlFromItem(item) {
+    const assets = item?.assets || {};
+
+    // ✅ Mini-frames / multi-image items
+    if (isMultiAssets(assets)) {
+      const first = assets.items.find((x) => x?.previewUrl || x?.originalUrl);
+      return first?.previewUrl || first?.originalUrl || "";
+    }
+
+    // ✅ Single-image items
+    return assets.previewUrl || assets.originalUrl || "";
+  }
+
+  function getMiniFramesCount(item) {
+    const assets = item?.assets || {};
+    if (!isMultiAssets(assets)) return 0;
+    return assets.items.length;
+  }
+
+
+
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -478,32 +506,61 @@ export default function CheckoutPage() {
             <div className="mt-4 space-y-3">
               {(cart?.items || []).map((item) => {
                 const cfg = item.config || {};
+
                 const material = typeof cfg.material === "string" && cfg.material.length ? cfg.material : null;
                 const frame = typeof cfg.frame === "string" && cfg.frame.length ? cfg.frame : null;
                 const mat = typeof cfg.mat === "string" && cfg.mat.length ? cfg.mat : null;
                 const size = typeof cfg.size === "string" && cfg.size.length ? cfg.size : "—";
-                const qty = Number(cfg.quantity || 1);
-                const thumb = item.assets?.previewUrl || item.assets?.originalUrl || "";
+
+                // ✅ qty support for both new + old carts
+                const qty = Number(item.quantity || cfg.quantity || 1);
+
+                // ✅ thumb supports single + multi
+                const thumb = getThumbUrlFromItem(item);
+
+                const isMiniFrames = item.productSlug === "mini-frames";
+                const miniCount = getMiniFramesCount(item);
+
                 return (
                   <div
                     key={item._id}
                     className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"
                   >
-                    <img
-                      src={thumb}
-                      alt="preview"
-                      className="h-12 w-12 rounded-xl border border-slate-200 object-cover"
-                    />
+                    {/* Thumbnail */}
+                    {thumb ? (
+                      <img
+                        src={thumb}
+                        alt="preview"
+                        className="h-12 w-12 rounded-xl border border-slate-200 object-cover"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                        No image
+                      </div>
+                    )}
 
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-extrabold text-slate-900">
                         {item.productSlug?.toUpperCase()}
                       </div>
+
                       <div className="mt-0.5 text-xs font-semibold text-slate-600">
-                        {material && <>Material: {material}{" • "}</>}
-                        {frame && <>Frame: {frame}{" • "}</>}
-                        {mat && <>Mat: {mat}{" • "}</>}
-                        Size: {size}
+                        {/* ✅ Mini-frames: show photo count */}
+                        {isMiniFrames ? (
+                          <>
+                            Photos: {miniCount}
+                            {" • "}Frame: {frame || "—"}
+                            {" • "}Type: {mat || "—"}
+                            {" • "}Size: {size}
+                          </>
+                        ) : (
+                          <>
+                            {material && <>Material: {material}{" • "}</>}
+                            {frame && <>Frame: {frame}{" • "}</>}
+                            {mat && <>Mat: {mat}{" • "}</>}
+                            Size: {size}
+                          </>
+                        )}
                       </div>
                     </div>
 
@@ -516,6 +573,7 @@ export default function CheckoutPage() {
                   </div>
                 );
               })}
+
             </div>
 
             <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
