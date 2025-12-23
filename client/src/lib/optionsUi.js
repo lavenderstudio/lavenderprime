@@ -19,6 +19,13 @@ export const FRAME_OPTIONS = [
   { id: "Gold Metal", img: metalGold },
 ];
 
+export const MINIFRAME_FRAME_OPTIONS = [
+  { id: "Black Wood", img: woodBlack },
+  { id: "White Wood", img: woodWhite },
+  { id: "Walnut Wood", img: woodWalnut },
+  { id: "Natural Wood", img: woodNatural },
+];
+
 export const CANVAS_OPTIONS = [
   { id: "Stretched", img: streched },
   { id: "Black Wood", img: woodBlack },
@@ -31,4 +38,9 @@ export const MAT_OPTIONS = [
   { id: "Thin", Icon: MatThin },
   { id: "Classic", Icon: MatClassic },
   { id: "Gallery", Icon: MatGallery },
+];
+
+export const MINI_FRAME_MAT = [
+  { id: "Classic", name: "Classic" },
+  { id: "Modern", name: "Modern" },
 ];
