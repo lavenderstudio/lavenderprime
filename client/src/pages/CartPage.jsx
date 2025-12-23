@@ -298,27 +298,14 @@ export default function CartPage() {
                       {/* Qty + Price */}
                       <div className="mt-5 rounded-2xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-extrabold text-slate-900">Qty</span>
-                            <input
-                              type="number"
-                              min="1"
-                              value={it.quantity || cfg.quantity || 1}
-                              onChange={(e) => handleUpdateQty(it._id, e.target.value)}
-                              className="w-24 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                            />
+                          <div className="text-sm text-slate-700">
+                            Unit:{" "}
+                            <b className="text-slate-900">
+                              {it.price?.unit ?? "—"} {it.price?.currency || "AED"}
+                            </b>
                           </div>
-
-                          <div className="text-right">
-                            <div className="text-sm text-slate-700">
-                              Unit:{" "}
-                              <b className="text-slate-900">
-                                {it.price?.unit ?? "—"} {it.price?.currency || "AED"}
-                              </b>
-                            </div>
-                            <div className="text-lg font-extrabold text-slate-900">
-                              Total: {it.price?.total ?? "—"} {it.price?.currency || "AED"}
-                            </div>
+                          <div className="text-lg font-bold text-slate-900">
+                            Total: {it.price?.total ?? "—"} {it.price?.currency || "AED"}
                           </div>
                         </div>
                       </div>
