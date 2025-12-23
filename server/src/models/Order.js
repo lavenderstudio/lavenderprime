@@ -2,9 +2,30 @@
 // ----------------------------------------------------
 // Order = immutable snapshot created at checkout.
 // We copy cart items into the order so pricing/config never changes.
+// Supports single-image items AND mini-frames multi-image items.
 // ----------------------------------------------------
 
 import mongoose from "mongoose";
+
+// ✅ For mini-frames: each uploaded photo slot becomes one asset item
+const OrderAssetItemSchema = new mongoose.Schema(
+  {
+    originalUrl: { type: String, default: "" },
+    previewUrl: { type: String, default: "" },
+
+    // keep transform per uploaded image (important for cropping/ratio)
+    transform: {
+      crop: { x: Number, y: Number },
+      zoom: Number,
+      croppedAreaPixels: { x: Number, y: Number, width: Number, height: Number },
+
+      ratio: String,
+      ratioW: Number,
+      ratioH: Number,
+    },
+  },
+  { _id: false }
+);
 
 const OrderItemSchema = new mongoose.Schema(
   {
@@ -22,7 +43,7 @@ const OrderItemSchema = new mongoose.Schema(
       mat: String,
       material: String,
 
-      // ✅ IMPORTANT: store crop/ratio metadata
+      // ✅ IMPORTANT: store crop/ratio metadata (for single-image products)
       transform: {
         crop: { x: Number, y: Number },
         zoom: Number,
@@ -34,9 +55,14 @@ const OrderItemSchema = new mongoose.Schema(
       },
     },
 
+    // ✅ UPDATED: support BOTH single image and multi images
     assets: {
-      originalUrl: String,
-      previewUrl: String,
+      // Single-image products (print & frame, canvas, etc.)
+      originalUrl: { type: String, default: "" },
+      previewUrl: { type: String, default: "" },
+
+      // Mini-frames: multiple uploads
+      items: { type: [OrderAssetItemSchema], default: [] },
     },
 
     price: {

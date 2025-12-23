@@ -29,6 +29,33 @@ function totalWithMat(w, h, matCm) {
   return { w: w + matCm * 2, h: h + matCm * 2 };
 }
 
+function isMultiAssets(assets) {
+  return !!assets && Array.isArray(assets.items) && assets.items.length > 0;
+}
+
+function getPreviewFromCartItem(it) {
+  const assets = it?.assets || {};
+
+  // ✅ Multi-image (mini-frames)
+  if (isMultiAssets(assets)) {
+    const first = assets.items.find((x) => x?.originalUrl || x?.previewUrl);
+    return first?.originalUrl || first?.previewUrl || "";
+  }
+
+  // ✅ Single-image (prints/canvas/print&frame)
+  if (assets.originalUrl || assets.previewUrl) {
+    return assets.originalUrl || assets.previewUrl || "";
+  }
+
+  // ✅ Ultra-legacy fallback (if you ever stored at root)
+  if (it?.originalUrl || it?.previewUrl) {
+    return it.originalUrl || it.previewUrl || "";
+  }
+
+  return "";
+}
+
+
 export default function CartPage() {
   const [cart, setCart] = useState(null);
   const [error, setError] = useState("");
@@ -132,8 +159,8 @@ export default function CartPage() {
             {(cart.items || []).map((it) => {
               const cfg = it.config || {};
               const assets = it.assets || {};
-
-              const previewImg = assets.originalUrl || assets.previewUrl || "";
+              const previewImg = getPreviewFromCartItem(it);
+              const isMiniFrames = it.productSlug === "mini-frames";
 
               const print = parseCmSize(cfg.size);
               const hasFrame = typeof cfg.frame === "string" && cfg.frame.length > 0;
@@ -154,24 +181,58 @@ export default function CartPage() {
                   <div className="grid gap-5 sm:grid-cols-[260px,1fr]">
                     {/* Preview */}
                     <div className="rounded-2xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-3">
-                      {previewImg ? (
+                      {/* ✅ MINI-FRAMES: render grid of N previews */}
+                      {isMiniFrames && isMultiAssets(assets) ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          {assets.items.map((a, idx) => {
+                            const url = a?.originalUrl || a?.previewUrl || "";
+                            return (
+                              <div
+                                key={idx}
+                                className="rounded-2xl border border-slate-200 bg-white p-2"
+                              >
+                                {url ? (
+                                  <FramePreview
+                                    imageUrl={url}
+                                    frame={frame || "Black Wood"}  // keep simple default
+                                    mat={mat || "None"}
+                                  />
+                                ) : (
+                                  <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-slate-100 text-xs font-semibold text-slate-600">
+                                    No image
+                                  </div>
+                                )}
+                                <div className="mt-2 text-center text-[11px] font-extrabold text-slate-700">
+                                  #{idx + 1}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        /* ✅ ALL OTHER PRODUCTS: single preview */
                         <>
-                          {frame === "Stretched" ? (
-                            <Canvas3DPreview imageUrl={previewImg} />
+                          {previewImg ? (
+                            <>
+                              {frame === "Stretched" ? (
+                                <Canvas3DPreview imageUrl={previewImg} />
+                              ) : (
+                                <FramePreview
+                                  imageUrl={previewImg}
+                                  frame={frame || "White Wood"}
+                                  mat={mat || "None"}
+                                />
+                              )}
+                            </>
                           ) : (
-                            <FramePreview
-                              imageUrl={previewImg}
-                              frame={frame || "White Wood"}
-                              mat={mat || "None"}
-                            />
+                            <div className="flex aspect-4/3 w-full items-center justify-center rounded-xl bg-slate-100 text-sm font-semibold text-slate-600">
+                              No image
+                            </div>
                           )}
                         </>
-                      ) : (
-                        <div className="flex aspect-4/3 w-full items-center justify-center rounded-xl bg-slate-100 text-sm font-semibold text-slate-600">
-                          No image
-                        </div>
                       )}
                     </div>
+
 
                     {/* Details */}
                     <div className="flex flex-col justify-between">
@@ -204,8 +265,11 @@ export default function CartPage() {
 
                             {mat && (
                               <div>
-                                <span className="font-extrabold text-slate-900">Mat:</span>{" "}
-                                {mat} ({matCm}cm)
+                                <span className="font-extrabold text-slate-900">
+                                  {isMiniFrames ? "Frame Type:" : "Mat:"}
+                                </span>{" "}
+                                {mat}
+                                {!isMiniFrames && ` (${matCm}cm)`}
                               </div>
                             )}
 
@@ -234,27 +298,14 @@ export default function CartPage() {
                       {/* Qty + Price */}
                       <div className="mt-5 rounded-2xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm font-extrabold text-slate-900">Qty</span>
-                            <input
-                              type="number"
-                              min="1"
-                              value={cfg.quantity || 1}
-                              onChange={(e) => handleUpdateQty(it._id, e.target.value)}
-                              className="w-24 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-                            />
+                          <div className="text-sm text-slate-700">
+                            Unit:{" "}
+                            <b className="text-slate-900">
+                              {it.price?.unit ?? "—"} {it.price?.currency || "AED"}
+                            </b>
                           </div>
-
-                          <div className="text-right">
-                            <div className="text-sm text-slate-700">
-                              Unit:{" "}
-                              <b className="text-slate-900">
-                                {it.price?.unit ?? "—"} {it.price?.currency || "AED"}
-                              </b>
-                            </div>
-                            <div className="text-lg font-extrabold text-slate-900">
-                              Total: {it.price?.total ?? "—"} {it.price?.currency || "AED"}
-                            </div>
+                          <div className="text-lg font-bold text-slate-900">
+                            Total: {it.price?.total ?? "—"} {it.price?.currency || "AED"}
                           </div>
                         </div>
                       </div>

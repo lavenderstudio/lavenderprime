@@ -43,3 +43,8 @@ export const MAT_PADDING = {
   Classic: "48px",
   Gallery: "96px",
 };
+
+export const MINI_FRAME_MAT_PADDING = {
+  Classic: "24px",
+  Modern: "0px",
+};

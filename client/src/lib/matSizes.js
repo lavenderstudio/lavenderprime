@@ -8,3 +8,8 @@ export const MAT_CM = {
   Classic: 5,
   Gallery: 10,
 };
+
+export const MINI_FRAME_MAT = {
+  Classic: 3,
+  Modern: 0,
+};

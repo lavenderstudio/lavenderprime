@@ -90,11 +90,8 @@ export const updateCartItemQuantity = async (req, res) => {
     if (!cart) return res.status(404).json({ message: "Cart Not Found" });
     const item = cart.items.id(itemId);
     if (!item) return res.status(404).json({ message: "Item Not Found" });
-
-    // Update quantity
-    item.config.quantity = qty;
-
-    // Recalculate totals using stored unit price snapshot
+    
+    item.quantity = qty;
     item.price.total = item.price.unit * qty;
 
     await cart.save();

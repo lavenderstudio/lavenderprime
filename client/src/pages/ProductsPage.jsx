@@ -14,6 +14,7 @@ const PRODUCTS = [
   { id: "print", name: "Print", image: "/print.png", href: "/editor/print" },
   { id: "print-frame", name: "Print & Frame", image: "/printandframe.png", href: "/editor/print-frame" },
   { id: "canvas", name: "Canvas", image: "/canvas.png", href: "/editor/canvas" },
+  { id: "mini-frames", name: "Mini Frames", image: "/print.png", href: "/editor/mini-frames" },
 ];
 
 export default function ProductsPage() {

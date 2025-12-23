@@ -329,19 +329,6 @@ export default function EditorPrint() {
               <MaterialTiles options={materialOptions} value={material} onChange={setMaterial} />
             </div>
 
-            {/* Quantity */}
-            <div className="mt-6 border-t border-slate-100 pt-6">
-              <label className="mb-2 block text-sm font-extrabold text-slate-900">
-                Quantity
-              </label>
-              <input
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
-              />
-            </div>
 
             {/* Summary */}
             <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">

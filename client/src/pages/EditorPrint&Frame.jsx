@@ -413,18 +413,6 @@ export default function EditorPrintPortrait() {
                 <MatTiles options={MAT_OPTIONS} value={mat} onChange={setMat} />
               </div>
 
-              {/* Quantity */}
-              <div className="mt-6">
-                <label className="mb-2 block text-sm font-extrabold text-slate-900">Quantity</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                />
-              </div>
-
               {/* Summary */}
               <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
                 <div className="text-sm font-semibold text-slate-700">
