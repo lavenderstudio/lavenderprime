@@ -38,7 +38,7 @@ function StepCard({ icon: Icon, title, text, number }) {
         {number}
       </div>
 
-      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-rose-50 ${ACCENT}`}>
+      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-blue-50 ${ACCENT}`}>
         <Icon className="h-5 w-5" />
       </div>
 
@@ -51,7 +51,7 @@ function StepCard({ icon: Icon, title, text, number }) {
 function InfoCard({ icon: Icon, title, text }) {
   return (
     <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-sm">
-      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-rose-50 ${ACCENT}`}>
+      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-blue-50 ${ACCENT}`}>
         <Icon className="h-5 w-5" />
       </div>
       <p className="mt-4 text-base font-extrabold text-slate-900">{title}</p>
@@ -171,9 +171,9 @@ export default function Delivery() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-linear-to-b from-amber-50 via-white to-white">
-        <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-amber-100/40 blur-3xl" />
-        <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
+      <section className="relative overflow-hidden bg-linear-to-b from-blue-50 via-white to-white">
+        <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-blue-100/40 blur-3xl" />
+        <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl" />
 
         <Container className="py-10 sm:py-14">
           <FadeUp>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable no-unused-vars */
 // client/src/components/Navbar.jsx
 // ----------------------------------------------------
@@ -96,10 +97,10 @@ export default function Navbar() {
   const navLinkClass = (path) => {
     const active = isActive(path);
     return [
-      "relative text-sm font-extrabold transition",
+      "relative text-sm font-semibold transition",
       active ? "text-slate-950" : "text-slate-600 hover:text-slate-950",
       // Accent underline for active
-      active ? "after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-amber-700 after:content-['']" : "",
+      active ? "after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-blue-700 after:content-['']" : "",
     ].join(" ");
   };
 
@@ -107,10 +108,10 @@ export default function Navbar() {
     "relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm hover:bg-slate-50 transition";
 
   const pillBtnClass =
-    "inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-900 shadow-sm hover:bg-slate-50 transition";
+    "inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 transition";
 
   const primaryBtnClass =
-    "inline-flex items-center justify-center rounded-2xl bg-amber-700 px-4 py-2 text-sm font-extrabold text-white shadow-sm hover:bg-amber-900 transition";
+    "inline-flex items-center justify-center rounded-2xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-900 transition";
 
   const handleLogout = async () => {
     try {
@@ -168,7 +169,7 @@ export default function Navbar() {
             >
               GOLDEN ART FRAMES
             </Link>
-            <div className="mx-auto mt-1 h-0.5 w-16 bg-amber-700/70 hidden md:block" />
+            <div className="mx-auto mt-1 h-0.5 w-16 bg-blue-700/70 hidden md:block" />
           </div>
 
           {/* Desktop right area */}
@@ -207,7 +208,7 @@ export default function Navbar() {
                   aria-haspopup="menu"
                   aria-expanded={accountOpen}
                 >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-amber-800 text-white">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-800 text-white">
                     {(me.fullName?.[0] || me.email?.[0] || "U").toUpperCase()}
                   </span>
 
@@ -225,7 +226,7 @@ export default function Navbar() {
                         setAccountOpen(false);
                         navigate("/orders");
                       }}
-                      className="flex w-full items-center gap-2 px-4 py-3 text-sm font-extrabold text-slate-800 hover:bg-slate-50"
+                      className="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                     >
                       <ClipboardList size={16} />
                       My Orders
@@ -236,7 +237,7 @@ export default function Navbar() {
                         setAccountOpen(false);
                         navigate("/account");
                       }}
-                      className="flex w-full items-center gap-2 px-4 py-3 text-sm font-extrabold text-slate-800 hover:bg-slate-50"
+                      className="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                     >
                       <User size={16} />
                       Account
@@ -248,7 +249,7 @@ export default function Navbar() {
                           setAccountOpen(false);
                           navigate("/admin");
                         }}
-                        className="flex w-full items-center gap-2 px-4 py-3 text-sm font-extrabold text-slate-800 hover:bg-slate-50"
+                        className="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                       >
                         <Settings size={16} />
                         Admin
@@ -273,7 +274,7 @@ export default function Navbar() {
             <Link to="/cart" className={iconBtnClass} aria-label="Cart">
               <ShoppingCart size={18} className="text-slate-900" />
               {cartCount > 0 && (
-                <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-950 px-1 text-xs font-extrabold text-white">
+                <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-950 px-1 text-xs font-semibold text-white">
                   {cartCount > 99 ? "99+" : cartCount}
                 </span>
               )}
@@ -297,7 +298,7 @@ export default function Navbar() {
                   setAccountOpen((v) => !v);
                   setMobileOpen(false);
                 }}
-                className="relative inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-800 text-white shadow-sm"
+                className="relative inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-800 text-white shadow-sm"
                 aria-label={accountOpen ? "Close account menu" : "Open account menu"}
                 aria-haspopup="menu"
                 aria-expanded={accountOpen}
@@ -305,14 +306,14 @@ export default function Navbar() {
                 {accountOpen ? (
                   <X size={18} />
                 ) : (
-                  <span className="text-sm font-extrabold">
+                  <span className="text-sm font-semibold">
                     {(me.fullName?.[0] || me.email?.[0] || "U").toUpperCase()}
                   </span>
                 )}
 
                 {/* Optional tiny cart badge on avatar button (like "you have items") */}
                 {cartCount > 0 && !accountOpen && (
-                  <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-extrabold text-white">
+                  <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-semibold text-white">
                     {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
@@ -331,7 +332,7 @@ export default function Navbar() {
                   setAccountOpen(false);
                   navigate("/cart");
                 }}
-                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50"
+                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
               >
                 <span className="flex items-center gap-2">
                   <ShoppingCart size={16} />
@@ -339,7 +340,7 @@ export default function Navbar() {
                 </span>
 
                 {cartCount > 0 && (
-                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-950 px-1 text-xs font-extrabold text-white">
+                  <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-950 px-1 text-xs font-semibold text-white">
                     {cartCount > 99 ? "99+" : cartCount}
                   </span>
                 )}
@@ -350,7 +351,7 @@ export default function Navbar() {
                   setAccountOpen(false);
                   navigate("/orders");
                 }}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
               >
                 <ClipboardList size={16} />
                 My Orders
@@ -361,7 +362,7 @@ export default function Navbar() {
                   setAccountOpen(false);
                   navigate("/account");
                 }}
-                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50"
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
               >
                 <User size={16} />
                 Account
@@ -373,7 +374,7 @@ export default function Navbar() {
                     setAccountOpen(false);
                     navigate("/admin");
                   }}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
                 >
                   <Settings size={16} />
                   Admin
@@ -400,24 +401,24 @@ export default function Navbar() {
         {mobileOpen && (
           <div className="pb-4 lg:hidden">
             <div className="mt-2 grid gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-              <Link className="rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50" to="/">
+              <Link className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50" to="/">
                 Home
               </Link>
-              <Link className="rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50" to="/products">
+              <Link className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50" to="/products">
                 Products
               </Link>
-              <Link className="rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50" to="/about">
+              <Link className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50" to="/about">
                 About
               </Link>
-              <Link className="rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50" to="/delivery">
+              <Link className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50" to="/delivery">
                 Delivery
               </Link>
-              <Link className="rounded-xl px-3 py-2 text-sm font-extrabold text-slate-800 hover:bg-slate-50" to="/contact">
+              <Link className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50" to="/contact">
                 Contact
               </Link>
 
               {!me && (
-                <Link className="rounded-xl bg-amber-700 px-3 py-2 text-center text-sm font-extrabold text-white hover:bg-amber-900" to="/login">
+                <Link className="rounded-xl bg-blue-700 px-3 py-2 text-center text-sm font-extrabold text-white hover:bg-blue-900" to="/login">
                   Login
                 </Link>
               )}

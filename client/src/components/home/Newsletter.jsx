@@ -11,7 +11,7 @@ export default function Newsletter() {
     <section className="border-t bg-white py-12">
       <Container>
         <FadeUp>
-          <div className="rounded-3xl border bg-linear-to-r from-rose-50 via-white to-amber-50 p-6 shadow-sm sm:p-10">
+          <div className="rounded-3xl border bg-linear-to-r from-blue-100 via-white to-white p-6 shadow-sm sm:p-10">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className={`text-sm font-extrabold ${ACCENT}`}>Newsletter</p>

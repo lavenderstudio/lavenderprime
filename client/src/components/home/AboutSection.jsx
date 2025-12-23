@@ -6,7 +6,7 @@ import { FadeUp } from "../motion/MotionWrappers.jsx";
 function SectionHeader({ eyebrow, title, subtitle }) {
   return (
     <div className="max-w-2xl">
-      <p className="text-sm font-semibold tracking-wide uppercase text-amber-600">
+      <p className="text-sm font-semibold tracking-wide uppercase text-blue-600">
         {eyebrow}
       </p>
       <h2 className="mt-2 text-2xl font-extrabold text-slate-900 sm:text-3xl">

@@ -28,8 +28,8 @@ function statusUi(statusRaw) {
   if (s === "requires_payment" || s === "payment_required") {
     return {
       label: "PAYMENT REQUIRED",
-      wrap: "border-amber-200 bg-amber-50 text-amber-900",
-      dot: "bg-amber-500",
+      wrap: "border-blue-200 bg-blue-50 text-blue-900",
+      dot: "bg-blue-500",
     };
   }
 

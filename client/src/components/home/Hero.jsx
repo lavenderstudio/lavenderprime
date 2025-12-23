@@ -59,9 +59,9 @@ function PromoCard({ title, subtitle, cta, href, imageUrl }) {
 
 export default function Hero({ promos }) {
   return (
-    <section className="relative overflow-hidden bg-linear-to-b from bg-amber-700/80 via-white to-white">
-      <div className="hidden sm:block absolute -top-24 right-0 h-64 w-64 rounded-full bg-amber-100/40 blur-xl opacity-45" />
-      <div className="hidden sm:block absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-amber-200/40 blur-xl opacity-45" />
+    <section className="relative overflow-hidden bg-linear-to-b from bg-blue-100 via-white to-white">
+      <div className="hidden sm:block absolute -top-24 right-0 h-64 w-64 rounded-full bg-blue-200/40 blur-xl opacity-45" />
+      <div className="hidden sm:block absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-blue-300/40 blur-xl opacity-45" />
 
       <Container className="py-10 sm:py-14">
         <div className="grid items-center gap-10 lg:grid-cols-2">
@@ -74,7 +74,7 @@ export default function Hero({ promos }) {
             <FadeUp>
               <h1 className="mt-4 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-3xl">
                 Luxury framing for modern living.{" "}
-                <span className={`${ACCENT} underline decoration-amber-500/60 underline-offset-8`}>
+                <span className={`${ACCENT} underline decoration-blue-500/60 underline-offset-8`}>
                   Crafted in UAE.
                 </span>
               </h1>

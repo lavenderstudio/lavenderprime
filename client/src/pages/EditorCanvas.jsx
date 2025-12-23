@@ -128,7 +128,7 @@ export default function EditorCanvas() {
               key={v.sku}
               type="button"
               onClick={() => onChange(v.sku)}
-              className={`rounded-full px-4 py-2 text-sm font-extrabold transition active:scale-[0.99]
+              className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.99]
                 ${
                   active
                     ? `${ACCENT_BG} text-white`
@@ -157,7 +157,7 @@ export default function EditorCanvas() {
               className={`group rounded-2xl p-2 text-center transition active:scale-[0.99]
                 ${
                   active
-                    ? "ring-2 ring-amber-500/60 bg-amber-50 border border-amber-200"
+                    ? "ring-2 ring-blue-500/60 bg-blue-50 border border-blue-200"
                     : "border border-slate-200 bg-white hover:bg-slate-50"
                 }`}
             >
@@ -170,7 +170,7 @@ export default function EditorCanvas() {
                 />
               </div>
 
-              <div className="mt-2 text-[10px] font-extrabold uppercase tracking-wide text-slate-700">
+              <div className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-slate-700">
                 {opt.id}
               </div>
             </button>
@@ -207,7 +207,7 @@ export default function EditorCanvas() {
         ) : (
           <div className="mt-4 grid gap-6 lg:grid-cols-12">
             {/* LEFT: Editor */}
-            <div className="relative overflow-visible rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-amber-50 via-white to-white shadow-sm">
+            <div className="relative overflow-visible rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-blue-50 via-white to-white shadow-sm">
               <div className="p-5">
                 {!originalUrl ? (
                   <div className="flex flex-col items-center justify-center">
@@ -258,7 +258,7 @@ export default function EditorCanvas() {
                           </div>
                         </div>
 
-                        <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-amber-500 shadow" />
+                        <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-blue-500 shadow" />
                       </div>
                     </button>
 
@@ -303,7 +303,7 @@ export default function EditorCanvas() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-amber-50 px-3 py-2 text-sm font-extrabold text-slate-900">
+                <div className="rounded-2xl border border-slate-200 bg-blue-50 px-3 py-2 text-sm font-bold text-slate-900">
                   {quote ? `${quote.total} ${quote.currency}` : "—"}
                 </div>
               </div>
@@ -332,7 +332,7 @@ export default function EditorCanvas() {
               <div className="mt-6">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-extrabold text-slate-900">
-                    Finish: <span className={`${ACCENT}`}>{frame}</span>
+                    Finish: <span className={`${ACCENT} font-bold`}>{frame}</span>
                   </label>
                 </div>
 
@@ -347,7 +347,7 @@ export default function EditorCanvas() {
                   min="1"
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
               </div>
 
@@ -372,7 +372,7 @@ export default function EditorCanvas() {
                 <button
                   disabled={!originalUrl || !quote || !selectedRatio}
                   onClick={handleAddToCart}
-                  className={`w-full rounded-2xl px-4 py-3 font-extrabold shadow-sm transition active:scale-[0.99]
+                  className={`w-full rounded-2xl px-4 py-3 font-bold shadow-sm transition active:scale-[0.99]
                     ${
                       !originalUrl || !quote || !selectedRatio
                         ? "cursor-not-allowed bg-slate-100 text-slate-500 border border-slate-200"

@@ -126,10 +126,10 @@ export default function EditorPrint() {
               key={v.sku}
               type="button"
               onClick={() => onChange(v.sku)}
-              className={`rounded-full px-4 py-2 text-sm font-extrabold transition active:scale-[0.99]
+              className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.99]
                 ${
                   active
-                    ? "bg-slate-950 text-white shadow-sm"
+                    ? "bg-blue-700 text-white shadow-sm"
                     : "bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 shadow-sm"
                 }`}
             >
@@ -155,11 +155,11 @@ export default function EditorPrint() {
               className={`rounded-2xl p-4 text-center transition active:scale-[0.99]
                 ${
                   active
-                    ? "ring-2 ring-amber-600/30 bg-amber-50 border border-amber-100 shadow-sm"
+                    ? "ring-2 ring-blue-600/30 bg-blue-50 border border-blue-100 shadow-sm"
                     : "border border-slate-200 bg-white hover:bg-slate-50 shadow-sm"
                 }`}
             >
-              <div className="text-sm font-extrabold text-slate-900">
+              <div className="text-sm font-bold text-slate-900">
                 {opt.name}
               </div>
 
@@ -197,7 +197,7 @@ export default function EditorPrint() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-12">
           {/* LEFT: Editor */}
-          <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-amber-50 via-white to-slate-50 shadow-sm">
+          <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-blue-50 via-white to-slate-50 shadow-sm">
             <div className="p-6">
               {!originalUrl ? (
                 <div className="flex flex-col items-center justify-center">
@@ -251,7 +251,7 @@ export default function EditorPrint() {
                       </div>
 
                       {/* Accent status dot */}
-                      <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-amber-700 shadow" />
+                      <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-blue-700 shadow" />
                     </div>
                   </button>
 
@@ -287,7 +287,7 @@ export default function EditorPrint() {
             <div className="flex items-start justify-between gap-3">
               <h3 className="text-lg font-extrabold text-slate-900">Options</h3>
 
-              <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-extrabold text-slate-700">
+              <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
                 Golden Art Frames
               </div>
             </div>
@@ -318,10 +318,10 @@ export default function EditorPrint() {
             <div className="mt-6 border-t border-slate-100 pt-6">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-extrabold text-slate-900">
-                  Material: <span className="text-amber-700">{material}</span>
+                  Material: <span className="text-blue-700 font-bold">{material}</span>
                 </label>
 
-                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-extrabold text-slate-900">
+                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-bold text-slate-900">
                   {quote ? `${quote.total} ${quote.currency}` : "—"}
                 </div>
               </div>
@@ -344,7 +344,7 @@ export default function EditorPrint() {
             </div>
 
             {/* Summary */}
-            <div className="mt-6 rounded-3xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-4">
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
               <div className="text-sm text-slate-800">
                 <b>Selected:</b> {selectedVariant ? `${selectedVariant.size}` : "-"}
               </div>
@@ -362,11 +362,11 @@ export default function EditorPrint() {
             <button
               disabled={!originalUrl || !quote || !selectedRatio}
               onClick={handleAddToCart}
-              className={`mt-5 w-full rounded-2xl px-4 py-3 font-extrabold shadow-sm transition active:scale-[0.99]
+              className={`mt-5 w-full rounded-2xl px-4 py-3 font-bold shadow-sm transition active:scale-[0.99]
                 ${
                   !originalUrl || !quote || !selectedRatio
                     ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-500"
-                    : "border border-amber-900 bg-amber-700 text-white hover:bg-amber-900"
+                    : "border border-blue-900 bg-blue-700 text-white hover:bg-blue-900"
                 }`}
             >
               Add to Cart

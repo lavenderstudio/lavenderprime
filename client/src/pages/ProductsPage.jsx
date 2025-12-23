@@ -20,7 +20,7 @@ export default function ProductsPage() {
   return (
     <Page title="Products">
       {/* Header */}
-      <div className="mb-8 rounded-3xl border bg-linear-to-b from-amber-50 via-white to-white p-6 shadow-sm sm:p-10">
+      <div className="mb-8 rounded-3xl border bg-linear-to-b from-blue-100/75 via-white to-white p-6 shadow-sm sm:p-10">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className={`text-sm font-extrabold uppercase tracking-wide ${ACCENT}`}>
@@ -73,7 +73,7 @@ function ProductCard({ product, index, total }) {
             </div>
 
             {/* Accent ring on hover */}
-            <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 ring-rose-600/20 transition group-hover:ring-2" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 ring-blue-600/20 transition group-hover:ring-2" />
           </div>
         </div>
 
@@ -88,7 +88,7 @@ function ProductCard({ product, index, total }) {
             </div>
 
             <span
-              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-extrabold ${ACCENT} bg-rose-50`}
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-extrabold ${ACCENT} bg-blue-50`}
             >
               Create
             </span>

@@ -137,7 +137,7 @@ export default function EditorPrintPortrait() {
               key={v.sku}
               type="button"
               onClick={() => onChange(v.sku)}
-              className={`rounded-full px-4 py-2 text-sm font-extrabold transition active:scale-[0.99]
+              className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.99]
                 ${
                   active
                     ? `${ACCENT_BG} text-white`
@@ -166,7 +166,7 @@ export default function EditorPrintPortrait() {
               className={`group rounded-2xl p-2 text-center transition active:scale-[0.99]
                 ${
                   active
-                    ? "ring-2 ring-amber-500/60 bg-amber-50 border border-amber-200"
+                    ? "ring-2 ring-blue-500/60 bg-blue-50 border border-blue-200"
                     : "border border-slate-200 bg-white hover:bg-slate-50"
                 }`}
             >
@@ -174,7 +174,7 @@ export default function EditorPrintPortrait() {
                 <img src={opt.img} alt={opt.id} className="h-full w-full object-cover" loading="lazy" />
               </div>
 
-              <div className="mt-2 text-[10px] font-extrabold uppercase tracking-wide text-slate-700">
+              <div className="mt-2 text-[10px] font-bold uppercase tracking-wide text-slate-700">
                 {opt.id}
               </div>
             </button>
@@ -199,7 +199,7 @@ export default function EditorPrintPortrait() {
               className={`rounded-2xl p-3 text-center transition active:scale-[0.99]
                 ${
                   active
-                    ? "ring-2 ring-amber-500/60 bg-amber-50 border border-amber-200"
+                    ? "ring-2 ring-blue-500/60 bg-blue-50 border border-blue-200"
                     : "border border-slate-200 bg-white hover:bg-slate-50"
                 }`}
             >
@@ -207,7 +207,7 @@ export default function EditorPrintPortrait() {
                 <Icon />
               </div>
 
-              <div className="mt-2 text-[10px] font-extrabold uppercase tracking-wide text-slate-700">
+              <div className="mt-2 text-[10px] font-bold uppercase tracking-wide text-slate-700">
                 {opt.id}
               </div>
             </button>
@@ -252,7 +252,7 @@ export default function EditorPrintPortrait() {
         ) : (
           <div className="mt-4 grid gap-6 lg:grid-cols-12">
             {/* LEFT: Editor */}
-            <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-amber-50 via-white to-white shadow-sm">
+            <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-blue-50 via-white to-white shadow-sm">
               <div className="p-5">
                 {!originalUrl ? (
                   <div className="flex flex-col items-center justify-center">
@@ -308,7 +308,7 @@ export default function EditorPrintPortrait() {
                         </div>
 
                         {/* Small “status dot” */}
-                        <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-amber-500 shadow" />
+                        <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-blue-500 shadow" />
                       </div>
                     </button>
 
@@ -349,7 +349,7 @@ export default function EditorPrintPortrait() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-amber-50 px-3 py-2 text-sm font-extrabold text-slate-900">
+                <div className="rounded-2xl border border-slate-200 bg-blue-50 px-3 py-2 text-sm font-extrabold text-slate-900">
                   {quote ? `${quote.total} ${quote.currency}` : "—"}
                 </div>
               </div>
@@ -421,7 +421,7 @@ export default function EditorPrintPortrait() {
                   min="1"
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                  className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
               </div>
 

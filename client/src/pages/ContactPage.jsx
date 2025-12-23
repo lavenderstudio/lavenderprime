@@ -72,7 +72,7 @@ ${form.remarks || "-"}
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-linear-to-b from-amber-50 via-white to-white">
+      <section className="relative overflow-hidden bg-linear-to-b from-blue-50 via-white to-white">
         <Container className="py-10 sm:py-14">
           <p className={`text-sm font-semibold tracking-wide uppercase ${ACCENT}`}>
             Contact Golden Art Frames
