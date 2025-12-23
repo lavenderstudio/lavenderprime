@@ -133,6 +133,78 @@ export default function AdminOrdersPage() {
     }
   };
 
+  // ✅ Get all image URLs for an item (supports single + mini-frames)
+  const getItemImageUrls = (it) => {
+    const items = it?.assets?.items;
+
+    // Mini-frames: assets.items[]
+    if (Array.isArray(items) && items.length > 0) {
+      return items
+        .map((x) => x?.originalUrl || x?.previewUrl)
+        .filter(Boolean);
+    }
+
+    // Single image products
+    const single = it?.assets?.originalUrl || it?.assets?.previewUrl;
+    return single ? [single] : [];
+  };
+
+  // ✅ Preview all images (opens a new tab with a simple gallery)
+  const previewAllImages = (urls, title = "Preview") => {
+    if (!urls?.length) return;
+
+    const html = `
+      <html>
+        <head>
+          <title>${title}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 16px; background: #f8fafc; }
+            h1 { font-size: 16px; margin: 0 0 12px; }
+            .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+            .card { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 10px; }
+            img { width: 100%; height: 220px; object-fit: cover; border-radius: 12px; border: 1px solid #e2e8f0; }
+            .meta { margin-top: 8px; font-size: 12px; color: #334155; word-break: break-all; }
+          </style>
+        </head>
+        <body>
+          <h1>${title} (${urls.length})</h1>
+          <div class="grid">
+            ${urls
+              .map(
+                (u, i) => `
+                  <div class="card">
+                    <img src="${u}" alt="img-${i}" />
+                    <div class="meta">Photo ${i + 1}</div>
+                  </div>
+                `
+              )
+              .join("")}
+          </div>
+        </body>
+      </html>
+    `;
+
+    const w = window.open("", "_blank");
+    if (!w) return;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  };
+
+  // ✅ Download ALL images for an item
+  const downloadAllImages = async (urls, baseName = "image") => {
+    if (!urls?.length) return;
+
+    // download sequentially (simple + reliable)
+    for (let i = 0; i < urls.length; i++) {
+      const extGuess = urls[i].includes(".png") ? "png" : "jpg";
+      // eslint-disable-next-line no-await-in-loop
+      await downloadImage(urls[i], `${baseName}-${String(i + 1).padStart(2, "0")}.${extGuess}`);
+    }
+  };
+
+
 
   return (
     <Page title="Admin Dashboard">
@@ -287,39 +359,91 @@ export default function AdminOrdersPage() {
                       className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[96px,1fr,auto]"
                     >
                       {/* IMAGE + ACTIONS */}
-                      <div className="flex gap-2">
-                        <img
-                          src={it.assets?.originalUrl}
-                          alt={it.productSlug}
-                          className="h-24 w-24 rounded-xl border border-slate-200 object-cover"
-                        />
+                      {(() => {
+                        const urls = getItemImageUrls(it);
+                        const isMini = Array.isArray(it?.assets?.items) && it.assets.items.length > 0;
 
-                        {/* Actions */}
-                        <div className="flex flex-col items-end justify-center gap-1 w-full">
-                          {/* Preview */}
-                          <a
-                            href={it.assets?.originalUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className={`w-50 text-center rounded-lg px-2 py-1 text-xs font-extrabold ${ACCENT_BG} ${ACCENT_HOVER} text-white`}
-                          >
-                            Preview
-                          </a>
+                        const stack = urls.slice(0, 4); // show max 4 stacked thumbs
+                        const first = urls[0];
 
-                          {/* Download */}
-                          <button
-                            onClick={() =>
-                              downloadImage(
-                                it.assets?.originalUrl,
-                                `${o.orderNumber}-${it.productSlug}.jpg`
-                              )
-                            }
-                            className="w-50 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-extrabold text-slate-900 hover:bg-slate-100"
-                          >
-                            Download
-                          </button>
-                        </div>
-                      </div>
+                        return (
+                          <div className="flex gap-2">
+                            {/* Thumbnails (stacked if mini-frames) */}
+                            <div className="relative h-24 w-24 shrink-0">
+                              {urls.length ? (
+                                <>
+                                  {isMini ? (
+                                    stack.map((u, i) => (
+                                      <img
+                                        key={u + i}
+                                        src={u}
+                                        alt={`${it.productSlug}-img-${i}`}
+                                        className="absolute h-24 w-24 rounded-xl border border-slate-200 object-cover shadow-sm"
+                                        style={{
+                                          transform: `translate(${i * 6}px, ${i * 6}px)`,
+                                          zIndex: 10 - i,
+                                        }}
+                                      />
+                                    ))
+                                  ) : (
+                                    <img
+                                      src={first}
+                                      alt={it.productSlug}
+                                      className="h-24 w-24 rounded-xl border border-slate-200 object-cover"
+                                    />
+                                  )}
+
+                                  {isMini && urls.length > 4 && (
+                                    <div className="absolute -bottom-2 -right-2 rounded-full border border-slate-200 bg-white px-2 py-1 text-[10px] font-extrabold text-slate-700 shadow">
+                                      +{urls.length - 4}
+                                    </div>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-500">
+                                  No image
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex flex-col items-end justify-center gap-1 w-full">
+                              {/* Preview */}
+                              <button
+                                type="button"
+                                onClick={() => previewAllImages(urls, `Order #${String(o.orderNumber).padStart(6, "0")} — ${it.productSlug}`)}
+                                disabled={!urls.length}
+                                className={`w-50 text-center rounded-lg px-2 py-1 text-xs font-extrabold ${
+                                  !urls.length
+                                    ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                                    : `${ACCENT_BG} ${ACCENT_HOVER} text-white`
+                                }`}
+                              >
+                                Preview{isMini ? ` (${urls.length})` : ""}
+                              </button>
+
+                              {/* Download */}
+                              <button
+                                type="button"
+                                disabled={!urls.length}
+                                onClick={() =>
+                                  isMini
+                                    ? downloadAllImages(urls, `${o.orderNumber}-${it.productSlug}`)
+                                    : downloadImage(first, `${o.orderNumber}-${it.productSlug}.jpg`)
+                                }
+                                className={`w-50 rounded-lg border px-2 py-1 text-xs font-extrabold ${
+                                  !urls.length
+                                    ? "border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed"
+                                    : "border-slate-300 bg-white text-slate-900 hover:bg-slate-100"
+                                }`}
+                              >
+                                Download{isMini ? " All" : ""}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
 
                       {/* DETAILS */}
                       <div className="text-sm text-slate-800">
