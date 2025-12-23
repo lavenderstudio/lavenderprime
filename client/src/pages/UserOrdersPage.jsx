@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 // client/src/pages/UserOrdersPage.jsx
 // ----------------------------------------------------
 // User Orders page
