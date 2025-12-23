@@ -1,8 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // client/src/pages/UserOrdersPage.jsx
 // ----------------------------------------------------
 // User Orders page
 // - Loads orders for the logged in user
 // - Shows order number, date, status, total, and items
+// - ✅ Supports mini-frames (assets.items[]) + single image products
 // ----------------------------------------------------
 
 import { useEffect, useState } from "react";
@@ -16,7 +18,6 @@ import { ACCENT, ACCENT_BG, ACCENT_HOVER, Container } from "../components/home/u
 function statusUi(statusRaw) {
   const s = String(statusRaw || "").toLowerCase();
 
-  // Keep your backend status values, just render nicer UI
   if (s === "paid" || s === "processing" || s === "shipped" || s === "completed") {
     return {
       label: s.toUpperCase(),
@@ -48,6 +49,73 @@ function statusUi(statusRaw) {
   };
 }
 
+// ✅ Supports single + mini-frames
+function getItemThumbUrls(it) {
+  const items = it?.assets?.items;
+
+  // Mini-frames: assets.items[]
+  if (Array.isArray(items) && items.length > 0) {
+    return items
+      .map((x) => x?.previewUrl || x?.originalUrl)
+      .filter(Boolean);
+  }
+
+  // Single image products
+  const single = it?.assets?.previewUrl || it?.assets?.originalUrl;
+  return single ? [single] : [];
+}
+
+// ✅ Stacked thumbnail UI for mini-frames
+function ThumbStack({ urls, alt = "preview" }) {
+  const stack = (urls || []).slice(0, 3); // show max 3 stacked
+  const first = stack[0];
+
+  if (!urls?.length) {
+    return (
+      <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-white flex items-center justify-center text-[10px] font-extrabold text-slate-500">
+        No img
+      </div>
+    );
+  }
+
+  // If only 1, render normal
+  if (urls.length === 1) {
+    return (
+      <img
+        src={first}
+        alt={alt}
+        className="h-12 w-12 rounded-2xl border border-slate-200 object-cover bg-white"
+        loading="lazy"
+      />
+    );
+  }
+
+  // Mini stack
+  return (
+    <div className="relative h-12 w-12 shrink-0">
+      {stack.map((u, i) => (
+        <img
+          key={u + i}
+          src={u}
+          alt={`${alt}-${i}`}
+          className="absolute h-12 w-12 rounded-2xl border border-slate-200 object-cover bg-white shadow-sm"
+          style={{
+            transform: `translate(${i * 4}px, ${i * 4}px)`,
+            zIndex: 10 - i,
+          }}
+          loading="lazy"
+        />
+      ))}
+
+      {urls.length > 3 && (
+        <div className="absolute -bottom-1 -right-1 rounded-full border border-slate-200 bg-white px-1.5 py-0.5 text-[9px] font-extrabold text-slate-700 shadow">
+          +{urls.length - 3}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function UserOrdersPage() {
   const navigate = useNavigate();
 
@@ -61,11 +129,9 @@ export default function UserOrdersPage() {
         setError("");
         setLoading(true);
 
-        // ✅ backend returns only the logged-in user's orders
         const res = await api.get("/orders/my");
         setOrders(res.data.orders || []);
       } catch (err) {
-        // If not logged in, redirect to login
         if (err?.response?.status === 401) {
           navigate("/login", { state: { from: "/orders" }, replace: true });
           return;
@@ -155,10 +221,7 @@ export default function UserOrdersPage() {
                       </div>
 
                       <div className="mt-2 flex gap-2 sm:justify-end">
-                        <Link
-                          to={`/order/${o._id}`}
-                          className="inline-flex"
-                        >
+                        <Link to={`/order/${o._id}`} className="inline-flex">
                           <button
                             type="button"
                             className={`rounded-2xl px-4 py-2 text-xs font-extrabold text-white shadow-sm ${ACCENT_BG} ${ACCENT_HOVER} active:scale-[0.99]`}
@@ -189,32 +252,42 @@ export default function UserOrdersPage() {
                     </div>
 
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                      {(o.items || []).slice(0, 4).map((it, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3"
-                        >
-                          <img
-                            src={it.assets?.previewUrl || it.assets?.originalUrl || ""}
-                            alt={it.productSlug}
-                            className="h-12 w-12 rounded-2xl border border-slate-200 object-cover bg-white"
-                            loading="lazy"
-                          />
+                      {(o.items || []).slice(0, 4).map((it, idx) => {
+                        const urls = getItemThumbUrls(it);
+                        const isMini = Array.isArray(it?.assets?.items) && it.assets.items.length > 0;
 
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-extrabold text-slate-900 truncate">
-                              {it.productSlug?.toUpperCase()}
-                            </div>
-                            <div className="mt-0.5 text-xs font-semibold text-slate-600 truncate">
-                              {it.config?.size ? `Size: ${it.config.size} • ` : ""}
-                              {it.config?.frame ? `Frame: ${it.config.frame} • ` : ""}
-                              {it.config?.mat ? `Mat: ${it.config.mat} • ` : ""}
-                              {it.config?.material ? `Material: ${it.config.material} • ` : ""}
-                              Qty: {it.config?.quantity || 1}
+                        // Mini-frames quantity = number of uploaded photos (assets.items)
+                        const qty =
+                          isMini ? it.assets.items.length : Number(it.config?.quantity || 1);
+
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3"
+                          >
+                            <ThumbStack
+                              urls={urls}
+                              alt={it.productSlug || "preview"}
+                            />
+
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-extrabold text-slate-900 truncate">
+                                {it.productSlug?.toUpperCase()}
+                                {isMini ? " (MINI FRAMES)" : ""}
+                              </div>
+
+                              <div className="mt-0.5 text-xs font-semibold text-slate-600 truncate">
+                                {it.config?.size ? `Size: ${it.config.size} • ` : ""}
+                                {it.config?.frame ? `Frame: ${it.config.frame} • ` : ""}
+                                {isMini && it.config?.mat ? `Frame Type: ${it.config.mat} • ` : ""}
+                                {!isMini && it.config?.mat ? `Mat: ${it.config.mat} • ` : ""}
+                                {it.config?.material ? `Material: ${it.config.material} • ` : ""}
+                                Qty: {qty}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {(o.items || []).length > 4 && (
