@@ -13,6 +13,7 @@ import stripeWebhookRoutes from "./routes/stripeWebhook.js";
 import adminRouter from "./routes/admin.js";
 import authRoutes from "./routes/auth.js";
 import userRoutes from "./routes/users.js";
+import newsletterRoutes from "./routes/newsletter.js";
 
 
 dotenv.config();
@@ -50,6 +51,7 @@ app.use("/api/payments", paymentsRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/newsletter", newsletterRoutes);
 
 // Start server only after DB is connected
 const PORT = process.env.PORT || 5000;
