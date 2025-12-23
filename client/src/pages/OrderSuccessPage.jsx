@@ -68,6 +68,29 @@ export default function OrderSuccessPage() {
     return res.data;
   };
 
+  function isMultiAssets(assets) {
+    return !!assets && Array.isArray(assets.items) && assets.items.length > 0;
+  }
+
+  function getThumbUrlFromItem(item) {
+    const assets = item?.assets || {};
+
+    // ✅ Mini-frames (multi images)
+    if (isMultiAssets(assets)) {
+      const first = assets.items.find((x) => x?.previewUrl || x?.originalUrl);
+      return first?.previewUrl || first?.originalUrl || "";
+    }
+
+    // ✅ Single-image products
+    return assets.previewUrl || assets.originalUrl || "";
+  }
+
+  function getMiniFramesCount(item) {
+    const assets = item?.assets || {};
+    if (!isMultiAssets(assets)) return 0;
+    return assets.items.length;
+  }
+
   useEffect(() => {
     let isMounted = true;
 
@@ -278,43 +301,60 @@ export default function OrderSuccessPage() {
 
                   <div className="mt-5 space-y-3">
                     {order.items.map((item, idx) => {
-                      const thumb = item.assets?.previewUrl || item.assets?.originalUrl || "";
+                      const cfg = item.config || {};
+                      const thumb = getThumbUrlFromItem(item);
+
+                      const isMiniFrames = item.productSlug === "mini-frames";
+                      const miniCount = getMiniFramesCount(item);
 
                       return (
                         <div
                           key={idx}
                           className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
-                              {thumb ? (
-                                <img
-                                  src={thumb}
-                                  alt="preview"
-                                  className="h-full w-full object-cover"
-                                  loading="lazy"
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-slate-500">
-                                  No image
-                                </div>
-                              )}
+                          {/* Thumbnail */}
+                          <div className="h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                            {thumb ? (
+                              <img
+                                src={thumb}
+                                alt="preview"
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-slate-500">
+                                No image
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Details */}
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-extrabold text-slate-900">
+                              {item.productSlug?.toUpperCase() || "CUSTOM PRINT"}
                             </div>
 
-                            <div className="min-w-0">
-                              <div className="text-sm font-extrabold text-slate-900">
-                                {item.productSlug?.toUpperCase() || "CUSTOM PRINT"}
-                              </div>
-                              <div className="mt-1 text-xs font-semibold text-slate-600">
-                                {item.config?.size ? `Size: ${item.config.size} • ` : ""}
-                                {item.config?.frame ? `Frame: ${item.config.frame} • ` : ""}
-                                {item.config?.mat ? `Mat: ${item.config.mat} • ` : ""}
-                                {item.config?.material ? `Material: ${item.config.material} • ` : ""}
-                                Qty {item.config?.quantity || 1}
-                              </div>
+                            <div className="mt-1 text-xs font-semibold text-slate-600">
+                              {isMiniFrames ? (
+                                <>
+                                  Photos: {miniCount}
+                                  {" • "}Frame: {cfg.frame || "—"}
+                                  {" • "}Type: {cfg.mat || "—"}
+                                  {" • "}Size: {cfg.size || "—"}
+                                </>
+                              ) : (
+                                <>
+                                  {cfg.size && <>Size: {cfg.size}{" • "}</>}
+                                  {cfg.frame && <>Frame: {cfg.frame}{" • "}</>}
+                                  {cfg.mat && <>Mat: {cfg.mat}{" • "}</>}
+                                  {cfg.material && <>Material: {cfg.material}{" • "}</>}
+                                  Qty {cfg.quantity || 1}
+                                </>
+                              )}
                             </div>
                           </div>
 
+                          {/* Price */}
                           <div className="sm:ml-auto sm:text-right">
                             <div className="text-sm font-extrabold text-slate-900">
                               {item.price?.total} {item.price?.currency}
