@@ -199,7 +199,6 @@ export default function AdminOrdersPage() {
     // download sequentially (simple + reliable)
     for (let i = 0; i < urls.length; i++) {
       const extGuess = urls[i].includes(".png") ? "png" : "jpg";
-      // eslint-disable-next-line no-await-in-loop
       await downloadImage(urls[i], `${baseName}-${String(i + 1).padStart(2, "0")}.${extGuess}`);
     }
   };
