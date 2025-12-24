@@ -25,6 +25,7 @@ import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
 import GuestRoute from "./components/GuestRoute.jsx";
 import EditorMiniFrame from "./pages/EditorMiniFrame.jsx";
+import EditorCollage from "./pages/EditorCollage.jsx";
 
 
 export default function App() {
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="/editor/print" element={<EditorPrint />} />
         <Route path="/editor/canvas" element={<EditorCanvas />} />
         <Route path="/editor/mini-frames" element={<EditorMiniFrame />} />
+        <Route path="/editor/collage" element={<EditorCollage />} />
         <Route
           path="/checkout"
           element={
