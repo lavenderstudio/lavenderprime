@@ -229,6 +229,13 @@ export default function EditorCollage() {
     load();
   }, []);
 
+  function skuForSquareCount(count) {
+    if (count === 4) return "COL_SQ_31.5x31.5_4";
+    if (count === 9) return "COL_SQ_43x43_9";
+    if (count === 16) return "COL_SQ_54.5x54.5_16";
+    return "COL_SQ_31.5x31.5_4";
+  }
+
   // ----------------------------------------------------
   // Derived: variants + selected variant
   // ----------------------------------------------------
@@ -362,6 +369,9 @@ export default function EditorCollage() {
     }
   };
 
+  useEffect(() => {
+    setVariantSku(skuForSquareCount(imageCount));
+  }, [imageCount]);
 
   function FrameTiles({ options, value, onChange }) {
     return (
@@ -478,9 +488,15 @@ export default function EditorCollage() {
                 onChange={setImageCount}
               />
 
-              <div className="mt-2 text-xs font-semibold text-slate-500">
-                Upload ratio is locked to:{" "}
-                <b className="text-slate-700">{lockedRatioId || "—"}</b>
+              <div className="mt-2 flex justify-between text-xs font-semibold text-slate-500">
+                <div>
+                  Upload ratio is locked to:{" "}
+                  <b className="text-slate-700">{lockedRatioId || "—"}</b>
+                </div>
+                <div>
+                  Size: {" "}
+                  <b className="text-slate-700">{selectedVariant.size}</b>
+                </div>
               </div>
             </div>
 

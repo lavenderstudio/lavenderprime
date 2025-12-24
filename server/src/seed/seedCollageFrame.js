@@ -34,7 +34,9 @@ async function run() {
 
       // ✅ orientation must match your enum -> only "portrait"/"landscape"
       variants: [
-        { sku: "COL_SQ_50x50", orientation: "portrait", size: "50x50", basePrice: 279 },
+        { sku: "COL_SQ_31.5x31.5_4", orientation: "portrait", size: "31.5x31.5", basePrice: 179 },
+        { sku: "COL_SQ_43x43_9", orientation: "portrait", size: "43x43", basePrice: 250 },
+        { sku: "COL_SQ_54.5x54.5_16", orientation: "portrait", size: "54.5x54.5", basePrice: 359 },
       ],
 
       options: {
