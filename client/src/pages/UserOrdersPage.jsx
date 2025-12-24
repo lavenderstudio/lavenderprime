@@ -272,7 +272,6 @@ export default function UserOrdersPage() {
                             <div className="min-w-0 flex-1">
                               <div className="text-sm font-extrabold text-slate-900 truncate">
                                 {it.productSlug?.toUpperCase()}
-                                {isMini ? " (MINI FRAMES)" : ""}
                               </div>
 
                               <div className="mt-0.5 text-xs font-semibold text-slate-600 truncate">

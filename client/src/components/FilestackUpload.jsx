@@ -10,15 +10,18 @@ export default function FilestackUpload({ ratio, onDone }) {
   const client = filestack.init(import.meta.env.VITE_FILESTACK_API_KEY);
 
   const openPicker = () => {
+    const w = Number(ratio?.w) || 1;
+    const h = Number(ratio?.h) || 1;
+
     const picker = client.picker({
       accept: ["image/*"],
       maxFiles: 1,
 
-      // Lock crop ratio (MVP)
+      // ✅ Lock crop ratio (width / height)
       transformations: {
         crop: {
           force: true,
-          aspectRatio: ratio.w / ratio.h,
+          aspectRatio: w / h,
         },
       },
 
@@ -39,6 +42,7 @@ export default function FilestackUpload({ ratio, onDone }) {
 
   return (
     <button
+      type="button"
       onClick={openPicker}
       className="w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 font-semibold text-gray-900 shadow-sm hover:bg-gray-50 active:scale-[0.99]"
     >

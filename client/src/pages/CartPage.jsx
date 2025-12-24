@@ -1,3 +1,4 @@
+ 
 // client/src/pages/Cart.jsx
 // ----------------------------------------------------
 // THEME UPDATE ONLY (Golden Art Frames look)
@@ -5,14 +6,14 @@
 // ----------------------------------------------------
 
 import { useEffect, useMemo, useState } from "react";
-import Page from "../components/Page.jsx";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../lib/api.js";
-import { getSessionId } from "../lib/session.js";
-import FramePreview from "../components/FramePreview.jsx";
 import { MAT_CM } from "../lib/matSizes.js";
-import { Link } from "react-router-dom";
+import { getSessionId } from "../lib/session.js";
+import Page from "../components/Page.jsx";
+import FramePreview from "../components/FramePreview.jsx";
 import Canvas3DPreview from "../components/CanvasStretchedPreview.jsx";
-import { useNavigate } from "react-router-dom";
+import CollagePreview from "../components/CollagePreview.jsx";
 
 // Parse "63x93" or "63x93cm"
 function parseCmSize(sizeStr) {
@@ -114,20 +115,9 @@ export default function CartPage() {
     }
   };
 
-  const handleUpdateQty = async (itemId, nextQty) => {
-    try {
-      setError("");
-      const qty = Math.max(1, Number(nextQty) || 1);
-
-      const res = await api.patch(`/cart/${sessionId}/items/${itemId}`, {
-        quantity: qty,
-      });
-
-      setCart(res.data);
-    } catch (err) {
-      setError(err?.response?.data?.message || err.message);
-    }
-  };
+  function isCollageItem(it) {
+    return it?.productSlug === "collage-frame" || it?.config?.orientation === "collage";
+  }
 
   return (
     <Page title="Cart">
@@ -181,8 +171,18 @@ export default function CartPage() {
                   <div className="grid gap-5 sm:grid-cols-[260px,1fr]">
                     {/* Preview */}
                     <div className="rounded-2xl border border-slate-200 bg-linear-to-b from-slate-50 to-white p-3">
-                      {/* ✅ MINI-FRAMES: render grid of N previews */}
-                      {isMiniFrames && isMultiAssets(assets) ? (
+                      {/* ✅ COLLAGE-FRAME: render CollagePreview (NO logic change to others) */}
+                      {isCollageItem(it) && isMultiAssets(assets) ? (
+                        <CollagePreview
+                          frame={frame || "Black Wood"}
+                          mat={mat || "None"}
+                          layout={cfg.layout || "square"} // will fallback safely if missing
+                          imageCount={cfg.imageCount || assets.items.length} // fallback to items length
+                          assets={assets.items}
+                          maxWidthClass="max-w-[300px]"
+                        />
+                      ) : isMiniFrames && isMultiAssets(assets) ? (
+                        /* ✅ MINI-FRAMES: render grid of N previews */
                         <div className="grid grid-cols-2 gap-3">
                           {assets.items.map((a, idx) => {
                             const url = a?.originalUrl || a?.previewUrl || "";
@@ -194,7 +194,7 @@ export default function CartPage() {
                                 {url ? (
                                   <FramePreview
                                     imageUrl={url}
-                                    frame={frame || "Black Wood"}  // keep simple default
+                                    frame={frame || "Black Wood"}
                                     mat={mat || "None"}
                                   />
                                 ) : (
@@ -232,6 +232,7 @@ export default function CartPage() {
                         </>
                       )}
                     </div>
+
 
 
                     {/* Details */}
