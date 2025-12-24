@@ -353,6 +353,7 @@ export default function EditorMiniFrame() {
     );
   }
 
+  const lockedRatioId = "1:1";
 
   // ----------------------------------------------------
   // Render
@@ -643,10 +644,11 @@ export default function EditorMiniFrame() {
           </div>
         )}
 
-        {/* Upload wizard (writes into active slot) */}
+        {/* Upload wizard */}
         <UploadWizardModal
           isOpen={isUploadWizardOpen}
           onClose={() => setIsUploadWizardOpen(false)}
+          lockedRatioId={lockedRatioId}
           onComplete={({ ratio, imageUrl }) => {
             setAssets((prev) => {
               const next = [...prev];

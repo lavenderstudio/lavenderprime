@@ -17,7 +17,7 @@ import api from "../lib/api.js";
 import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
 import { FRAME_OPTIONS } from "../lib/optionsUi.js";
-import CollagePreview from "../components/CollagePreview.jsx";
+import FramePreview from "../components/FramePreview.jsx";
 
 
 // ✅ Theme tokens
@@ -67,7 +67,7 @@ function CollageFramePreview({
     if (imageOrientation === "landscape") return "4 / 3";
     return "3 / 4"; // portrait
   }, [imageOrientation]);
-  
+
   const grid = useMemo(() => {
     if (isSquare) {
       if (imageCount === 4) return { cols: 2, rows: 2 };
@@ -90,7 +90,7 @@ function CollageFramePreview({
 
       {/* Real frame preview */}
       <div className="mt-4 flex justify-center">
-        <CollagePreview
+        <FramePreview
           frame={frame}
           aspectRatio="1:1"
           maxHeight={720}
@@ -170,7 +170,7 @@ function CollageFramePreview({
               </div>
             </div>
           </div>
-        </CollagePreview>
+        </FramePreview>
       </div>
 
       <p className="mt-3 text-xs font-semibold text-slate-500">
@@ -333,6 +333,8 @@ export default function EditorCollage() {
             orientation: "collage",
             size: selectedVariant.size,
             frame,
+            layout,
+            imageCount,
             quantity: 1,
           },
 

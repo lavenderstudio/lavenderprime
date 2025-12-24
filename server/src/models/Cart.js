@@ -50,13 +50,16 @@ const CartItemSchema = new mongoose.Schema(
     // Product configuration (NO quantity here)
     config: {
       orientation: String,
+
+      layout: String,
+      imageCount: Number,
+
       size: String,
       mount: String,
       material: String,
       frame: String,
       mat: String,
 
-      // Legacy single-image crop support
       transform: {
         ratio: String,
         ratioW: Number,
@@ -76,6 +79,7 @@ const CartItemSchema = new mongoose.Schema(
         },
       },
     },
+
 
     // ✅ Quantity belongs at item level
     quantity: { type: Number, default: 1 },

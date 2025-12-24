@@ -1,118 +1,76 @@
-/* eslint-disable no-unused-vars */
 // client/src/components/CollagePreview.jsx
-import { motion, AnimatePresence } from "framer-motion";
-import { FRAME_STYLES, MAT_PADDING } from "../lib/frameStyles.js";
+// ----------------------------------------------------
+// CollagePreview (Cart)
+// - Renders a square collage grid using assets.items
+// - Wraps grid inside FramePreview (real frame + mat)
+// ----------------------------------------------------
 
-function isUrlBackground(bg) {
-  return typeof bg === "string" && bg.trim().startsWith("url(");
+import FramePreview from "./FramePreview.jsx";
+
+function gridSizeFromCount(n) {
+  if (n === 4) return 2;
+  if (n === 9) return 3;
+  if (n === 16) return 4;
+  // fallback
+  return 2;
 }
 
 export default function CollagePreview({
-  imageUrl,          // optional (single-image mode)
-  frame,
-  mat = "0px",       // keep your existing mat behavior
-  children,          // ✅ NEW: collage/content mode
-  className = "",    // optional: allow parent to override sizing
-  aspectRatio,       // optional: allow parent to control aspect ratio (collage uses it)
-  maxWidthClass = "max-w-md", // optional sizing control
+  frame = "Black Wood",
+  mat = "None",
+  imageCount = 4,
+  assets = [],
+  maxWidthClass = "max-w-[260px]",
 }) {
-  const safeFrame = FRAME_STYLES[frame] ? frame : "Black Wood";
-  const frameStyle = FRAME_STYLES[safeFrame];
-  const matPadding = MAT_PADDING[mat] ?? "0px";
-  const FALLBACK_BG = "#ffffff";
+  const safeCount = [4, 9, 16].includes(imageCount) ? imageCount : 4;
 
-  const bg = frameStyle.background;
-  const bgIsTexture = isUrlBackground(bg);
+  const grid = gridSizeFromCount(safeCount);
 
   return (
-    <div className={`mx-auto w-full ${maxWidthClass} ${className}`}>
-      {/* OUTER FRAME */}
-      <motion.div
-        className="relative overflow-hidden rounded-sm"
-        animate={{
-          padding: frameStyle.border,
-          backgroundColor: bgIsTexture ? FALLBACK_BG : bg,
-        }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        style={{
-          // OUTER DROP SHADOW (frame floating)
-          boxShadow: "0 18px 35px rgba(0,0,0,0.22), 0 6px 12px rgba(0,0,0,0.12)",
-        }}
-      >
-        {/* TEXTURE BACKGROUND (crossfades) */}
-        <AnimatePresence mode="wait">
-          {bgIsTexture && (
-            <motion.div
-              key={bg}
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut" }}
-              style={{
-                background: bg,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            />
-          )}
-        </AnimatePresence>
+    <FramePreview
+      frame={frame}
+      mat={mat}
+      aspectRatio={"1 / 1"} // square opening
+      maxWidthClass={maxWidthClass}
+    >
+      {/* Inner print area */}
+      <div className="h-full w-full p-2">
+        <div
+          className="grid h-full w-full gap-2"
+          style={{
+            gridTemplateColumns: `repeat(${grid}, minmax(0, 1fr))`,
+          }}
+        >
+          {(assets || []).slice(0, safeCount).map((a, idx) => {
+            // prefer previewUrl, fallback to originalUrl
+            const url = a?.previewUrl || a?.originalUrl || "";
 
-        {/* CONTENT ABOVE TEXTURE */}
-        <div className="relative">
-          {/* MAT */}
-          <motion.div
-            className="bg-white"
-            animate={{ padding: matPadding }}
-            transition={{ duration: 0.28, ease: "easeOut" }}
-            style={{
-              // INNER SHADOW (depth of frame edge)
-              boxShadow: `
-                inset 0 0 6px rgba(0,0,0,0.22),
-                inset 0 1px 2px rgba(255,255,255,0.5),
-                inset 0 -3px 4px rgba(0,0,0,0.35),
-                inset 2px 0 3px rgba(0,0,0,0.25),
-                inset -2px 0 3px rgba(0,0,0,0.25)
-              `,
-            }}
-          >
-            {/* CONTENT AREA (either children OR single image) */}
-            <div
-              className="relative w-full bg-black/5"
-              style={{
-                // ✅ Allow collage to control the opening aspect ratio
-                aspectRatio: aspectRatio || undefined,
-              }}
-            >
-              {/* If children provided, render collage/grid/etc */}
-              {children ? (
-                <div className="h-full w-full">{children}</div>
-              ) : (
-                // Else fallback to single image mode (backwards compatible)
-                <AnimatePresence mode="wait">
-                  <motion.img
-                    key={imageUrl}
-                    src={imageUrl}
-                    alt="Preview"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
-                    className="block h-full w-full object-contain"
+            return (
+              <div
+                key={idx}
+                className="relative overflow-hidden border border-slate-200 bg-white"
+              >
+                {url ? (
+                  <img
+                    src={url}
+                    alt={`collage-${idx + 1}`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
                   />
-                </AnimatePresence>
-              )}
+                ) : (
+                  <div className="flex aspect-square w-full items-center justify-center bg-slate-100 text-xs font-semibold text-slate-600">
+                    No image
+                  </div>
+                )}
 
-              {/* INNER VIGNETTE (gallery realism) */}
-              <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.18)]" />
-            </div>
-          </motion.div>
+                <div className="pointer-events-none absolute left-2 top-2 rounded-md bg-white/90 px-2 py-1 text-[11px] font-extrabold text-slate-900">
+                  #{idx + 1}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </motion.div>
-
-      <p className="mt-2 text-center text-xs text-gray-500">
-        Preview only – final product may vary slightly
-      </p>
-    </div>
+      </div>
+    </FramePreview>
   );
 }

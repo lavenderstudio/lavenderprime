@@ -232,7 +232,7 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
                 </div>
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+              <div className="mt-6 grid grid-cols-3 gap-3">
                 {RATIOS.map((r) => (
                   <RatioCard
                     key={r.id}
