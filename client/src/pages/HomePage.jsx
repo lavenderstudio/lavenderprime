@@ -73,13 +73,13 @@ export default function Home() {
         href: "/editor/canvas",
       },
       {
-        name: "Poster Print (A3/A2)",
-        price: "from £9.99",
+        name: "Collage Frames",
+        price: "from 179 AED",
         rating: 4.6,
         tag: "Value",
         imageUrl:
           "./feature1.avif",
-        href: "/editor/poster",
+        href: "/editor/collage-frame",
       },
     ],
     []

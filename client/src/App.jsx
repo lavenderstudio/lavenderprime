@@ -26,11 +26,13 @@ import Footer from "./components/Footer.jsx";
 import GuestRoute from "./components/GuestRoute.jsx";
 import EditorMiniFrame from "./pages/EditorMiniFrame.jsx";
 import EditorCollage from "./pages/EditorCollage.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 
 export default function App() {
   return (
     <>
+      <ScrollToTop />
       <Navbar />   {/* 👈 always visible */}
       <Routes>
         <Route path="/" element={<HomePage />} />
@@ -64,7 +66,7 @@ export default function App() {
         <Route path="/editor/print" element={<EditorPrint />} />
         <Route path="/editor/canvas" element={<EditorCanvas />} />
         <Route path="/editor/mini-frames" element={<EditorMiniFrame />} />
-        <Route path="/editor/collage" element={<EditorCollage />} />
+        <Route path="/editor/collage-frame" element={<EditorCollage />} />
         <Route
           path="/checkout"
           element={
