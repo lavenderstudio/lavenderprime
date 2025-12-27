@@ -14,6 +14,7 @@ import Page from "../components/Page.jsx";
 import FramePreview from "../components/FramePreview.jsx";
 import Canvas3DPreview from "../components/CanvasStretchedPreview.jsx";
 import CollagePreview from "../components/CollagePreview.jsx";
+import WeddingFramePreview from "../components/WeddingFramePreview.jsx";
 
 // Parse "63x93" or "63x93cm"
 function parseCmSize(sizeStr) {
@@ -119,6 +120,10 @@ export default function CartPage() {
     return it?.productSlug === "collage-frame" || it?.config?.orientation === "collage";
   }
 
+  function isWeddingFrameItem(it) {
+    return it?.productSlug === "wedding-frame";
+  }
+
   return (
     <Page title="Cart">
       {error && (
@@ -214,7 +219,18 @@ export default function CartPage() {
                         <>
                           {previewImg ? (
                             <>
-                              {frame === "Stretched" ? (
+                              {isWeddingFrameItem(it) ? (
+                                <WeddingFramePreview
+                                  imageUrl={previewImg}
+                                  frame={frame || "White Wood"}
+                                  groomName={it.personalization?.groomName}
+                                  brideName={it.personalization?.brideName}
+                                  locationText={it.personalization?.location}
+                                  weddingDateText={it.personalization?.weddingDate}
+                                  message={it.personalization?.message}
+                                  maxWidthClass="max-w-[410px]"
+                                />
+                              ) : frame === "Stretched" ? (
                                 <Canvas3DPreview imageUrl={previewImg} />
                               ) : (
                                 <FramePreview
@@ -243,46 +259,87 @@ export default function CartPage() {
                             <h3 className="text-base font-extrabold text-slate-900">
                               {it.productSlug?.toUpperCase() || "ITEM"}
                             </h3>
-                            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-extrabold text-slate-700">
+                            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
                               SKU: {it.variantSku}
                             </span>
                           </div>
 
                           {/* Specs */}
-                          <div className="mt-4 grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
-                            {hasMaterial && (
-                              <div>
-                                <span className="font-extrabold text-slate-900">Material:</span>{" "}
-                                {cfg.material}
-                              </div>
-                            )}
+                          <div className="mt-4 flex w-full flex-col gap-4 lg:flex-row lg:items-start">
+                            {/* LEFT: Specs (single line) */}
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-700 lg:flex-nowrap">
+                              {hasMaterial && (
+                                <div className="whitespace-nowrap">
+                                  <span className="font-extrabold text-slate-900">Material:</span>{" "}
+                                  {cfg.material}
+                                </div>
+                              )}
 
-                            {frame && (
-                              <div>
-                                <span className="font-extrabold text-slate-900">Frame:</span>{" "}
-                                {frame}
-                              </div>
-                            )}
+                              {frame && (
+                                <div className="whitespace-nowrap">
+                                  <span className="font-extrabold text-slate-900">Frame:</span>{" "}
+                                  {frame}
+                                </div>
+                              )}
 
-                            {mat && (
-                              <div>
-                                <span className="font-extrabold text-slate-900">
-                                  {isMiniFrames ? "Frame Type:" : "Mat:"}
-                                </span>{" "}
-                                {mat}
-                                {!isMiniFrames && ` (${matCm}cm)`}
-                              </div>
-                            )}
+                              {mat && (
+                                <div className="whitespace-nowrap">
+                                  <span className="font-extrabold text-slate-900">
+                                    {isMiniFrames ? "Frame Type:" : "Mat:"}
+                                  </span>{" "}
+                                  {mat}
+                                  {!isMiniFrames && ` (${matCm}cm)`}
+                                </div>
+                              )}
 
-                            <div>
-                              <span className="font-extrabold text-slate-900">Print Size:</span>{" "}
-                              {print ? `${print.w}x${print.h}cm` : cfg.size || "—"}
+                              <div className="whitespace-nowrap">
+                                <span className="font-extrabold text-slate-900">Print Size:</span>{" "}
+                                {print ? `${print.w}x${print.h}cm` : cfg.size || "—"}
+                              </div>
+
+                              {mat && (
+                                <div className="whitespace-nowrap">
+                                  <span className="font-extrabold text-slate-900">Total Size:</span>{" "}
+                                  {total ? `${total.w}x${total.h}cm` : "—"}
+                                </div>
+                              )}
                             </div>
 
-                            {mat && (
-                              <div>
-                                <span className="font-extrabold text-slate-900">Total Size:</span>{" "}
-                                {total ? `${total.w}x${total.h}cm` : "—"}
+                            {/* RIGHT: Personalisation (fixed column, full width inside) */}
+                            {isWeddingFrameItem(it) && it.personalization && (
+                              <div className="w-full lg:max-w-md lg:ml-auto">
+                                <div className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                                  <div className="mb-1 text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                                    Personalisation
+                                  </div>
+
+                                  {it.personalization.groomName && it.personalization.brideName && (
+                                    <div>
+                                      <span className="font-extrabold text-slate-900">Names:</span>{" "}
+                                      {it.personalization.groomName} & {it.personalization.brideName}
+                                    </div>
+                                  )}
+
+                                  {it.personalization.location && (
+                                    <div>
+                                      <span className="font-extrabold text-slate-900">Location:</span>{" "}
+                                      {it.personalization.location}
+                                    </div>
+                                  )}
+
+                                  {it.personalization.weddingDate && (
+                                    <div>
+                                      <span className="font-extrabold text-slate-900">Date:</span>{" "}
+                                      {it.personalization.weddingDate}
+                                    </div>
+                                  )}
+
+                                  {it.personalization.message && (
+                                    <div className="italic text-slate-600">
+                                      “{it.personalization.message}”
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
                           </div>

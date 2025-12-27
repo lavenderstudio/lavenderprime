@@ -27,10 +27,16 @@ const OrderAssetItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const OrderPersonalizationSchema = new mongoose.Schema(
+  {},
+  { _id: false, strict: false }
+);
+
 const OrderItemSchema = new mongoose.Schema(
   {
     productSlug: { type: String, required: true },
     variantSku: { type: String, required: true },
+    personalization: { type: OrderPersonalizationSchema, default: () => ({}) },
 
     config: {
       orientation: String,

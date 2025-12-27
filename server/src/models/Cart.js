@@ -4,6 +4,7 @@
 // Supports:
 // - Single-image products (prints, canvas)
 // - Multi-image products (mini-frames, per-unit uploads)
+// - ✅ Personalised products (wedding frame text inputs etc.)
 // ----------------------------------------------------
 
 import mongoose from "mongoose";
@@ -37,6 +38,14 @@ const AssetItemSchema = new mongoose.Schema(
     },
   },
   { _id: false }
+);
+
+const PersonalizationSchema = new mongoose.Schema(
+  {},
+  {
+    _id: false,
+    strict: false, // ✅ allows any keys defined by the product config
+  }
 );
 
 /**
@@ -80,6 +89,8 @@ const CartItemSchema = new mongoose.Schema(
       },
     },
 
+    // ✅ NEW: personalized text/inputs for products that need it
+    personalization: { type: PersonalizationSchema, default: () => ({}) },
 
     // ✅ Quantity belongs at item level
     quantity: { type: Number, default: 1 },

@@ -168,6 +168,10 @@ export default function OrderSuccessPage() {
     }
     return "border-slate-200 bg-white text-slate-900";
   };
+    
+  function isWeddingFrameItem(item) {
+    return item?.productSlug === "wedding-frame";
+  }
 
   return (
     <Page title={isPaid ? "Order Confirmed" : "Order Status"}>
@@ -341,6 +345,38 @@ export default function OrderSuccessPage() {
                                   {" • "}Frame: {cfg.frame || "—"}
                                   {" • "}Type: {cfg.mat || "—"}
                                   {" • "}Size: {cfg.size || "—"}
+                                </>
+                              ) : isWeddingFrameItem(item) ? (
+                                <>
+                                  {cfg.size && <>Size: {cfg.size}{" • "}</>}
+                                  {cfg.frame && <>Frame: {cfg.frame}{" • "}</>}
+                                  {cfg.mat && <>Mat: {cfg.mat}{" • "}</>}
+                                  Qty {cfg.quantity || 1}
+
+                                  {/* ✅ Personalisation (wedding frame) */}
+                                  {item.personalization?.groomName && item.personalization?.brideName && (
+                                    <>
+                                      {" • "}Names: {item.personalization.groomName} & {item.personalization.brideName}
+                                    </>
+                                  )}
+
+                                  {item.personalization?.location && (
+                                    <>
+                                      {" • "}Location: {item.personalization.location}
+                                    </>
+                                  )}
+
+                                  {item.personalization?.weddingDate && (
+                                    <>
+                                      {" • "}Date: {item.personalization.weddingDate}
+                                    </>
+                                  )}
+
+                                  {item.personalization?.message && (
+                                    <>
+                                      {" • "}“{item.personalization.message}”
+                                    </>
+                                  )}
                                 </>
                               ) : (
                                 <>

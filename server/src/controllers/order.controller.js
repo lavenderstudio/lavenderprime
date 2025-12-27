@@ -59,6 +59,19 @@ function normalizeAssets(cartItem) {
   };
 }
 
+function normalizePersonalization(cartItem) {
+  const p = cartItem?.personalization;
+  if (!p || typeof p !== "object") return {};
+  // Remove empty strings so orders stay clean
+  const out = {};
+  for (const [k, v] of Object.entries(p)) {
+    const val = typeof v === "string" ? v.trim() : v;
+    if (val === "" || val === null || val === undefined) continue;
+    out[k] = val;
+  }
+  return out;
+}
+
 export const checkout = async (req, res) => {
   try {
     const { sessionId, customer, shippingAddress, shippingMethod } = req.body;
@@ -108,14 +121,15 @@ export const checkout = async (req, res) => {
       shippingAddress,
       shippingMethod: shippingMethod || "standard",
 
-      // ✅ IMPORTANT: normalize assets before storing in the order snapshot
       items: cart.items.map((it) => ({
         productSlug: it.productSlug,
         variantSku: it.variantSku,
+        personalization: normalizePersonalization(it),
         config: it.config,
         assets: normalizeAssets(it),
         price: it.price,
       })),
+
 
       totals: {
         subtotal,
