@@ -144,6 +144,10 @@ export default function UserOrdersPage() {
     load();
   }, [navigate]);
 
+  function isWeddingFrameItem(item) {
+    return item?.productSlug === "wedding-frame";
+  }
+
   return (
     <Page title="My Orders">
       <Container className="px-0">
@@ -280,6 +284,9 @@ export default function UserOrdersPage() {
                                 {isMini && it.config?.mat ? `Frame Type: ${it.config.mat} • ` : ""}
                                 {!isMini && it.config?.mat ? `Mat: ${it.config.mat} • ` : ""}
                                 {it.config?.material ? `Material: ${it.config.material} • ` : ""}
+                                {isWeddingFrameItem && it.personalization?.groomName && it.personalization?.brideName ? `Names: ${it.personalization.groomName} & ${it.personalization.brideName} • ` : ""}
+                                {isWeddingFrameItem && it.personalization?.location ? `Location: ${it.personalization.location} • ` : ""}
+                                {isWeddingFrameItem && it.personalization?.weddingDate ? `Date: ${it.personalization.weddingDate} • ` : ""}
                                 Qty: {qty}
                               </div>
                             </div>

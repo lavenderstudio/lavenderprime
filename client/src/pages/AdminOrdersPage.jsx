@@ -203,7 +203,9 @@ export default function AdminOrdersPage() {
     }
   };
 
-
+  function isWeddingFrameItem(item) {
+    return item?.productSlug === "wedding-frame";
+  }
 
   return (
     <Page title="Admin Dashboard">
@@ -456,6 +458,10 @@ export default function AdminOrdersPage() {
                           {it.config?.frame && <div><b>Frame:</b> {it.config.frame}</div>}
                           {it.config?.mat && <div><b>Mat:</b> {it.config.mat}</div>}
                           {it.config?.material && <div><b>Material:</b> {it.config.material}</div>}
+                          {isWeddingFrameItem && it.personalization?.groomName && it.personalization?.brideName ? `Names: ${it.personalization.groomName} & ${it.personalization.brideName} • ` : ""}
+                          {isWeddingFrameItem && it.personalization?.location ? `Location: ${it.personalization.location} • ` : ""}
+                          {isWeddingFrameItem && it.personalization?.weddingDate ? `Date: ${it.personalization.weddingDate} • ` : ""}
+                          {isWeddingFrameItem && it.personalization?.message ? `Message: ${it.personalization.message}` : ""}
                           <div><b>Qty:</b> {it.config?.quantity || 1}</div>
                         </div>
                       </div>
