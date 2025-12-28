@@ -28,6 +28,7 @@ import EditorMiniFrame from "./pages/EditorMiniFrame.jsx";
 import EditorCollage from "./pages/EditorCollage.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import EditorWeddingFrame from "./pages/EditorWeddingFrame.jsx";
+import EditorWeddingPrint from "./pages/EditorWeddingPrint.jsx";
 
 
 export default function App() {
@@ -69,6 +70,7 @@ export default function App() {
         <Route path="/editor/mini-frames" element={<EditorMiniFrame />} />
         <Route path="/editor/collage-frame" element={<EditorCollage />} />
         <Route path="/editor/wedding-frame" element={<EditorWeddingFrame />} />
+        <Route path="/editor/wedding-print" element={<EditorWeddingPrint />} />
         <Route
           path="/checkout"
           element={

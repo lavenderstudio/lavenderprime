@@ -121,7 +121,7 @@ export default function CartPage() {
   }
 
   function isWeddingFrameItem(it) {
-    return it?.productSlug === "wedding-frame";
+    return it?.productSlug === "wedding-frame" || it?.productSlug === "wedding-print";
   }
 
   return (

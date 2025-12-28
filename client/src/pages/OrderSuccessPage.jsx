@@ -170,7 +170,7 @@ export default function OrderSuccessPage() {
   };
     
   function isWeddingFrameItem(item) {
-    return item?.productSlug === "wedding-frame";
+    return item?.productSlug === "wedding-frame" || item.productSlug === "wedding-print";
   }
 
   return (
