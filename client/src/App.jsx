@@ -29,6 +29,7 @@ import EditorCollage from "./pages/EditorCollage.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import EditorWeddingFrame from "./pages/EditorWeddingFrame.jsx";
 import EditorWeddingPrint from "./pages/EditorWeddingPrint.jsx";
+import EditorFineArtPrint from "./pages/EditorFineArtPrint.jsx";
 
 
 export default function App() {
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="/editor/collage-frame" element={<EditorCollage />} />
         <Route path="/editor/wedding-frame" element={<EditorWeddingFrame />} />
         <Route path="/editor/wedding-print" element={<EditorWeddingPrint />} />
+        <Route path="/editor/fine-art-print" element={<EditorFineArtPrint />} />
         <Route
           path="/checkout"
           element={

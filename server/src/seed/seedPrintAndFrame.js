@@ -2,7 +2,7 @@
 // ----------------------------------------------------
 // Seeds the database with a "Print & Frame" product containing
 // portrait variants + options (mounts, frames, mats) for MVP.
-// Run: node src/seed/seedPrint&Frame.js
+// Run: node src/seed/seedPrintAndFrame.js
 // ----------------------------------------------------
 
 import dotenv from "dotenv";
@@ -18,12 +18,12 @@ async function run() {
     console.log("✅ DB connected (seed)");
 
     // If product exists, replace it (keeps seeding repeatable)
-    await Product.deleteOne({ slug: "print" });
+    await Product.deleteOne({ slug: "print-and-frame" });
 
     const printProduct = await Product.create({
-      slug: "print",
-      name: "Print",
-      type: "PRINT",
+      slug: "print-and-frame",
+      name: "Print & Frame",
+      type: "PRINT_&_FRAME",
       variants: [
         { sku: "PRINT&FRAME_14x20", orientation: "portrait", size: "14x20", basePrice: 89 },
         { sku: "PRINT&FRAME_22x32", orientation: "portrait", size: "22x32", basePrice: 139 },

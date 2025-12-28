@@ -1,8 +1,8 @@
-// server/src/seed/seedCanvas.js
+// server/src/seed/seedFineArtPrint.js
 // ----------------------------------------------------
-// Seeds the database with a "Canvas" product containing
+// Seeds the database with a "Fine Art Print" product containing
 // portrait variants + options (mounts, frames, mats) for MVP.
-// Run: node src/seed/seedCanvas.js
+// Run: node src/seed/seedFineArtPrint.js
 // ----------------------------------------------------
 
 import dotenv from "dotenv";
@@ -18,35 +18,35 @@ async function run() {
     console.log("✅ DB connected (seed)");
 
     // If product exists, replace it (keeps seeding repeatable)
-    await Product.deleteOne({ slug: "canvas" });
+    await Product.deleteOne({ slug: "fine-art-print" });
 
     const printProduct = await Product.create({
-      slug: "canvas",
-      name: "Canvas",
-      type: "CANVAS",
+      slug: "fine-art-print",
+      name: "Fine Art Print",
+      type: "FINE_ART_PRINT",
       variants: [
-        { sku: "CANVAS_30x45", orientation: "portrait", size: "30x45", basePrice: 149 },
-        { sku: "CANVAS_40x60", orientation: "portrait", size: "40x60", basePrice: 209 },
-        { sku: "CANVAS_50x75", orientation: "portrait", size: "50x75", basePrice: 269 },
-        { sku: "CANVAS_60x90", orientation: "portrait", size: "60x90", basePrice: 329 },
-        { sku: "CANVAS_70x105", orientation: "portrait", size: "70x105", basePrice: 399 },
+        { sku: "FINE_ART_PRINT_12x18", orientation: "portrait", size: "12x18", basePrice: 29 },
+        { sku: "FINE_ART_PRINT_20x30", orientation: "portrait", size: "20x30", basePrice: 39 },
+        { sku: "FINE_ART_PRINT_30x45", orientation: "portrait", size: "30x45", basePrice: 59 },
+        { sku: "FINE_ART_PRINT_40x60", orientation: "portrait", size: "40x60", basePrice: 79 },
+        { sku: "FINE_ART_PRINT_50x75", orientation: "portrait", size: "50x75", basePrice: 99 },
+        { sku: "FINE_ART_PRINT_60x90", orientation: "portrait", size: "60x90", basePrice: 169 },
       ],
       options: {
         // Mount options (existing)
         mounts: [],
 
         // NEW: Frame options (names MUST match your UI strings)
-        frames: [
-          { name: "Stretched", price: 0 },
-          { name: "Black Wood", price: 100 },
-          { name: "White Wood", price: 100 },
-          { name: "Natural Wood", price: 100 },
-        ],
+        frames: [],
 
         // NEW: Mat options (names MUST match your UI strings)
         mats: [],
 
-        materials: [],
+        // NEW: Material options (names MUST match your UI strings)
+        materials: [
+          { name: "Fine Art", price: 0 },
+          { name: "Glossy", price: 0 },
+        ],
 
         // keep for later
         frameColors: [],

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/static-components */
 // client/src/pages/EditorPrintPortrait.jsx
 // Tailwind version: responsive editor UI
@@ -35,7 +36,7 @@ export default function EditorPrintPortrait() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get("/products/printandframe");
+        const res = await api.get("/products/print-and-frame");
         setProduct(res.data);
 
         const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
@@ -56,7 +57,7 @@ export default function EditorPrintPortrait() {
       if (!variantSku) return;
       try {
         const res = await api.post("/pricing/quote", {
-          productSlug: "printandframe",
+          productSlug: "print-and-frame",
           variantSku,
           options: {
             frame,
@@ -94,7 +95,7 @@ export default function EditorPrintPortrait() {
       await api.post("/cart/items", {
         sessionId,
         item: {
-          productSlug: "print and frame",
+          productSlug: "print-and-frame",
           variantSku,
           config: {
             orientation: "portrait",

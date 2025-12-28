@@ -12,7 +12,7 @@ import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
 import PrintPreview from "../components/PrintPreview.jsx";
 
-export default function EditorPrint() {
+export default function EditorFineArtPrint() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
@@ -29,7 +29,7 @@ export default function EditorPrint() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await api.get("/products/print");
+        const res = await api.get("/products/fine-art-print");
         setProduct(res.data);
 
         const firstMaterial = res.data.options?.materials?.[0];
@@ -54,7 +54,7 @@ export default function EditorPrint() {
       if (!variantSku) return;
       try {
         const res = await api.post("/pricing/quote", {
-          productSlug: "print",
+          productSlug: "fine-art-print",
           variantSku,
           options: {
             material,
@@ -86,7 +86,7 @@ export default function EditorPrint() {
       await api.post("/cart/items", {
         sessionId,
         item: {
-          productSlug: "print",
+          productSlug: "fine-art-print",
           variantSku,
           config: {
             orientation: "portrait",
@@ -185,7 +185,7 @@ export default function EditorPrint() {
   }
 
   return (
-    <Page title="Editor — Print">
+    <Page title="Editor — Fine Art Print">
       {/* Softer, themed error */}
       {error && (
         <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-700 shadow-sm">

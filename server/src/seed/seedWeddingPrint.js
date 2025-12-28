@@ -18,7 +18,7 @@ async function run() {
     console.log("✅ DB connected (seed)");
 
     // If product exists, replace it (keeps seeding repeatable)
-    await Product.deleteOne({ slug: "wedding-frame" });
+    await Product.deleteOne({ slug: "wedding-print" });
 
     const weddingProduct = await Product.create({
       slug: "wedding-print",

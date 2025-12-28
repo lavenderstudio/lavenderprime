@@ -18,6 +18,7 @@ const PRODUCTS = [
   { id: "collage-frame", name: "Collage Frame", image: "/canvas.png", href: "/editor/collage-frame" },
   { id: "wedding-frame", name: "Wedding Frame", image: "/print.png", href: "/editor/wedding-frame" },
   { id: "wedding-print", name: "Wedding Print", image: "/print.png", href: "/editor/wedding-print" },
+  { id: "fine-art-print", name: "Fine Art Print", image: "/print.png", href: "/editor/fine-art-print" },
 ];
 
 export default function ProductsPage() {

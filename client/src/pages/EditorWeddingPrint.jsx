@@ -316,7 +316,7 @@ export default function EditorWeddingPrint() {
   const lockedRatioId = "2:3";
 
   return (
-    <Page title="Editor — Wedding Print & Frame">
+    <Page title="Editor — Wedding Print">
       <Container className="px-0">
         {error && (
           <div className="rounded-2xl bg-red-50 p-4 text-red-700 border border-red-200">
