@@ -1,41 +1,19 @@
 // client/src/lib/cropImage.js
 // ----------------------------------------------------
-// Creates a cropped image blob from an image URL + crop pixels.
-// Used to generate a preview image after the user positions the crop.
+// Takes an image src (dataURL/objectURL), crop pixels from react-easy-crop,
+// returns a Blob (JPEG) containing the cropped image.
 // ----------------------------------------------------
 
-/**
- * Load an image element from a URL.
- * @param {string} url
- * @returns {Promise<HTMLImageElement>}
- */
-function loadImage(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    // Needed if your images are served from a different origin
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-
-/**
- * Crop an image (by pixel coordinates) and return a Blob.
- * @param {string} imageUrl - URL to the original image
- * @param {{x:number,y:number,width:number,height:number}} cropPixels
- * @returns {Promise<Blob>}
- */
-export async function getCroppedImageBlob(imageUrl, cropPixels) {
-  const image = await loadImage(imageUrl);
+export async function getCroppedBlob(imageSrc, cropPixels, outType = "image/jpeg", quality = 0.92) {
+  const image = await loadImage(imageSrc);
 
   const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
   canvas.width = cropPixels.width;
   canvas.height = cropPixels.height;
 
-  const ctx = canvas.getContext("2d");
-
-  // Draw cropped area into canvas
+  // Draw the cropped area onto the canvas
   ctx.drawImage(
     image,
     cropPixels.x,
@@ -48,12 +26,21 @@ export async function getCroppedImageBlob(imageUrl, cropPixels) {
     cropPixels.height
   );
 
-  // Convert canvas to Blob (PNG)
+  // Convert canvas to Blob
+  const blob = await new Promise((resolve) =>
+    canvas.toBlob((b) => resolve(b), outType, quality)
+  );
+
+  if (!blob) throw new Error("Failed to create cropped blob.");
+  return blob;
+}
+
+function loadImage(src) {
   return new Promise((resolve, reject) => {
-		canvas.toBlob((blob) => {
-			if (!blob) return reject(new Error("Canvas export failed (blob was null)."));
-			resolve(blob);
-		}, "image/png");
-	});
-  
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
 }
