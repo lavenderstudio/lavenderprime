@@ -4,8 +4,8 @@
 // ----------------------------------------------------
 // 3-step modal:
 // 1) Choose Ratio
-// 2) Filestack upload (crop locked to ratio)
-// 3) Framed preview
+// 2) Local crop (locked to ratio) + Upload CROPPED image to Cloudinary
+// 3) Preview
 //
 // Props:
 // - isOpen
@@ -15,11 +15,12 @@
 // ----------------------------------------------------
 
 import { useEffect, useMemo, useState } from "react";
+import Cropper from "react-easy-crop";
 import { RATIOS } from "../lib/ratios.js";
-import FilestackUpload from "./FilestackUpload.jsx";
+import { getCroppedBlob } from "../lib/cropImage.js";
+import { uploadToCloudinary } from "../lib/cloudinaryUpload.js";
 
 function Stepper({ step, totalSteps = 3 }) {
-  // NOTE: if lockedRatioId is used, totalSteps becomes 2 (Choose Image -> Preview)
   const step1Label = totalSteps === 2 ? "Choose Image" : "Choose Orientation";
   const step2Label = totalSteps === 2 ? "Preview" : "Choose Image";
   const step3Label = "Preview";
@@ -106,9 +107,6 @@ function RatioCard({ ratio, selected, onClick }) {
 }
 
 export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedRatioId = null }) {
-  // If lockedRatioId is present: steps become:
-  // Step 1 = Choose Image
-  // Step 2 = Preview
   const totalSteps = lockedRatioId ? 2 : 3;
 
   const [step, setStep] = useState(1);
@@ -117,7 +115,14 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
   const [fileMeta, setFileMeta] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
 
-  // If locked, force ratio selection from prop (and fall back safely)
+  // ✅ local cropping state
+  const [localSrc, setLocalSrc] = useState("");
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedPixels, setCroppedPixels] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+
   const effectiveRatioId = useMemo(() => {
     if (!lockedRatioId) return selectedRatioId;
     return lockedRatioId;
@@ -129,11 +134,19 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
   );
 
   const reset = () => {
-    // Reset to defaults (but if lockedRatioId exists, we’ll re-force it on open)
     setStep(1);
     setSelectedRatioId("3:2");
     setFileMeta(null);
     setImageUrl("");
+
+    // local crop reset
+    if (localSrc) URL.revokeObjectURL(localSrc);
+    setLocalSrc("");
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedPixels(null);
+    setUploading(false);
+    setUploadError("");
   };
 
   const close = () => {
@@ -141,17 +154,9 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
     onClose();
   };
 
-  // ✅ When modal opens with lockedRatioId, jump to Choose Image directly
   useEffect(() => {
     if (!isOpen) return;
-
-    if (lockedRatioId) {
-      // Step 1 becomes "Choose Image" in locked flow
-      setStep(1);
-    } else {
-      // Normal flow starts with ratio chooser
-      setStep(1);
-    }
+    setStep(1);
   }, [isOpen, lockedRatioId]);
 
   if (!isOpen) return null;
@@ -180,19 +185,63 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
     );
   }
 
+  const onPickFile = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+
+    setUploadError("");
+    // cleanup previous
+    if (localSrc) URL.revokeObjectURL(localSrc);
+
+    const url = URL.createObjectURL(f);
+    setLocalSrc(url);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedPixels(null);
+  };
+
+  const onCropComplete = (_, croppedAreaPixels) => {
+    setCroppedPixels(croppedAreaPixels);
+  };
+
+  const saveCropAndUpload = async () => {
+    try {
+      setUploading(true);
+      setUploadError("");
+
+      if (!localSrc || !croppedPixels) {
+        setUploadError("Please choose an image and crop it first.");
+        return;
+      }
+
+      // ✅ Create cropped image blob (this is the final image)
+      const blob = await getCroppedBlob(localSrc, croppedPixels, "image/jpeg", 0.92);
+
+      // ✅ Give it a filename so Cloudinary is happy
+      const croppedFile = new File([blob], `cropped-${Date.now()}.jpg`, { type: "image/jpeg" });
+
+      // ✅ Upload CROPPED file only
+      const uploaded = await uploadToCloudinary({ file: croppedFile, folder: "user-uploads" });
+
+      setFileMeta(uploaded);
+      setImageUrl(uploaded.url);
+
+      // ✅ Go to preview step
+      if (lockedRatioId) setStep(2);
+      else setStep(3);
+    } catch (err) {
+      console.error(err);
+      setUploadError(err?.message || "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-6">
-      {/* Backdrop */}
-      <button
-        type="button"
-        onClick={close}
-        className="absolute inset-0 bg-black/40"
-        aria-label="Close"
-      />
+      <button type="button" onClick={close} className="absolute inset-0 bg-black/40" aria-label="Close" />
 
-      {/* Modal */}
       <div className="relative w-full max-w-105 sm:max-w-4xl rounded-2xl bg-white shadow-xl max-h-[90svh] sm:max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="shrink-0 p-3 sm:p-6 flex items-start justify-between gap-3 border-b border-gray-100">
           <div className="w-full">
             <MobileStepHeader step={step} />
@@ -210,7 +259,6 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-6">
           {/* STEP 1 (normal flow only): choose ratio */}
           {!lockedRatioId && step === 1 && (
@@ -255,32 +303,60 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
             </div>
           )}
 
-          {/* STEP 1 (locked flow) OR STEP 2 (normal flow): choose image */}
+          {/* STEP 1 (locked flow) OR STEP 2 (normal flow): choose image + crop + upload */}
           {((lockedRatioId && step === 1) || (!lockedRatioId && step === 2)) && (
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
                 <p className="text-sm font-semibold text-gray-900">Selected ratio</p>
-                <p className="mt-1 text-sm text-gray-700">
-                  {selectedRatio.label} (locked crop)
-                </p>
+                <p className="mt-1 text-sm text-gray-700">{selectedRatio.label} (locked crop)</p>
 
-                <div className="mt-4">
-                  <FilestackUpload
-                    ratio={selectedRatio}
-                    onDone={(meta) => {
-                      setFileMeta(meta);
-                      setImageUrl(meta.url);
+                <div className="mt-4 space-y-3">
+                  <input type="file" accept="image/*" onChange={onPickFile} className="rounded-full bg-blue-500 px-3 py-2 text-sm font-semibold text-white inset-ring inset-ring-white/5 hover:bg-blue-600" />
 
-                      // ✅ Go to preview
-                      if (lockedRatioId) setStep(2);
-                      else setStep(3);
-                    }}
-                  />
+                  {localSrc && (
+                    <div className="relative h-72 w-full overflow-hidden rounded-2xl border bg-black">
+                      <Cropper
+                        image={localSrc}
+                        crop={crop}
+                        zoom={zoom}
+                        aspect={selectedRatio.w / selectedRatio.h}
+                        onCropChange={setCrop}
+                        onZoomChange={setZoom}
+                        onCropComplete={onCropComplete}
+                      />
+                    </div>
+                  )}
+
+                  {localSrc && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-600">Zoom</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={3}
+                        step={0.01}
+                        value={zoom}
+                        onChange={(e) => setZoom(Number(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+
+                  {uploadError && (
+                    <div className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700">
+                      {uploadError}
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={saveCropAndUpload}
+                    disabled={!localSrc || uploading}
+                    className="w-full rounded-2xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white hover:bg-black disabled:opacity-60"
+                  >
+                    {uploading ? "Uploading..." : "Save & Upload"}
+                  </button>
                 </div>
-
-                <p className="mt-3 text-xs text-gray-600">
-                  After you crop and press “Save”, you’ll see a preview.
-                </p>
               </div>
 
               <div className="rounded-2xl border border-gray-200 bg-white p-4">
@@ -315,7 +391,13 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
                 <div className="rounded-2xl border border-gray-200 bg-white p-4">
                   <p className="text-sm font-semibold text-gray-900">Preview</p>
                   <div className="mt-3">
-                    <img src={imageUrl} alt="preview" className="h-full w-full object-contain" />
+                    {imageUrl ? (
+                      <img src={imageUrl} alt="preview" className="h-full w-full object-contain" />
+                    ) : (
+                      <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+                        imageUrl Is Empty (Upload Did Not Return A URL)
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -331,13 +413,12 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
                     <button
                       type="button"
                       onClick={() => {
-                        // back to choose image step
                         if (lockedRatioId) setStep(1);
                         else setStep(2);
                       }}
                       className="rounded-2xl border border-gray-300 bg-white px-5 py-3 text-sm font-semibold hover:bg-gray-50"
                     >
-                      Choose another image
+                      Choose Another Image
                     </button>
 
                     <button
@@ -362,7 +443,6 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
                 <button
                   type="button"
                   onClick={() => {
-                    // back to choose image step
                     if (lockedRatioId) setStep(1);
                     else setStep(2);
                   }}
