@@ -2,10 +2,11 @@
 // client/src/components/home/Hero.jsx
 
 import { Link } from "react-router-dom";
-import { Sparkles, Truck, ShieldCheck, Ruler, Star, ArrowRight} from "lucide-react";
-import { motion } from "framer-motion";
+import { Sparkles, Truck, ShieldCheck, Ruler, Star, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Container, ACCENT, ACCENT_BG, ACCENT_HOVER } from "./ui.jsx";
-import { FadeUp} from "../motion/MotionWrappers.jsx";
+import { FadeUp } from "../motion/MotionWrappers.jsx";
+import { useEffect, useMemo, useState } from "react";
 
 function Rating({ value = 4.8 }) {
   return (
@@ -30,23 +31,19 @@ function PromoCard({ title, subtitle, cta, href, imageUrl }) {
   return (
     <Link
       to={href}
-      className="group relative min-h-47.5 overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="group relative min-h-47.5 overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
       <div className="absolute inset-0">
         <img
           src={imageUrl}
           alt={title}
-          decoding="async"
           className="h-full w-full object-cover opacity-90 transition duration-300 group-hover:scale-[1.03]"
-          loading="lazy"
         />
         <div className="absolute inset-0 bg-linear-to-r from-black/65 via-black/30 to-black/10" />
       </div>
 
       <div className="relative p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-white/90">
-          {subtitle}
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-white/90">{subtitle}</p>
         <p className="mt-1 text-lg font-extrabold text-white sm:text-xl">{title}</p>
 
         <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-sm font-semibold text-white backdrop-blur transition group-hover:bg-white/20">
@@ -57,22 +54,74 @@ function PromoCard({ title, subtitle, cta, href, imageUrl }) {
   );
 }
 
-export default function Hero({ promos }) {
-  return (
-    <section className="relative overflow-hidden bg-linear-to-b from bg-blue-100 via-white to-white">
-      <div className="hidden sm:block absolute -top-24 right-0 h-64 w-64 rounded-full bg-blue-200/40 blur-xl opacity-45" />
-      <div className="hidden sm:block absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-blue-300/40 blur-xl opacity-45" />
+// Small helper to wrap index properly
+function mod(n, m) {
+  return ((n % m) + m) % m;
+}
 
-      <Container className="py-10 sm:py-14">
+export default function Hero({
+  promos,
+  bgImages = ["./hero-img.png", "./hero-img-2.png", "./hero-img-3.png", "./hero-img.avif"],
+  autoPlay = true,
+  intervalMs = 4500,
+}) {
+  const images = useMemo(() => (Array.isArray(bgImages) && bgImages.length ? bgImages : ["./hero-img.avif"]), [bgImages]);
+
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const goTo = (i) => setActive(mod(i, images.length));
+
+  // ✅ Auto-rotate
+  useEffect(() => {
+    if (!autoPlay) return;
+    if (paused) return;
+    if (images.length <= 1) return;
+
+    const t = setInterval(() => {
+      setActive((i) => mod(i + 1, images.length));
+    }, intervalMs);
+
+    return () => clearInterval(t);
+  }, [autoPlay, paused, images.length, intervalMs]);
+
+  return (
+    <section
+      className="relative overflow-hidden"
+      onFocusCapture={() => setPaused(true)} // ✅ pause when interacting
+      onBlurCapture={() => setPaused(false)}
+    >
+      {/* ✅ Background slider */}
+      <div className="absolute inset-0">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={images[active]} // key triggers fade animation on change
+            src={images[active]}
+            alt="Hero background"
+            className="h-full w-full object-cover"
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0.4 }}
+            transition={{ duration: 0.5 }}
+          />
+        </AnimatePresence>
+
+        {/* Overlay for readability */}
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/35 via-black/25 to-black/50" />
+      </div>
+
+      {/* ✅ Content on top */}
+      <Container className="relative z-10 py-12 sm:py-16" >
         <div className="grid items-center gap-10 lg:grid-cols-2">
-          <div>
+          {/* White card with shadow */}
+          <div className="rounded-3xl bg-white/95 p-6 shadow-xl ring-1 ring-black/5 backdrop-blur sm:p-8">
             <div className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-bold text-slate-700 shadow-sm">
               <Sparkles className={`h-4 w-4 ${ACCENT}`} />
               Premium prints • Perfect frames • Delivered fast
             </div>
 
             <FadeUp>
-              <h1 className="mt-4 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-3xl">
+              <h1 className="mt-4 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
                 Luxury framing for modern living.{" "}
                 <span className={`${ACCENT} underline decoration-blue-500/60 underline-offset-8`}>
                   Crafted in UAE.
@@ -83,11 +132,12 @@ export default function Hero({ promos }) {
                 Upload a photo, choose the size, frame and finish — we print, frame and deliver to your door.
               </p>
             </FadeUp>
-            <div className="mt-6 flex gap-3 sm:items-center">
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link
                   to="/products"
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition sm:w-auto`}
                 >
                   Start Designing
                 </Link>
@@ -96,13 +146,12 @@ export default function Hero({ promos }) {
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link
                   to="/contact"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
                 >
                   Contact Us
                 </Link>
               </motion.div>
             </div>
-          
 
             <div className="mt-6 flex flex-wrap gap-2">
               <Badge icon={Truck} label="Fast Delivery" />
@@ -111,41 +160,35 @@ export default function Hero({ promos }) {
             </div>
           </div>
 
-          {/* Hero image + floating rating card */}
-          <div className="relative">
-            <div className="aspect-4/3 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm">
-              <img
-                src="./hero-img.avif"
-                alt="Framed print in interior"
-                className="h-full w-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-
-            <div className="absolute -bottom-5 left-1/2 w-[92%] -translate-x-1/2 rounded-2xl border bg-white p-4 shadow-sm sm:w-96 sm:p-5 lg:left-6 lg:translate-x-0">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-extrabold text-slate-900">Top Rated Quality</p>
-                <Rating value={4.8} />
-              </div>
-              <p className="mt-1 text-sm text-slate-600">
-                Crisp prints, premium mounts, and strong packaging.
-              </p>
-            </div>
-          </div>
           
         </div>
-        <Container className="mt-16">
+        {/* Promo cards */}
+        <Container className="mt-14">
           <div className="grid gap-4 md:grid-cols-3">
             {promos.map((p) => (
-              <PromoCard title={p.title} {...p} />
+              <PromoCard key={p.href || p.title} title={p.title} {...p} />
             ))}
           </div>
         </Container>
+        {images.length > 1 && (
+          <div className="mt-10 flex items-center justify-center">
+            {/* Dots */}
+            <div className="flex items-center gap-2">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  className={`h-2.5 w-2.5 rounded-full transition ${
+                    i === active ? "bg-slate-900" : "bg-slate-300 hover:bg-slate-400"
+                  }`}
+                  aria-label={`Go to slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </Container>
     </section>
-
-    
-
   );
 }

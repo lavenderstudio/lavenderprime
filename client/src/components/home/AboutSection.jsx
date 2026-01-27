@@ -72,7 +72,6 @@ export default function AboutSection() {
                   alt="Frames"
                   className="h-full w-full object-cover"
                   loading="lazy"
-                  decoding="async"
                 />
               </div>
               <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm sm:mt-10">
@@ -81,7 +80,6 @@ export default function AboutSection() {
                   alt="Wall art"
                   className="h-full w-full object-cover"
                   loading="lazy"
-                  decoding="async"
                 />
               </div>
             </div>
