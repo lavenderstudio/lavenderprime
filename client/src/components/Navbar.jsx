@@ -158,6 +158,9 @@ export default function Navbar() {
             <Link className={navLinkClass("/delivery")} to="/delivery">
               Delivery
             </Link>
+            <Link className={navLinkClass("/blog")} to="/blog">
+              Blogs
+            </Link>
           </nav>
 
           {/* Center brand */}
@@ -412,6 +415,9 @@ export default function Navbar() {
               </Link>
               <Link className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50" to="/delivery">
                 Delivery
+              </Link>
+              <Link className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50" to="/blog">
+                Blogs
               </Link>
               <Link className="rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50" to="/contact">
                 Contact

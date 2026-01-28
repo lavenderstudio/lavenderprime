@@ -30,6 +30,11 @@ import ScrollToTop from "./components/ScrollToTop.jsx";
 import EditorWeddingFrame from "./pages/EditorWeddingFrame.jsx";
 import EditorWeddingPrint from "./pages/EditorWeddingPrint.jsx";
 import EditorFineArtPrint from "./pages/EditorFineArtPrint.jsx";
+import BlogListPage from "./pages/BlogListPage.jsx";
+import BlogPostPage from "./pages/BlogPostPage.jsx";
+import AdminBlogsPage from "./pages/AdminBlogsPage.jsx";
+import AdminBlogEditorPage from "./pages/AdminBlogEditorPage.jsx";
+import RequireRole from "./components/auth/RequireRole.jsx";
 
 
 export default function App() {
@@ -88,6 +93,38 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<div>404</div>} />
         <Route path="/delivery" element={<Delivery />} />
+
+        {/* Public */}
+        <Route path="/blog" element={<BlogListPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
+
+        {/* Admin/Manager */}
+        <Route
+          path="/admin/blogs"
+          element={
+            <RequireRole roles={["admin", "manager"]}>
+              <AdminBlogsPage />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/blogs/new"
+          element={
+            <RequireRole roles={["admin", "manager"]}>
+              <AdminBlogEditorPage mode="create" />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/blogs/:id/edit"
+          element={
+            <RequireRole roles={["admin", "manager"]}>
+              <AdminBlogEditorPage mode="edit" />
+            </RequireRole>
+          }
+        />
+
+
       </Routes>
       <Footer />
     </>
