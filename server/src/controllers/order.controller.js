@@ -25,7 +25,7 @@ function calcShippingFee({ country, currency }) {
   const cur = String(currency || "AED").trim().toUpperCase();
 
   if (cur !== "AED") return 0;
-  if (c === "united arab emirates" || c === "uae") return 50;
+  if (c === "united arab emirates" || c === "uae") return 35;
   return 100;
 }
 

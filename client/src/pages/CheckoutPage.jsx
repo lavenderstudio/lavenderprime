@@ -305,7 +305,7 @@ export default function CheckoutPage() {
       c === "uae" ||
       c === "u.a.e"
 
-    return isUAE ? 50 : 100;
+    return isUAE ? 35 : 100;
   }, [shippingAddress?.country]);
 
   // ✅ Before checkout: show estimate. After checkout: show backend-confirmed delivery.
