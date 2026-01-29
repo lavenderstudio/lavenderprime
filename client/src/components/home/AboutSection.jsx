@@ -68,7 +68,7 @@ export default function AboutSection() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm">
                 <img
-                  src="./about1.jfif"
+                  src="./about/about1_converted.avif"
                   alt="Frames"
                   className="h-full w-full object-cover"
                   loading="lazy"
@@ -76,7 +76,7 @@ export default function AboutSection() {
               </div>
               <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm sm:mt-10">
                 <img
-                  src="./about2.jfif"
+                  src="./about/about2_converted.avif"
                   alt="Wall art"
                   className="h-full w-full object-cover"
                   loading="lazy"

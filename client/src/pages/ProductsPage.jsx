@@ -11,14 +11,14 @@ import Page from "../components/Page.jsx";
 import { ACCENT, ACCENT_BG, ACCENT_HOVER } from "../components/home/ui.jsx";
 
 const PRODUCTS = [
-  { id: "print", name: "Print", image: "/print.png", href: "/editor/print" },
-  { id: "print-frame", name: "Print & Frame", image: "/printandframe.png", href: "/editor/print-frame" },
-  { id: "canvas", name: "Canvas", image: "/canvas.png", href: "/editor/canvas" },
-  { id: "mini-frames", name: "Mini Frames", image: "/print.png", href: "/editor/mini-frames" },
-  { id: "collage-frame", name: "Collage Frame", image: "/canvas.png", href: "/editor/collage-frame" },
-  { id: "wedding-frame", name: "Wedding Frame", image: "/print.png", href: "/editor/wedding-frame" },
-  { id: "wedding-print", name: "Wedding Print", image: "/print.png", href: "/editor/wedding-print" },
-  { id: "fine-art-print", name: "Fine Art Print", image: "/print.png", href: "/editor/fine-art-print" },
+  { id: "print", name: "Print", image: "/products/print_converted.avif", href: "/editor/print" },
+  { id: "print-frame", name: "Print & Frame", image: "/products/printandframe_converted.avif", href: "/editor/print-frame" },
+  { id: "canvas", name: "Canvas", image: "/products/canvas_converted.avif", href: "/editor/canvas" },
+  { id: "mini-frames", name: "Mini Frames", image: "/products/canvas_converted.avif", href: "/editor/mini-frames" },
+  { id: "collage-frame", name: "Collage Frame", image: "/products/canvas_converted.avif", href: "/editor/collage-frame" },
+  { id: "wedding-frame", name: "Wedding Frame", image: "/products/canvas_converted.avif", href: "/editor/wedding-frame" },
+  { id: "wedding-print", name: "Wedding Print", image: "/products/canvas_converted.avif", href: "/editor/wedding-print" },
+  { id: "fine-art-print", name: "Fine Art Print", image: "/products/canvas_converted.avif", href: "/editor/fine-art-print" },
 ];
 
 export default function ProductsPage() {

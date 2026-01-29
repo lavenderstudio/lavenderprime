@@ -21,7 +21,7 @@ export default function Home() {
         cta: "Start Designing",
         href: "/products",
         imageUrl:
-          "./promo1.jfif",
+          "./promo/promo1_converted.avif",
       },
       {
         title: "Premium Canvas Prints",
@@ -29,7 +29,7 @@ export default function Home() {
         cta: "Shop Canvas",
         href: "/editor/canvas",
         imageUrl:
-          "./promo2.jfif",
+          "./promo/promo2_converted.avif",
       },
       {
         title: "Fast Delivery, Safe Packaging",
@@ -37,7 +37,7 @@ export default function Home() {
         cta: "How Delivery Works",
         href: "/delivery",
         imageUrl:
-          "./promo3.jfif",
+          "./promo/promo3_converted.avif",
       },
     ],
     []
@@ -51,7 +51,7 @@ export default function Home() {
         rating: 4.9,
         tag: "Popular",
         imageUrl:
-          "./feature1.avif",
+          "./feature/feature1_converted.avif",
         href: "/editor/print-frame",
       },
       {
@@ -60,7 +60,7 @@ export default function Home() {
         rating: 4.8,
         tag: "Premium",
         imageUrl:
-          "./feature2.avif",
+          "./feature/feature2_converted.avif",
         href: "/editor/print",
       },
       {
@@ -69,7 +69,7 @@ export default function Home() {
         rating: 4.7,
         tag: "Best seller",
         imageUrl:
-          "./feature3.jfif",
+          "./feature/feature3_converted.avif",
         href: "/editor/canvas",
       },
       {
@@ -78,7 +78,7 @@ export default function Home() {
         rating: 4.6,
         tag: "Value",
         imageUrl:
-          "./feature1.avif",
+          "./feature/feature1_converted.avif",
         href: "/editor/collage-frame",
       },
     ],
@@ -120,7 +120,7 @@ export default function Home() {
         excerpt:
           "A quick guide for picking frame sizes, mounts, and orientations for your wall space.",
         imageUrl:
-          "./blog1.avif",
+          "./blog/blog1_converted.avif",
       },
       {
         title: "Canvas vs poster: what’s best for you?",
@@ -128,7 +128,7 @@ export default function Home() {
         excerpt:
           "We break down durability, finish, and style to help you choose confidently.",
         imageUrl:
-          "./blog2.avif",
+          "./blog/blog2_converted.avif",
       },
       {
         title: "How we pack frames for safe delivery",
@@ -136,7 +136,7 @@ export default function Home() {
         excerpt:
           "Behind the scenes: corner protection, wrap layers, and courier handling tips.",
         imageUrl:
-          "./blog3.avif",
+          "./blog/blog3_converted.avif",
       },
     ],
     []

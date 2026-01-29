@@ -61,7 +61,7 @@ function mod(n, m) {
 
 export default function Hero({
   promos,
-  bgImages = ["./hero-img.png", "./hero-img-2.png", "./hero-img-3.png", "./hero-img.avif"],
+  bgImages = ["./hero/hero-img_converted.avif", "./hero/hero-img-2_converted.avif", "./hero/hero-img-3_converted.avif", "./hero/hero-img.avif"],
   autoPlay = true,
   intervalMs = 4500,
 }) {

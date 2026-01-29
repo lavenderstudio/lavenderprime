@@ -184,7 +184,7 @@ export default function About() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm">
                   <img
-                    src="https://plus.unsplash.com/premium_photo-1681113076872-c74b8926e70c"
+                    src="./about/about1_converted.avif"
                     alt="Golden Art Frames - framed wall art example"
                     className="h-full w-full object-cover"
                     loading="lazy"
@@ -192,7 +192,7 @@ export default function About() {
                 </div>
                 <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm sm:mt-10">
                   <img
-                    src="https://images.unsplash.com/photo-1634969948017-a9abffad732f"
+                    src="./about/about2_converted.avif"
                     alt="Golden Art Frames - modern frames in interior"
                     className="h-full w-full object-cover"
                     loading="lazy"
