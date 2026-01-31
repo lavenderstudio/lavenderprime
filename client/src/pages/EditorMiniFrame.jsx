@@ -314,7 +314,7 @@ export default function EditorMiniFrame() {
               className={`group rounded-2xl p-2 text-center transition active:scale-[0.99]
                 ${
                   active
-                    ? "ring-2 ring-blue-500/60 bg-blue-50 border border-blue-200"
+                    ? "ring-2 ring-[#FF633F]/60 bg-[#FF633F]/10 border border-[#FF633F]/20"
                     : "border border-slate-200 bg-white hover:bg-slate-50"
                 }`}
             >
@@ -343,7 +343,7 @@ export default function EditorMiniFrame() {
               type="button"
               onClick={() => onChange(opt.id)}
               className={`flex-1 rounded-full px-4 py-2 text-sm font-extrabold transition
-                ${active ? "bg-blue-700 text-white shadow" : "text-slate-600 hover:text-slate-900"}`}
+                ${active ? "bg-[#FF633F] text-white shadow" : "text-slate-600 hover:text-slate-900"}`}
             >
               {opt.name || opt.id}
             </button>
@@ -374,7 +374,7 @@ export default function EditorMiniFrame() {
         ) : (
           <div className="mt-4 grid gap-6 lg:grid-cols-12">
             {/* LEFT */}
-            <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-blue-50 via-white to-white shadow-sm">
+            <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-[#FF633F]/5 via-white to-white shadow-sm">
               <div className="p-5">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-semibold text-slate-700">
@@ -457,7 +457,7 @@ export default function EditorMiniFrame() {
                               </div>
 
                               {/* little dot like your earlier UI */}
-                              <span className="mt-4 h-3 w-3 rounded-full bg-blue-500 shadow" />
+                              <span className="mt-4 h-3 w-3 rounded-full bg-[#FF633F] shadow" />
                             </button>
                           )}
                         </div>
@@ -499,7 +499,7 @@ export default function EditorMiniFrame() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-blue-50 px-3 py-2 text-sm font-extrabold text-slate-900">
+                  <div className="rounded-2xl border border-slate-200 bg-[#FF633F]/10 px-3 py-2 text-sm font-extrabold text-slate-900">
                     {quote ? `${quote.total} ${quote.currency}` : "—"}
                   </div>
                 </div>
@@ -580,7 +580,7 @@ export default function EditorMiniFrame() {
                       step={qtyStep}
                       value={quantity}
                       onChange={(e) => setQuantitySafe(Number(e.target.value))}
-                      className="w-full rounded-2xl border text-center border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="w-full rounded-2xl border text-center border-slate-200 bg-white p-3 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#FF633F]/50"
                     />
 
                     <button
@@ -629,7 +629,7 @@ export default function EditorMiniFrame() {
                       ${
                         !quote || (requiredUploads > 0 && !hasAllUploads)
                           ? "cursor-not-allowed bg-slate-100 text-slate-500 border border-slate-200"
-                          : `${ACCENT_BG} ${ACCENT_HOVER} text-white`
+                          : `${ACCENT_BG} ${ACCENT_HOVER} text-white transition-all hover:scale-105 duration-300`
                       }`}
                   >
                     Add to Cart

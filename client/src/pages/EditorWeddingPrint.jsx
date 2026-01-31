@@ -279,7 +279,7 @@ export default function EditorWeddingPrint() {
               className={`rounded-2xl p-4 text-center transition active:scale-[0.99]
                 ${
                   active
-                    ? "ring-2 ring-blue-600/30 bg-blue-50 border border-blue-100 shadow-sm"
+                    ? "ring-2 ring-[#FF633F]/60 bg-[#FF633F]/10 border border-[#FF633F]/20 shadow-sm"
                     : "border border-slate-200 bg-white hover:bg-slate-50 shadow-sm"
                 }`}
             >
@@ -331,7 +331,7 @@ export default function EditorWeddingPrint() {
         ) : (
           <div className="mt-4 grid gap-6 lg:grid-cols-12">
             {/* LEFT: Editor */}
-            <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-blue-50 via-white to-white shadow-sm">
+            <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-[#FF633F]/5 via-white to-white shadow-sm">
               <div className="p-5">
                 {!originalUrl ? (
                   <div className="flex flex-col items-center justify-center">
@@ -382,7 +382,7 @@ export default function EditorWeddingPrint() {
                           </div>
                         </div>
 
-                        <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-blue-500 shadow" />
+                        <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#FF633F] shadow" />
                       </div>
                     </button>
 
@@ -431,7 +431,7 @@ export default function EditorWeddingPrint() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-blue-50 px-3 py-2 text-sm font-extrabold text-slate-900">
+                <div className="rounded-2xl border border-slate-200 bg-[#FF633F]/10 px-3 py-2 text-sm font-extrabold text-slate-900">
                   {quote ? `${quote.total} ${quote.currency}` : "—"}
                 </div>
               </div>
@@ -458,7 +458,7 @@ export default function EditorWeddingPrint() {
               <div className="mt-6 border-t border-slate-100 pt-6">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-extrabold text-slate-900">
-                    Material: <span className="text-blue-700 font-bold">{material}</span>
+                    Material: <span className="text-[#FF633F] font-bold">{material}</span>
                   </label>
 
                   <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-bold text-slate-900">
@@ -505,7 +505,7 @@ export default function EditorWeddingPrint() {
                     ${
                       !originalUrl || !quote || !selectedRatio
                         ? "cursor-not-allowed bg-slate-100 text-slate-500 border border-slate-200"
-                        : `${ACCENT_BG} ${ACCENT_HOVER} text-white`
+                        : `${ACCENT_BG} ${ACCENT_HOVER} text-white transition-all duration-300 hover:scale-105`
                     }`}
                 >
                   Add to Cart

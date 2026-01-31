@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 
 function TestimonialCard({ name, role, text, rating = 5 }) {
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="font-extrabold text-slate-900">{name}</p>

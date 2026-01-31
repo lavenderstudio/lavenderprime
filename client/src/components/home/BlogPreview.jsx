@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 function BlogCard({ title, date, excerpt, imageUrl, href }) {
   return (
     <div
-      className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="group overflow-hidden rounded-2xl border bg-white shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] transition-all duration-300 hover:-translate-y-1.5"
     >
       <div className="aspect-16/10 overflow-hidden bg-slate-100">
         <img

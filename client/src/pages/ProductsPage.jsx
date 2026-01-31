@@ -25,7 +25,7 @@ export default function ProductsPage() {
   return (
     <Page title="Products">
       {/* Header */}
-      <div className="mb-8 rounded-3xl border bg-linear-to-b from-blue-100/75 via-white to-white p-6 shadow-sm sm:p-10">
+      <div className="mb-8 rounded-3xl border bg-linear-to-b from-[#FF633F]/15 via-white to-white p-6 shadow-sm sm:p-10">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
             <p className={`text-sm font-extrabold uppercase tracking-wide ${ACCENT}`}>
@@ -61,7 +61,7 @@ function ProductCard({ product, index, total }) {
     <div className={isLastSingle ? "lg:col-start-2" : ""}>
       <Link
         to={product.href}
-        className="group block rounded-3xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+        className="group block rounded-3xl border bg-white shadow-[5px_5px_5px_0_rgba(0,0,0,0.45)] transition hover:-translate-y-1.5 duration-300 hover:shadow-[8px_8px_5px_0_rgba(0,0,0,0.65)]"
         aria-label={product.name}
       >
         {/* Image area */}
@@ -78,7 +78,7 @@ function ProductCard({ product, index, total }) {
             </div>
 
             {/* Accent ring on hover */}
-            <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 ring-blue-600/20 transition group-hover:ring-2" />
+            <div className="pointer-events-none absolute inset-0 rounded-2xl ring-0 ring-[#FF633F]/20 transition group-hover:ring-2" />
           </div>
         </div>
 
@@ -101,7 +101,7 @@ function ProductCard({ product, index, total }) {
 
           <div className="mt-5">
             <div
-              className={`inline-flex w-full items-center justify-center rounded-2xl ${ACCENT_BG} ${ACCENT_HOVER} px-4 py-2.5 text-sm font-extrabold text-white transition`}
+              className={`inline-flex w-full items-center justify-center rounded-2xl ${ACCENT_BG} ${ACCENT_HOVER} px-4 py-2.5 text-sm font-extrabold text-white transition-all duration-300 hover:scale-105`}
             >
               Start
             </div>

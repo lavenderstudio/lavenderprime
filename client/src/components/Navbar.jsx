@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-/* eslint-disable no-unused-vars */
 // client/src/components/Navbar.jsx
 // ----------------------------------------------------
 // Golden Art Frames Navbar (no Framer Motion)
@@ -21,8 +20,6 @@ import {
   Settings,
   LogOut,
   ClipboardList,
-  Phone,
-  MapPin,
 } from "lucide-react";
 import api from "../lib/api.js";
 import { getSessionId } from "../lib/session.js";
@@ -98,9 +95,9 @@ export default function Navbar() {
     const active = isActive(path);
     return [
       "relative text-sm font-semibold transition",
-      active ? "text-slate-950" : "text-slate-600 hover:text-slate-950",
+      active ? "text-slate-950" : "text-slate-600 hover:text-[#FF633F] transition-all duration-200 hover:scale-105",
       // Accent underline for active
-      active ? "after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-blue-700 after:content-['']" : "",
+      active ? "after:absolute after:-bottom-2 after:left-0 after:h-0.5 after:w-full after:bg-[#FF633F] after:content-['']" : "",
     ].join(" ");
   };
 
@@ -108,10 +105,7 @@ export default function Navbar() {
     "relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm hover:bg-slate-50 transition";
 
   const pillBtnClass =
-    "inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 transition";
-
-  const primaryBtnClass =
-    "inline-flex items-center justify-center rounded-2xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-900 transition";
+    "group inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-50 transition";
 
   const handleLogout = async () => {
     try {
@@ -170,9 +164,8 @@ export default function Navbar() {
               className="whitespace-nowrap select-none text-center font-extrabold tracking-[0.18em] text-slate-950 sm:text-[16px] md:text-[20px]"
               aria-label="Golden Art Frames"
             >
-              GOLDEN ART FRAMES
+              <img src="/logo.png" alt="Golden Art Frames Logo" className="h-12 w-auto" />
             </Link>
-            <div className="mx-auto mt-1 h-0.5 w-16 bg-blue-700/70 hidden md:block" />
           </div>
 
           {/* Desktop right area */}
@@ -198,7 +191,18 @@ export default function Navbar() {
                 state={{ from: location.pathname }}
                 className={pillBtnClass}
               >
-                Login
+                <span
+                className="
+                  relative after:absolute after:left-0
+                  after:-bottom-1 after:h-0.5
+                  after:w-full after:origin-left
+                  after:scale-x-0 after:bg-[#FF633F]
+                  after:transition-transform after:duration-300
+                  after:ease-out group-hover:after:scale-x-100
+                "
+                >
+                  Login
+                </span>
               </Link>
             ) : (
               <div ref={desktopDropdownRef} className="relative">
@@ -211,7 +215,7 @@ export default function Navbar() {
                   aria-haspopup="menu"
                   aria-expanded={accountOpen}
                 >
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-800 text-white">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#FF633F] text-white">
                     {(me.fullName?.[0] || me.email?.[0] || "U").toUpperCase()}
                   </span>
 
@@ -301,7 +305,7 @@ export default function Navbar() {
                   setAccountOpen((v) => !v);
                   setMobileOpen(false);
                 }}
-                className="relative inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-800 text-white shadow-sm"
+                className="relative inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FF633F] text-white shadow-sm"
                 aria-label={accountOpen ? "Close account menu" : "Open account menu"}
                 aria-haspopup="menu"
                 aria-expanded={accountOpen}
@@ -424,7 +428,7 @@ export default function Navbar() {
               </Link>
 
               {!me && (
-                <Link className="rounded-xl bg-blue-700 px-3 py-2 text-center text-sm font-extrabold text-white hover:bg-blue-900" to="/login">
+                <Link className="rounded-xl bg-[#FF633F] px-3 py-2 text-center text-sm font-extrabold text-white hover:bg-[#E55A38]" to="/login">
                   Login
                 </Link>
               )}

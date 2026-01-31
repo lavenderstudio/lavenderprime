@@ -57,7 +57,7 @@ export default function LoginPage() {
 
   return (
     <Page title="Login">
-      <div className="mx-auto max-w-md rounded-2xl border border-gray-200 bg-linear-to-b from-blue-50 via-white to-white p-6 shadow-sm">
+      <div className="mx-auto max-w-md rounded-2xl border border-gray-200 bg-linear-to-b from-[#FF633F]/5 via-white to-white p-6 shadow-sm">
         <h1 className="text-xl font-semibold text-gray-900">Welcome back</h1>
         <p className="mt-1 text-sm text-gray-600">
           Log in to continue to checkout and view your orders.
@@ -99,7 +99,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full rounded-2xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99]"
+            className="mt-2 w-full rounded-2xl bg-[#FF633F] px-5 py-3 text-sm font-semibold text-white hover:bg-[#FF633F]/90 disabled:cursor-not-allowed disabled:opacity-60 active:scale-[0.99] transition-all duration-300 hover:scale-105"
           >
             {loading ? "Logging in..." : "Log in"}
           </button>

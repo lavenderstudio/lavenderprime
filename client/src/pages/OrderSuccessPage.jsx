@@ -161,7 +161,7 @@ export default function OrderSuccessPage() {
   const badgeCls = (status) => {
     // Uses your ACCENT for the positive state
     if (isPositiveStatus(status)) {
-      return `border-slate-200 bg-gradient-to-b from-blue-50 via-white to-white text-slate-900`;
+      return `border-black bg-gradient-to-b from-[#FF633F]/10 via-white to-white text-slate-900`;
     }
     if (status === "requires_payment") {
       return "border-yellow-200 bg-yellow-50 text-yellow-950";
@@ -182,10 +182,21 @@ export default function OrderSuccessPage() {
           <Link to="/products" className="w-full sm:w-auto">
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-900 shadow-sm hover:bg-slate-50 active:scale-[0.99] sm:w-auto"
+              className="group inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-900 shadow-sm hover:bg-slate-50 active:scale-[0.99] sm:w-auto"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Products
+              <span
+                className="
+                  relative after:absolute after:left-0
+                  after:-bottom-1 after:h-0.5 flex gap-2 items-center
+                  after:w-full after:origin-left
+                  after:scale-x-0 after:bg-[#FF633F]
+                  after:transition-transform after:duration-300
+                  after:ease-out group-hover:after:scale-x-100
+                "
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Products
+              </span>
             </button>
           </Link>
 
@@ -211,7 +222,7 @@ export default function OrderSuccessPage() {
         ) : (
           <>
             {/* Status banner */}
-            <div className={`mt-6 rounded-3xl border p-5 shadow-sm ${badgeCls(order.status)}`}>
+            <div className={`mt-6 rounded-3xl border p-5 shadow-[5px_5px_5px_rgba(0,0,0,0.6)] ${badgeCls(order.status)}`}>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div
@@ -293,7 +304,7 @@ export default function OrderSuccessPage() {
             <div className="mt-6 grid gap-6 lg:grid-cols-12 lg:items-start">
               {/* LEFT: Items */}
               <div className="lg:col-span-8">
-                <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="rounded-3xl border border-black bg-white p-5 shadow-[5px_5px_5px_rgba(0,0,0,0.6)]">
                   <div className="flex items-end justify-between gap-4">
                     <div>
                       <h3 className="text-lg font-extrabold text-slate-900">Order details</h3>
@@ -303,7 +314,7 @@ export default function OrderSuccessPage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 space-y-3">
+                  <div className="mt-5 space-y-3 bg-white">
                     {order.items.map((item, idx) => {
                       const cfg = item.config || {};
                       const thumb = getThumbUrlFromItem(item);
@@ -314,7 +325,7 @@ export default function OrderSuccessPage() {
                       return (
                         <div
                           key={idx}
-                          className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center"
+                          className="flex flex-col gap-3 rounded-2xl border border-black bg-white p-4 sm:flex-row sm:items-center shadow-[5px_5px_5px_rgba(0,0,0,0.6)]"
                         >
                           {/* Thumbnail */}
                           <div className="h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
@@ -414,7 +425,7 @@ export default function OrderSuccessPage() {
 
               {/* RIGHT: Summary (sticky) */}
               <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
-                <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-blue-50 via-white to-white p-5 shadow-sm">
+                <div className="rounded-3xl border border-black bg-linear-to-b from-[#FF633F]/5 via-white to-white p-5 shadow-[5px_5px_5px_rgba(0,0,0,0.6)]">
                   <h3 className="text-lg font-extrabold text-slate-900">Summary</h3>
 
                   <div className="mt-4 space-y-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-800">

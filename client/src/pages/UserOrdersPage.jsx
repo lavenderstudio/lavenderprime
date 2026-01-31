@@ -28,8 +28,8 @@ function statusUi(statusRaw) {
   if (s === "requires_payment" || s === "payment_required") {
     return {
       label: "PAYMENT REQUIRED",
-      wrap: "border-blue-200 bg-blue-50 text-blue-900",
-      dot: "bg-blue-500",
+      wrap: "border-[#FF633F]/90 bg-[#FF633F]/30 text-[#FF633F]",
+      dot: "bg-[#FF633F]/90",
     };
   }
 
@@ -227,18 +227,29 @@ export default function UserOrdersPage() {
                         <Link to={`/order/${o._id}`} className="inline-flex">
                           <button
                             type="button"
-                            className={`rounded-2xl px-4 py-2 text-xs font-extrabold text-white shadow-sm ${ACCENT_BG} ${ACCENT_HOVER} active:scale-[0.99]`}
+                            className={`rounded-2xl px-4 py-2 text-xs font-extrabold text-white shadow-sm ${ACCENT_BG} ${ACCENT_HOVER} active:scale-[0.99] transition-all duration-300  hover:scale-105`}
                           >
-                            View details
+                            View Details
                           </button>
                         </Link>
 
                         <Link to="/products" className="inline-flex">
                           <button
                             type="button"
-                            className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-900 shadow-sm hover:bg-slate-50 active:scale-[0.99]"
+                            className="group rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-900 shadow-sm hover:bg-slate-50 active:scale-[0.99]"
                           >
-                            Shop more
+                            <span
+                              className="
+                                relative after:absolute after:left-0
+                                after:-bottom-1 after:h-0.5
+                                after:w-full after:origin-left
+                                after:scale-x-0 after:bg-[#FF633F]
+                                after:transition-transform after:duration-300
+                                after:ease-out group-hover:after:scale-x-100
+                              "
+                              >
+                              Continue Shopping
+                            </span>
                           </button>
                         </Link>
                       </div>

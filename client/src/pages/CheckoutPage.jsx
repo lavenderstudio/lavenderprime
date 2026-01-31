@@ -332,7 +332,7 @@ export default function CheckoutPage() {
   return (
     <Page title="Checkout">
       <Link to="/cart">
-        <button className="w-full rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 active:scale-[0.99]">
+        <button className="w-full rounded-2xl bg-[#FF633F] px-5 py-3 text-sm font-semibold text-white hover:bg-[#FF633F]/90 active:scale-[0.99] transition-all duration-300 hover:scale-105">
           Back to cart
         </button>
       </Link>
@@ -473,7 +473,7 @@ export default function CheckoutPage() {
                 ${
                   !cart?.items?.length || creating || !!clientSecret
                     ? "cursor-not-allowed bg-slate-100 text-slate-500"
-                    : "bg-blue-700 text-white hover:bg-blue-800"
+                    : "bg-[#FF633F] text-white hover:bg-[#FF633F]/90 transition-all duration-300 hover:scale-105"
                 }`}
             >
               {creating
@@ -500,7 +500,7 @@ export default function CheckoutPage() {
 
         {/* RIGHT: Summary (sticky) */}
         <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
-          <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-blue-50 via-white to-white p-5 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-[#FF633F]/5 via-white to-white p-5 shadow-sm">
             <h3 className="text-lg font-extrabold text-slate-900">Order Summary</h3>
 
             <div className="mt-4 space-y-3">

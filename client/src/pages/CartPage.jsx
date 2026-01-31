@@ -135,14 +135,14 @@ export default function CartPage() {
       {!cart ? (
         <p className="text-slate-600">Loading cart…</p>
       ) : (cart.items || []).length === 0 ? (
-        <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-blue-50 via-white to-white p-10 text-center shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-[#FF633F]/5 via-white to-white p-10 text-center shadow-sm">
           <h2 className="text-2xl font-extrabold text-slate-900">Your cart is empty</h2>
           <p className="mt-2 text-sm font-semibold text-slate-600">
             Start creating premium prints and frames with Golden Art Frames.
           </p>
           <Link
             to="/products"
-            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-blue-700 px-6 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-blue-800 transition active:scale-[0.99]"
+            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-[#FF633F] px-6 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-[#FF633F]/90 transition-all duration-300 hover:scale-105 active:scale-[0.99]"
           >
             Browse Products
           </Link>
@@ -380,7 +380,7 @@ export default function CartPage() {
           </div>
 
           <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
-            <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-blue-50 via-white to-white p-5 shadow-sm">
+            <div className="rounded-3xl border border-slate-200 bg-linear-to-b from-[#FF633F]/5 via-white to-white p-5 shadow-sm">
               <h3 className="text-lg font-extrabold text-slate-900">Order Summary</h3>
 
               <div className="mt-4 space-y-3">
@@ -411,7 +411,7 @@ export default function CartPage() {
                 <button
                   onClick={handleProceedToCheckout}
                   disabled={!cart?.items?.length}
-                  className="mt-5 w-full rounded-2xl bg-blue-700 px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-blue-800 active:scale-[0.99] disabled:opacity-60 transition"
+                  className="mt-5 w-full rounded-2xl bg-[#FF633F] px-5 py-3 text-sm font-extrabold text-white shadow-sm hover:bg-[#FF633F]/90 active:scale-[0.99] disabled:opacity-60 transition-all duration-300 hover:scale-105"
                 >
                   Proceed to Checkout
                 </button>

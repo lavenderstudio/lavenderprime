@@ -345,7 +345,7 @@ export default function AdminOrdersPage() {
                       {o.totals?.grandTotal} {o.totals?.currency}
                     </div>
                     <span className={`mt-1 inline-block rounded-full px-3 py-1 text-xs font-extrabold ${
-                      o.status === "paid" ? "bg-blue-100 text-blue-800" : "bg-emerald-100 text-emerald-800"
+                      o.status === "paid" ? "bg-[#FF633F]/10 text-[#FF633F]" : "bg-emerald-100 text-emerald-800"
                     }`}>
                       {o.status.toUpperCase()}
                     </span>

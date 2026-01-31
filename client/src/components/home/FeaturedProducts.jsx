@@ -19,7 +19,7 @@ function Rating({ value }) {
 function ProductCard({ name, price, imageUrl, rating = 4.7, tag, href }) {
   const navigate = useNavigate();
   return (
-    <div className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <div className="group overflow-hidden rounded-2xl border bg-white shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] transition-all duration-300 hover:-translate-y-1.5">
       <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
         <img
           src={imageUrl}
@@ -58,7 +58,7 @@ function ProductCard({ name, price, imageUrl, rating = 4.7, tag, href }) {
 
 export default function FeaturedProducts({ products }) {
   return (
-    <section className="border-y bg-slate-50 py-12 sm:py-16">
+    <section className="border-b bg-slate-50 py-12 sm:py-16">
       <Container>
         <FadeUp>
           <div className="text-center mx-auto max-w-2xl">

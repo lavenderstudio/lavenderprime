@@ -31,14 +31,14 @@ function StepCard({ icon: Icon, title, text, number }) {
   return (
     <motion.div
       variants={item}
-      className="relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm"
+      className="relative overflow-hidden rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]"
     >
       {/* Step number bubble */}
       <div className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-xl bg-slate-900 text-sm font-extrabold text-white">
         {number}
       </div>
 
-      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-blue-50 ${ACCENT}`}>
+      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-[#FF633F]/15 ${ACCENT}`}>
         <Icon className="h-5 w-5" />
       </div>
 
@@ -50,8 +50,8 @@ function StepCard({ icon: Icon, title, text, number }) {
 
 function InfoCard({ icon: Icon, title, text }) {
   return (
-    <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-sm">
-      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-blue-50 ${ACCENT}`}>
+    <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
+      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-[#FF633F]/15 ${ACCENT}`}>
         <Icon className="h-5 w-5" />
       </div>
       <p className="mt-4 text-base font-extrabold text-slate-900">{title}</p>
@@ -62,7 +62,7 @@ function InfoCard({ icon: Icon, title, text }) {
 
 function FAQ({ q, a }) {
   return (
-    <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-sm">
+    <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
       <p className="text-sm font-extrabold text-slate-900">{q}</p>
       <p className="mt-2 text-sm leading-relaxed text-slate-600">{a}</p>
     </motion.div>
@@ -171,9 +171,9 @@ export default function Delivery() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-linear-to-b from-blue-50 via-white to-white">
-        <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-blue-100/40 blur-3xl" />
-        <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl" />
+      <section className="relative overflow-hidden bg-linear-to-b from-[#FF633F]/10 via-white to-white">
+        <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-[#FF633F]/20 blur-3xl" />
+        <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-[#FF633F]/20 blur-3xl" />
 
         <Container className="py-10 sm:py-14">
           <FadeUp>
@@ -192,15 +192,26 @@ export default function Delivery() {
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/products"
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-105`}
                 >
                   Start Designing <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   to="/contact"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50"
                 >
-                  Contact Us <ArrowRight className="h-4 w-4" />
+                  <span
+                  className="
+                    relative after:absolute after:left-0
+                    after:-bottom-1 after:h-0.5
+                    after:w-full after:origin-left flex items-center gap-2
+                    after:scale-x-0 after:bg-[#FF633F]
+                    after:transition-transform after:duration-300
+                    after:ease-out group-hover:after:scale-x-100
+                  "
+                  >
+                    Contact Us <ArrowRight className="h-4 w-4" />
+                  </span>
                 </Link>
               </div>
             </div>
@@ -238,7 +249,7 @@ export default function Delivery() {
           </Stagger>
 
           <FadeUp>
-            <div className="mt-8 rounded-2xl border bg-slate-50 p-5 text-sm text-slate-700">
+            <div className="mt-8 rounded-2xl border bg-slate-50 p-5 text-sm text-slate-700 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
               <span className="font-extrabold text-slate-900">Pro tip:</span>{" "}
               For the sharpest results, use high-resolution photos and avoid screenshots where possible.
             </div>
@@ -271,7 +282,7 @@ export default function Delivery() {
 
           <FadeUp>
             <div className="mt-8 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                 <p className="text-sm font-extrabold text-slate-900">Before we seal the box</p>
                 <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-600">
                   <li>Print quality check (sharpness, color, alignment)</li>
@@ -280,7 +291,7 @@ export default function Delivery() {
                 </ul>
               </div>
 
-              <div className="rounded-2xl border bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                 <p className="text-sm font-extrabold text-slate-900">When you receive the parcel</p>
                 <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-600">
                   <li>Inspect the outer box before opening</li>
@@ -345,7 +356,7 @@ export default function Delivery() {
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/products"
-                className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
+                className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-105`}
               >
                 Start an Order <ArrowRight className="h-4 w-4" />
               </Link>

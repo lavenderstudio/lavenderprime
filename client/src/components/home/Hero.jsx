@@ -31,7 +31,7 @@ function PromoCard({ title, subtitle, cta, href, imageUrl }) {
   return (
     <Link
       to={href}
-      className="group relative min-h-47.5 overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="group relative min-h-47.5 overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-200 hover:-translate-y-1.5 hover:shadow-md"
     >
       <div className="absolute inset-0">
         <img
@@ -61,7 +61,7 @@ function mod(n, m) {
 
 export default function Hero({
   promos,
-  bgImages = ["./hero/hero-img_converted.avif", "./hero/hero-img-2_converted.avif", "./hero/hero-img-3_converted.avif", "./hero/hero-img.avif"],
+  bgImages = ["./hero/hero-img_converted.avif", "./hero/hero-img-2_converted.avif", "./hero/hero-img-3_converted.avif"],
   autoPlay = true,
   intervalMs = 4500,
 }) {
@@ -86,7 +86,7 @@ export default function Hero({
 
   return (
     <section
-      className="relative overflow-hidden"
+      className="relative overflow-hidden rounded-b-[44px]"
       onFocusCapture={() => setPaused(true)} // ✅ pause when interacting
       onBlurCapture={() => setPaused(false)}
     >
@@ -114,21 +114,21 @@ export default function Hero({
       <Container className="relative z-10 py-12 sm:py-16" >
         <div className="grid items-center gap-10 lg:grid-cols-2">
           {/* White card with shadow */}
-          <div className="rounded-3xl bg-white/95 p-6 shadow-xl ring-1 ring-black/5 backdrop-blur sm:p-8">
+          <div className="rounded-3xl bg-white/15 p-6 shadow-[7px_10px_5px_0_rgba(0,0,0,0.65)] ring-1 ring-black/5 backdrop-blur sm:p-8">
             <div className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-bold text-slate-700 shadow-sm">
               <Sparkles className={`h-4 w-4 ${ACCENT}`} />
               Premium prints • Perfect frames • Delivered fast
             </div>
 
             <FadeUp>
-              <h1 className="mt-4 text-2xl font-extrabold leading-tight text-slate-900 sm:text-3xl lg:text-4xl">
+              <h1 className="mt-4 text-2xl font-extrabold leading-tight text-black sm:text-3xl lg:text-4xl">
                 Luxury framing for modern living.{" "}
-                <span className={`${ACCENT} underline decoration-blue-500/60 underline-offset-8`}>
+                <span className={`${ACCENT} underline decoration-[#FF633F]/35 underline-offset-8`}>
                   Crafted in UAE.
                 </span>
               </h1>
 
-              <p className="mt-4 max-w-xl text-sm leading-relaxed text-slate-600 sm:text-base">
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-black sm:text-base">
                 Upload a photo, choose the size, frame and finish — we print, frame and deliver to your door.
               </p>
             </FadeUp>
@@ -137,7 +137,7 @@ export default function Hero({
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link
                   to="/products"
-                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition sm:w-auto`}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-105 sm:w-auto`}
                 >
                   Start Designing
                 </Link>
@@ -146,9 +146,21 @@ export default function Hero({
               <motion.div whileTap={{ scale: 0.98 }}>
                 <Link
                   to="/contact"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50 sm:w-auto"
+                  className="group inline-flex w-full items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 hover:bg-slate-50 hover:scale-105 transition-all duration-200 sm:w-auto"
                 >
-                  Contact Us
+                  <span
+                  className="
+                    relative after:absolute after:left-0
+                    after:-bottom-1 after:h-0.5
+                    after:w-full after:origin-left
+                    after:scale-x-0 after:bg-[#FF633F]
+                    after:transition-transform after:duration-300
+                    after:ease-out group-hover:after:scale-x-100
+                  "
+                  >
+                    Contact Us
+                  </span>
+                  
                 </Link>
               </motion.div>
             </div>

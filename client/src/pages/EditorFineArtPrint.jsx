@@ -130,7 +130,7 @@ export default function EditorFineArtPrint() {
               className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.99]
                 ${
                   active
-                    ? "bg-blue-700 text-white shadow-sm"
+                    ? "bg-[#FF633F] text-white shadow-sm"
                     : "bg-white text-slate-900 border border-slate-200 hover:bg-slate-50 shadow-sm"
                 }`}
             >
@@ -156,7 +156,7 @@ export default function EditorFineArtPrint() {
               className={`rounded-2xl p-4 text-center transition active:scale-[0.99]
                 ${
                   active
-                    ? "ring-2 ring-blue-600/30 bg-blue-50 border border-blue-100 shadow-sm"
+                    ? "ring-2 ring-[#FF633F]/60 bg-[#FF633F]/10 border border-[#FF633F]/20 shadow-sm"
                     : "border border-slate-200 bg-white hover:bg-slate-50 shadow-sm"
                 }`}
             >
@@ -198,7 +198,7 @@ export default function EditorFineArtPrint() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-12">
           {/* LEFT: Editor */}
-          <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-blue-50 via-white to-slate-50 shadow-sm">
+          <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-[#FF633F]/5 via-white to-slate-50 shadow-sm">
             <div className="p-6">
               {!originalUrl ? (
                 <div className="flex flex-col items-center justify-center">
@@ -252,7 +252,7 @@ export default function EditorFineArtPrint() {
                       </div>
 
                       {/* Accent status dot */}
-                      <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-blue-700 shadow" />
+                      <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#FF633F] shadow" />
                     </div>
                   </button>
 
@@ -319,7 +319,7 @@ export default function EditorFineArtPrint() {
             <div className="mt-6 border-t border-slate-100 pt-6">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-extrabold text-slate-900">
-                  Material: <span className="text-blue-700 font-bold">{material}</span>
+                  Material: <span className="text-[#FF633F] font-bold">{material}</span>
                 </label>
 
                 <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-bold text-slate-900">
@@ -354,7 +354,7 @@ export default function EditorFineArtPrint() {
                 ${
                   !originalUrl || !quote || !selectedRatio
                     ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-500"
-                    : "border border-blue-900 bg-blue-700 text-white hover:bg-blue-900"
+                    : "border border-[#FF633F] bg-[#FF633F] text-white hover:bg-[#FF633F]/90 hover:scale-105 transition-all duration-300"
                 }`}
             >
               Add to Cart

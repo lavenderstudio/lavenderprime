@@ -387,7 +387,7 @@ export default function EditorCollage() {
               className={`group rounded-2xl p-2 text-center transition active:scale-[0.99]
                 ${
                   active
-                    ? "ring-2 ring-blue-500/60 bg-blue-50 border border-blue-200"
+                    ? "ring-2 ring-[#FF633F]/60 bg-[#FF633F]/10 border border-[#FF633F]/20"
                     : "border border-slate-200 bg-white hover:bg-slate-50"
                 }`}
             >
@@ -416,7 +416,7 @@ export default function EditorCollage() {
               type="button"
               onClick={() => onChange(c)}
               className={`flex-1 rounded-full px-4 py-2 text-sm font-extrabold transition
-                ${active ? "bg-blue-700 text-white shadow" : "text-slate-600 hover:text-slate-900"}`}
+                ${active ? "bg-[#FF633F] text-white shadow" : "text-slate-600 hover:text-slate-900"}`}
             >
               {c}
             </button>
@@ -468,7 +468,7 @@ export default function EditorCollage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-blue-50 px-3 py-2 text-sm font-extrabold text-slate-900">
+              <div className="rounded-2xl border border-slate-200 bg-[#FF633F]/10 px-3 py-2 text-sm font-extrabold text-slate-900">
                 {quote ? `${quote.total} ${quote.currency}` : "—"}
               </div>
             </div>
@@ -544,7 +544,7 @@ export default function EditorCollage() {
                   ${
                     !quote || !hasAllUploads
                       ? "cursor-not-allowed bg-slate-100 text-slate-500 border border-slate-200"
-                      : `${ACCENT_BG} ${ACCENT_HOVER} text-white`
+                      : `${ACCENT_BG} ${ACCENT_HOVER} text-white duration-300 hover:scale-105 transition-all`
                   }`}
               >
                 Add to Cart

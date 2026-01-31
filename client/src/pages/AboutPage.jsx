@@ -25,8 +25,8 @@ import { Container, ACCENT, ACCENT_BG, ACCENT_HOVER } from "../components/home/u
 
 function ValueCard({ icon: Icon, title, text }) {
   return (
-    <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-sm">
-      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-blue-50 ${ACCENT}`}>
+    <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
+      <div className={`grid h-11 w-11 place-items-center rounded-xl bg-[#FF633F]/15 ${ACCENT}`}>
         <Icon className="h-5 w-5" />
       </div>
       <p className="mt-4 text-base font-extrabold text-slate-900">{title}</p>
@@ -37,7 +37,7 @@ function ValueCard({ icon: Icon, title, text }) {
 
 function FAQ({ q, a }) {
   return (
-    <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-sm">
+    <motion.div variants={item} className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
       <p className="text-sm font-extrabold text-slate-900">{q}</p>
       <p className="mt-2 text-sm leading-relaxed text-slate-600">{a}</p>
     </motion.div>
@@ -110,9 +110,9 @@ export default function About() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-linear-to-b from-blue-50 via-white to-white">
-        <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-blue-100/40 blur-3xl" />
-        <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-blue-200/40 blur-3xl" />
+      <section className="relative overflow-hidden bg-linear-to-b from-[#FF633F]/10 via-white to-white">
+        <div className="absolute -top-24 right-0 h-64 w-64 rounded-full bg-[#FF633F]/5 blur-3xl" />
+        <div className="absolute -bottom-24 left-0 h-64 w-64 rounded-full bg-[#FF633F]/5 blur-3xl" />
 
         <Container className="py-10 sm:py-14">
           <FadeUp>
@@ -135,15 +135,26 @@ export default function About() {
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/products"
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-105 sm:w-auto`}
                 >
                   Start Designing <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   to="/delivery"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:scale-105 hover:bg-slate-50"
                 >
-                  How Delivery Works <ArrowRight className="h-4 w-4" />
+                  <span
+                  className="
+                    relative after:absolute after:left-0
+                    after:-bottom-1 after:h-0.5
+                    after:w-full after:origin-left
+                    after:scale-x-0 after:bg-[#FF633F]
+                    after:transition-transform after:duration-300
+                    after:ease-out group-hover:after:scale-x-100
+                  "
+                  >
+                    How Delivery Works
+                  </span>
                 </Link>
               </div>
             </div>
@@ -172,9 +183,9 @@ export default function About() {
                   process based on customer feedback.
                 </p>
 
-                <div className="mt-6 rounded-2xl border bg-slate-50 p-5 text-sm text-slate-700">
+                <div className="mt-6 rounded-2xl border bg-slate-50 p-5 text-sm text-slate-700 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                   <span className="font-extrabold text-slate-900">What we make:</span>{" "}
-                  prints, posters, canvas prints, and framed wall art — made to order at Golden Art Frames.
+                  Prints, Posters, Canvas Prints, & Framed Wall Art — Made to order at Golden Art Frames.
                 </div>
               </div>
             </FadeUp>
@@ -182,7 +193,7 @@ export default function About() {
             {/* Visual block */}
             <FadeUp>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm">
+                <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                   <img
                     src="./about/about1_converted.avif"
                     alt="Golden Art Frames - framed wall art example"
@@ -190,7 +201,7 @@ export default function About() {
                     loading="lazy"
                   />
                 </div>
-                <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm sm:mt-10">
+                <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] sm:mt-10">
                   <img
                     src="./about/about2_converted.avif"
                     alt="Golden Art Frames - modern frames in interior"
@@ -247,27 +258,27 @@ export default function About() {
           </FadeUp>
 
           <FadeUp>
-            <div className="mt-8 rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+            <div className="mt-8 rounded-3xl border bg-white p-6 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] sm:p-8">
               <ol className="grid gap-4 md:grid-cols-2">
-                <li className="rounded-2xl border bg-slate-50 p-5">
+                <li className="rounded-2xl border bg-slate-50 p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                   <p className="text-sm font-extrabold text-slate-900">1) Design your order</p>
                   <p className="mt-2 text-sm text-slate-600">
                     Upload your photo/artwork and choose size, frame style, and finish on Golden Art Frames.
                   </p>
                 </li>
-                <li className="rounded-2xl border bg-slate-50 p-5">
+                <li className="rounded-2xl border bg-slate-50 p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                   <p className="text-sm font-extrabold text-slate-900">2) Print & quality check</p>
                   <p className="mt-2 text-sm text-slate-600">
                     Golden Art Frames checks sharpness, colours, alignment, and cleanliness before framing.
                   </p>
                 </li>
-                <li className="rounded-2xl border bg-slate-50 p-5">
+                <li className="rounded-2xl border bg-slate-50 p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                   <p className="text-sm font-extrabold text-slate-900">3) Frame & finish</p>
                   <p className="mt-2 text-sm text-slate-600">
                     We mount (optional), frame your print, and confirm fit before packaging at Golden Art Frames.
                   </p>
                 </li>
-                <li className="rounded-2xl border bg-slate-50 p-5">
+                <li className="rounded-2xl border bg-slate-50 p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                   <p className="text-sm font-extrabold text-slate-900">4) Package & deliver</p>
                   <p className="mt-2 text-sm text-slate-600">
                     Corner protection, rigid boxing, then doorstep delivery. See the full delivery page for details.
@@ -278,13 +289,24 @@ export default function About() {
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link
                   to="/delivery"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-50"
+                  className="group inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 transition-all duration-300 hover:scale-105 hover:bg-slate-50"
                 >
-                  Delivery & Packaging <ArrowRight className="h-4 w-4" />
+                  <span
+                  className="
+                    relative after:absolute after:left-0
+                    after:-bottom-1 after:h-0.5
+                    after:w-full after:origin-left
+                    after:scale-x-0 after:bg-[#FF633F]
+                    after:transition-transform after:duration-300
+                    after:ease-out group-hover:after:scale-x-100 flex items-center gap-2
+                  "
+                  >
+                    Delivery & Packaging <ArrowRight className="h-4 w-4" />
+                  </span>
                 </Link>
                 <Link
                   to="/products"
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-105`}
                 >
                   Shop Golden Art Frames <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -318,7 +340,7 @@ export default function About() {
           </Stagger>
 
           <FadeUp>
-            <div className="mt-10 rounded-3xl border bg-linear-to-r from-blue-50 via-white to-white-50 p-6 shadow-sm sm:p-8">
+            <div className="mt-10 rounded-3xl border bg-linear-to-r from-[#FF633F]/15 via-white to-white-50 p-6 shadow-sm sm:p-8">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <p className={`text-sm font-extrabold ${ACCENT}`}>Ready to create?</p>
@@ -331,7 +353,7 @@ export default function About() {
                 </div>
                 <Link
                   to="/products"
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition`}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-105`}
                 >
                   Start Designing <ArrowRight className="h-4 w-4" />
                 </Link>

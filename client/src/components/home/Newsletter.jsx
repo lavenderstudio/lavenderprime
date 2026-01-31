@@ -34,7 +34,7 @@ export default function Newsletter() {
     <section className="border-t bg-white py-12">
       <Container>
         <FadeUp>
-          <div className="rounded-3xl border bg-linear-to-r from-blue-100 via-white to-white p-6 shadow-sm sm:p-10">
+          <div className="rounded-3xl border bg-linear-to-r from-[#FF633F]/25 via-white to-white p-6 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] sm:p-10">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className={`text-sm font-extrabold ${ACCENT}`}>Newsletter</p>
@@ -67,7 +67,7 @@ export default function Newsletter() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`h-12 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 text-sm font-extrabold text-white transition disabled:opacity-60`}
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-105 sm:w-auto`}
                 >
                   {loading ? "Subscribing..." : "Subscribe"}
                 </button>

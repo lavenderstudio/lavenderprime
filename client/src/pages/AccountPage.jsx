@@ -151,7 +151,7 @@ export default function AccountPage() {
             </div>
           )}
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 bg-linear-to-b from-blue-50 via-white to-white shadow-sm">
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 bg-linear-to-b from-[#FF633F]/10 via-white to-white shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900">Profile</h2>
             <p className="mt-1 text-sm text-gray-600">
               Update your name, phone number, and saved address for faster checkout.
@@ -273,7 +273,7 @@ export default function AccountPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full rounded-2xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-2xl bg-[#FF633F] px-5 py-3 text-sm font-semibold text-white hover:bg-[#FF633F]/90 transition-all duration-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {saving ? "Saving…" : "Save changes"}
               </button>

@@ -6,7 +6,7 @@ import { FadeUp } from "../motion/MotionWrappers.jsx";
 function SectionHeader({ eyebrow, title, subtitle }) {
   return (
     <div className="max-w-2xl">
-      <p className="text-sm font-semibold tracking-wide uppercase text-blue-600">
+      <p className="text-sm font-semibold tracking-wide uppercase text-[#FF633F]">
         {eyebrow}
       </p>
       <h2 className="mt-2 text-2xl font-extrabold text-slate-900 sm:text-3xl">
@@ -34,13 +34,13 @@ export default function AboutSection() {
             </FadeUp>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <Link to="/about" className="rounded-2xl border bg-white p-5 shadow-sm cursor-pointer transition hover:-translate-y-2 hover:shadow-md">
+              <Link to="/about" className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] cursor-pointer transition hover:-translate-y-2 ">
                 <p className="font-extrabold text-slate-900">Museum-style finish</p>
                 <p className="mt-1 text-sm text-slate-600">
                   Clean cuts, sharp colors, and premium paper.
                 </p>
               </Link>
-              <Link to="/delivery" className="rounded-2xl border bg-white p-5 shadow-sm cursor-pointer transition hover:-translate-y-2 hover:shadow-md">
+              <Link to="/delivery" className="rounded-2xl border bg-white p-5 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] cursor-pointer transition hover:-translate-y-2">
                 <p className="font-extrabold text-slate-900">Safe delivery</p>
                 <p className="mt-1 text-sm text-slate-600">
                   Corner protection + secure packaging.
@@ -51,13 +51,24 @@ export default function AboutSection() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/about"
-                className="inline-flex items-center justify-center rounded-xl border bg-white px-5 py-3 text-sm font-bold text-slate-900 hover:bg-slate-50"
+                className="group inline-flex items-center justify-center rounded-xl border hover:scale-105 transition-all duration-200 bg-white px-5 py-3 text-sm font-bold text-slate-900 hover:bg-slate-50"
               >
-                Learn more
+                <span
+                className="
+                  relative after:absolute after:left-0
+                  after:-bottom-1 after:h-0.5
+                  after:w-full after:origin-left
+                  after:scale-x-0 after:bg-[#FF633F]
+                  after:transition-transform after:duration-300
+                  after:ease-out group-hover:after:scale-x-100
+                "
+                >
+                  Learn More
+                </span>
               </Link>
               <Link
                 to="/products"
-                className={`inline-flex items-center justify-center rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white`}
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-bold text-white transition-all duration-300 hover:scale-105 sm:w-auto`}
               >
                 Start Designing
               </Link>
@@ -66,7 +77,7 @@ export default function AboutSection() {
 
           <div className="order-1 lg:order-2">
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm">
+              <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)]">
                 <img
                   src="./about/about1_converted.avif"
                   alt="Frames"
@@ -74,7 +85,7 @@ export default function AboutSection() {
                   loading="lazy"
                 />
               </div>
-              <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-sm sm:mt-10">
+              <div className="aspect-4/5 overflow-hidden rounded-3xl border bg-slate-100 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] sm:mt-10">
                 <img
                   src="./about/about2_converted.avif"
                   alt="Wall art"

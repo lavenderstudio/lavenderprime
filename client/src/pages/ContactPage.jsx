@@ -72,7 +72,7 @@ ${form.remarks || "-"}
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-linear-to-b from-blue-50 via-white to-white">
+      <section className="relative overflow-hidden bg-linear-to-b from-[#FF633F]/10 via-white to-white">
         <Container className="py-10 sm:py-14">
           <p className={`text-sm font-semibold tracking-wide uppercase ${ACCENT}`}>
             Contact Golden Art Frames
@@ -92,7 +92,7 @@ ${form.remarks || "-"}
         <Container>
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
             {/* Left */}
-            <div className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-3xl border h-150 bg-white p-6 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] sm:p-8">
               <p className={`text-sm font-semibold tracking-wide uppercase ${ACCENT}`}>Contact</p>
               <h2 className="mt-2 text-2xl font-extrabold">Say hello</h2>
               <p className="mt-2 text-sm text-slate-600">
@@ -152,7 +152,7 @@ ${form.remarks || "-"}
             </div>
 
             {/* Right */}
-            <div className="rounded-3xl border bg-white p-6 shadow-sm sm:p-8">
+            <div className="rounded-3xl border bg-white p-6 shadow-[5px_5px_5px_0_rgba(0,0,0,0.6)] sm:p-8">
               <p className={`text-sm font-semibold tracking-wide uppercase ${ACCENT}`}>Enquiry</p>
               <h2 className="mt-2 text-2xl font-extrabold">Request a call back</h2>
               <p className="mt-2 text-sm text-slate-600">
@@ -264,16 +264,27 @@ ${form.remarks || "-"}
                 <div className="pt-2 flex flex-col gap-3 sm:flex-row">
                   <button
                     type="submit"
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-6 py-3 text-sm font-extrabold text-white transition`}
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${ACCENT_BG} ${ACCENT_HOVER} px-6 py-3 text-sm font-extrabold text-white transition-all duration-300 hover:scale-105`}
                   >
                     Send via WhatsApp <ArrowRight className="h-4 w-4" />
                   </button>
 
                   <Link
                     to="/delivery"
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-6 py-3 text-sm font-extrabold hover:bg-slate-50"
+                    className="group inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-6 py-3 text-sm font-extrabold hover:bg-slate-50"
                   >
-                    How delivery works <ArrowRight className="h-4 w-4" />
+                    <span
+                    className="
+                      relative after:absolute after:left-0
+                      after:-bottom-1 after:h-0.5
+                      after:w-full after:origin-left flex gap-2 items-center
+                      after:scale-x-0 after:bg-[#FF633F]
+                      after:transition-transform after:duration-300
+                      after:ease-out group-hover:after:scale-x-100
+                    "
+                    >
+                      How delivery works <ArrowRight className="h-4 w-4" />
+                    </span>
                   </Link>
                 </div>
 
