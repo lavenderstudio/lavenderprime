@@ -30,12 +30,12 @@ function Stepper({ step, totalSteps = 3 }) {
       <div className="flex items-center gap-2">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold ${
-            step === 1 ? "border-blue-500 text-blue-700" : "border-gray-300 text-gray-600"
+            step === 1 ? "border-[#FF633F] text-[#FF633F]" : "border-gray-300 text-gray-600"
           }`}
         >
           1
         </div>
-        <span className={step === 1 ? "font-semibold text-blue-600" : "text-gray-600"}>
+        <span className={step === 1 ? "font-semibold text-[#FF633F]" : "text-gray-600"}>
           {step1Label}
         </span>
       </div>
@@ -45,12 +45,12 @@ function Stepper({ step, totalSteps = 3 }) {
       <div className="flex items-center gap-2">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold ${
-            step === 2 ? "border-blue-500 text-blue-700" : "border-gray-300 text-gray-600"
+            step === 2 ? "border-[#FF633F] text-[#FF633F]" : "border-gray-300 text-gray-600"
           }`}
         >
           2
         </div>
-        <span className={step === 2 ? "font-semibold text-blue-600" : "text-gray-600"}>
+        <span className={step === 2 ? "font-semibold text-[#FF633F]" : "text-gray-600"}>
           {step2Label}
         </span>
       </div>
@@ -62,12 +62,12 @@ function Stepper({ step, totalSteps = 3 }) {
           <div className="flex items-center gap-2">
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold ${
-                step === 3 ? "border-blue-500 text-blue-700" : "border-gray-300 text-gray-600"
+                step === 3 ? "border-[#FF633F] text-[#FF633F]" : "border-gray-300 text-gray-600"
               }`}
             >
               3
             </div>
-            <span className={step === 3 ? "font-semibold text-blue-600" : "text-gray-600"}>
+            <span className={step === 3 ? "font-semibold text-[#FF633F]" : "text-gray-600"}>
               {step3Label}
             </span>
           </div>
@@ -83,7 +83,7 @@ function RatioCard({ ratio, selected, onClick }) {
       type="button"
       onClick={onClick}
       className={`group flex flex-col items-center justify-center rounded-2xl border p-3 transition active:scale-[0.99]
-        ${selected ? "border-blue-400 bg-blue-100" : "border-gray-200 bg-white hover:bg-gray-50"}`}
+        ${selected ? "border-[#FF633F] bg-[#FF633F]/10" : "border-gray-200 bg-white hover:bg-gray-50"}`}
     >
       <div className="flex h-16 w-20 items-center justify-center rounded-xl">
         <div
@@ -97,7 +97,7 @@ function RatioCard({ ratio, selected, onClick }) {
 
       <span
         className={`mt-2 rounded-full px-3 py-1 text-xs font-semibold ${
-          selected ? "bg-blue-400 text-white" : "bg-gray-100 text-gray-700"
+          selected ? "bg-[#FF633F] text-white" : "bg-gray-100 text-gray-700"
         }`}
       >
         {ratio.label}
@@ -295,7 +295,7 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="rounded-2xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800 active:scale-[0.99]"
+                  className="rounded-2xl bg-[#FF633F] px-5 py-3 text-sm font-semibold text-white hover:bg-[#FF633F]/90 active:scale-[0.99]"
                 >
                   Next →
                 </button>
@@ -311,7 +311,7 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
                 <p className="mt-1 text-sm text-gray-700">{selectedRatio.label} (locked crop)</p>
 
                 <div className="mt-4 space-y-3">
-                  <input type="file" accept="image/*" onChange={onPickFile} className="rounded-full bg-blue-500 px-3 py-2 text-sm font-semibold text-white inset-ring inset-ring-white/5 hover:bg-blue-600" />
+                  <input type="file" accept="image/*" onChange={onPickFile} className="rounded-full bg-[#FF633F] px-3 py-2 text-sm font-semibold text-white inset-ring inset-ring-white/5 hover:bg-[#FF633F]/90" />
 
                   {localSrc && (
                     <div className="relative h-72 w-full overflow-hidden rounded-2xl border bg-black">
