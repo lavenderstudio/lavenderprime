@@ -106,7 +106,6 @@ export default function MultiUploadWizardModal({ isOpen, onClose, onComplete }) 
   };
 
   const handleClose = () => {
-    // cleanup
     selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
     setSelectedFiles([]);
     setStep(1);
