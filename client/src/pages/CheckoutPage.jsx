@@ -298,6 +298,12 @@ export default function CheckoutPage() {
   // This is just for display before the order is created.
   // Final delivery comes from backend (orderTotals.shipping).
   const estimatedDelivery = useMemo(() => {
+    // ✅ Check for free shipping products
+    const hasFreeShipping = cart?.items?.some((it) => 
+        it.productSlug === "print-and-frame" || it.productSlug === "wedding-frame"
+    );
+    if (hasFreeShipping) return 0;
+
     const c = String(shippingAddress?.country || "").trim().toLowerCase();
 
     const isUAE =
@@ -306,7 +312,7 @@ export default function CheckoutPage() {
       c === "u.a.e"
 
     return isUAE ? 35 : 100;
-  }, [shippingAddress?.country]);
+  }, [shippingAddress?.country, cart?.items]);
 
   // ✅ Before checkout: show estimate. After checkout: show backend-confirmed delivery.
   const deliveryToShow =

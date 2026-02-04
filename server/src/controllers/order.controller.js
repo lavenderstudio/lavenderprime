@@ -20,7 +20,13 @@ async function getNextOrderNumber() {
   return counter.seq;
 }
 
-function calcShippingFee({ country, currency }) {
+function calcShippingFee({ country, currency, items = [] }) {
+  // ✅ Check for free shipping products
+  const hasFreeShipping = items.some((it) => 
+      it.productSlug === "print-and-frame" || it.productSlug === "wedding-frame"
+  );
+  if (hasFreeShipping) return 0;
+
   const c = String(country || "").trim().toLowerCase();
   const cur = String(currency || "AED").trim().toUpperCase();
 
@@ -97,6 +103,7 @@ export const checkout = async (req, res) => {
     const shipping = calcShippingFee({
       country: shippingAddress.country,
       currency,
+      items: cart.items, // ✅ Pass items for free shipping check
     });
 
     const tax = 0;
