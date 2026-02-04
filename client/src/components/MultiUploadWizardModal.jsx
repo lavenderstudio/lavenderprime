@@ -125,9 +125,6 @@ export default function MultiUploadWizardModal({ isOpen, onClose, onComplete }) 
           <h2 className="text-xl font-extrabold text-slate-900">
             {step === 1 ? "Upload Photos" : `Review (${selectedFiles.length})`}
           </h2>
-          <button onClick={handleClose} className="p-2 rounded-full hover:bg-slate-100 transition">
-            ✕
-          </button>
         </div>
 
         {/* Content */}
