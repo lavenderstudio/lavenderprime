@@ -12,6 +12,7 @@ import { ACCENT, ACCENT_BG, ACCENT_HOVER } from "../components/home/ui.jsx";
 
 const PRODUCTS = [
   { id: "print", name: "Print", image: "/products/print_converted.avif", href: "/editor/print" },
+  { id: "multiple-prints", name: "Multiple Prints", image: "/products/print_converted.avif", href: "/editor/multiple-prints" },
   { id: "print-frame", name: "Print & Frame", image: "/products/printandframe_converted.avif", href: "/editor/print-frame" },
   { id: "canvas", name: "Canvas", image: "/products/canvas_converted.avif", href: "/editor/canvas" },
   { id: "mini-frames", name: "Mini Frames", image: "/products/canvas_converted.avif", href: "/editor/mini-frames" },

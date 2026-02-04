@@ -214,6 +214,41 @@ export default function CartPage() {
                             );
                           })}
                         </div>
+                      ) : it.productSlug === "multiple-prints" && isMultiAssets(assets) ? (
+                        /* ✅ MULTIPLE-PRINTS: render stack */
+                        <div className="relative flex items-center justify-center h-64 w-full isolate">
+                            {assets.items.slice(0, 3).reverse().map((a, idx, arr) => {
+                                // Stack logic: 3 items max shown
+                                const reverseIdx = arr.length - 1 - idx; // 0 (top) to N
+                                const url = a?.originalUrl || a?.previewUrl || "";
+                                
+                                // Tighter offsets
+                                const yOffset = reverseIdx * -5; 
+                                const xOffset = reverseIdx * 5;
+                                const rotate = reverseIdx % 2 === 0 ? reverseIdx * 3 : reverseIdx * -3;
+                                const scale = 1 - (reverseIdx * 0.05); // slight shrink for items behind
+                                
+                                return (
+                                    <div 
+                                        key={idx}
+                                        className="absolute w-44 shadow-xl border-[3px] border-white bg-white transition hover:scale-105 hover:z-20 rounded-sm overflow-hidden"
+                                        style={{
+                                            transform: `translate(${xOffset}px, ${yOffset}px) rotate(${rotate}deg) scale(${scale})`,
+                                            zIndex: idx,
+                                            maxWidth: "90%",
+                                            maxHeight: "90%"
+                                        }}
+                                    >
+                                        <img src={url} alt="" className="w-full h-auto object-cover block" />
+                                    </div>
+                                )
+                            })}
+                            {assets.items.length > 3 && (
+                                <div className="absolute bottom-2 right-4 bg-slate-900/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full z-20 shadow-sm border border-white/20">
+                                    +{assets.items.length - 3} photos
+                                </div>
+                            )}
+                        </div>
                       ) : (
                         /* ✅ ALL OTHER PRODUCTS: single preview */
                         <>
