@@ -112,36 +112,6 @@ export default function Home() {
     []
   );
 
-  const blogs = useMemo(
-    () => [
-      {
-        title: "How to choose the right frame size",
-        date: "Dec 2025 • Guides",
-        excerpt:
-          "A quick guide for picking frame sizes, mounts, and orientations for your wall space.",
-        imageUrl:
-          "./blog/blog1_converted.avif",
-      },
-      {
-        title: "Canvas vs poster: what’s best for you?",
-        date: "Dec 2025 • Comparison",
-        excerpt:
-          "We break down durability, finish, and style to help you choose confidently.",
-        imageUrl:
-          "./blog/blog2_converted.avif",
-      },
-      {
-        title: "How we pack frames for safe delivery",
-        date: "Dec 2025 • Shipping",
-        excerpt:
-          "Behind the scenes: corner protection, wrap layers, and courier handling tips.",
-        imageUrl:
-          "./blog/blog3_converted.avif",
-      },
-    ],
-    []
-  );
-
   return (
     <div className="min-h-screen bg-white text-slate-900">
 
@@ -151,7 +121,7 @@ export default function Home() {
       <AboutSection />
 
       <Testimonials testimonials={testimonials} />
-      <BlogPreview blogs={blogs} />
+      <BlogPreview />
 
       <Newsletter />
     </div>
