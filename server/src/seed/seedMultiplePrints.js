@@ -69,8 +69,8 @@ async function run() {
         frames: [],
         mats: [],
         materials: [
-          { name: "Matte", price: 0 },
-          { name: "Glossy", price: 0 },
+          { name: "Premium Luster", price: 0 },
+          { name: "Premium Glossy", price: 0 },
         ],
         frameColors: [],
       },

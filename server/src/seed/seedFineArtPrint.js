@@ -45,7 +45,7 @@ async function run() {
         // NEW: Material options (names MUST match your UI strings)
         materials: [
           { name: "Fine Art", price: 0 },
-          { name: "Glossy", price: 0 },
+          { name: "Premium Glossy", price: 0 },
         ],
 
         // keep for later

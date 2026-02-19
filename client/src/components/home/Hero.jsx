@@ -61,7 +61,7 @@ function mod(n, m) {
 
 export default function Hero({
   promos,
-  bgImages = ["./hero/hero-img_converted.avif", "./hero/hero-img-2_converted.avif", "./hero/hero-img-3_converted.avif"],
+  bgImages = ["./hero/hero-1.avif", "./hero/hero-2.avif", "./hero/hero-3.avif", "./hero/hero-4.avif"],
   autoPlay = true,
   intervalMs = 4500,
 }) {
@@ -106,7 +106,6 @@ export default function Hero({
         </AnimatePresence>
 
         {/* Overlay for readability */}
-        <div className="absolute inset-0 bg-black/40" />
         <div className="absolute inset-0 bg-linear-to-b from-black/35 via-black/25 to-black/50" />
       </div>
 
@@ -114,7 +113,7 @@ export default function Hero({
       <Container className="relative z-10 py-12 sm:py-16" >
         <div className="grid items-center gap-10 lg:grid-cols-2">
           {/* White card with shadow */}
-          <div className="rounded-3xl bg-white/15 p-6 shadow-[7px_10px_5px_0_rgba(0,0,0,0.65)] ring-1 ring-black/5 backdrop-blur sm:p-8">
+          <div className="rounded-3xl p-6 sm:p-8">
             <div className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs font-bold text-slate-700 shadow-sm">
               <Sparkles className={`h-4 w-4 ${ACCENT}`} />
               Premium prints • Perfect frames • Delivered fast
