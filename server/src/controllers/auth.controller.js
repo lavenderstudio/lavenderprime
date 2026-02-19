@@ -5,11 +5,15 @@
 // - login: validate credentials and issue JWT cookie
 // - me: return current logged-in user
 // - logout: clear cookie
+// - forgotPassword: generate reset token and email link
+// - resetPassword: validate token and set new password
 // ----------------------------------------------------
 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import User from "../models/User.js";
+import { sendPasswordResetEmail } from "../utils/brevoMailer.js";
 
 // Create JWT token
 function signToken(user) {
@@ -111,6 +115,70 @@ export async function logout(req, res) {
     });
 
     return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+}
+
+// ─── Forgot Password ──────────────────────────────────────────────────────────
+export async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    // Always respond with success to prevent email enumeration
+    if (!user) {
+      return res.json({ ok: true, message: "If that email exists, a reset link has been sent." });
+    }
+
+    // Generate a secure random token
+    const plainToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(plainToken).digest("hex");
+
+    user.resetToken = hashedToken;
+    user.resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    const clientUrl = process.env.FORGOT_CLIENT_URL || "http://localhost:5173";
+    const resetLink = `${clientUrl}/reset-password?token=${plainToken}`;
+
+    await sendPasswordResetEmail(user.email, resetLink);
+
+    return res.json({ ok: true, message: "If that email exists, a reset link has been sent." });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+}
+
+// ─── Reset Password ───────────────────────────────────────────────────────────
+export async function resetPassword(req, res) {
+  try {
+    const { token, password } = req.body;
+    if (!token) return res.status(400).json({ message: "Reset token is required" });
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: "Password must be at least 8 characters" });
+    }
+
+    // Hash the incoming plain token to compare with DB
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      resetToken: hashedToken,
+      resetTokenExpiry: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Reset token is invalid or has expired" });
+    }
+
+    user.passwordHash = await bcrypt.hash(password, 12);
+    user.resetToken = null;
+    user.resetTokenExpiry = null;
+    await user.save();
+
+    return res.json({ ok: true, message: "Password updated successfully" });
   } catch (err) {
     return res.status(500).json({ message: err.message });
   }

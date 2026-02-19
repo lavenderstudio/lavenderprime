@@ -36,6 +36,8 @@ import BlogPostPage from "./pages/BlogPostPage.jsx";
 import AdminBlogsPage from "./pages/AdminBlogsPage.jsx";
 import AdminBlogEditorPage from "./pages/AdminBlogEditorPage.jsx";
 import RequireRole from "./components/auth/RequireRole.jsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 
 
 export default function App() {
@@ -99,6 +101,8 @@ export default function App() {
         {/* Public */}
         <Route path="/blog" element={<BlogListPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Admin/Manager */}
         <Route

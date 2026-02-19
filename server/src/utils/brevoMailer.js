@@ -72,3 +72,48 @@ export async function sendOrderConfirmation(order) {
     }
   );
 }
+
+/**
+ * Send password reset email
+ */
+export async function sendPasswordResetEmail(toEmail, resetLink) {
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#fff;">
+      <h2 style="color:#FF633F;margin-bottom:8px;">Reset your password</h2>
+      <p style="color:#444;margin-bottom:24px;">
+        We received a request to reset the password for your Golden Art Frames account.
+        Click the button below to choose a new password. This link expires in <b>1 hour</b>.
+      </p>
+      <a href="${resetLink}"
+         style="display:inline-block;background:#FF633F;color:#fff;text-decoration:none;
+                padding:14px 28px;border-radius:8px;font-weight:700;font-size:15px;">
+        Reset Password
+      </a>
+      <p style="color:#888;margin-top:24px;font-size:13px;">
+        If you didn't request a password reset, you can safely ignore this email.
+      </p>
+      <p style="color:#bbb;font-size:12px;margin-top:40px;">
+        © Golden Art Frames
+      </p>
+    </div>
+  `;
+
+  await axios.post(
+    BREVO_API_URL,
+    {
+      sender: {
+        name: "Golden Art Frames",
+        email: process.env.FROM_EMAIL.match(/<(.*)>/)[1],
+      },
+      to: [{ email: toEmail }],
+      subject: "Reset your Golden Art Frames password",
+      htmlContent: html,
+    },
+    {
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+}

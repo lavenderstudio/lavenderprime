@@ -19,6 +19,7 @@ export default function LoginPage() {
 
   // If user was redirected here, we store where they wanted to go (e.g. /checkout)
   const redirectTo = location.state?.from || "/";
+  const resetSuccess = location.state?.resetSuccess || false;
 
   const { setUser } = useAuth(); // ✅ NEW
 
@@ -63,6 +64,12 @@ export default function LoginPage() {
           Log in to continue to checkout and view your orders.
         </p>
 
+        {resetSuccess && (
+          <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+            <b>Password reset successful!</b> You can now log in with your new password.
+          </div>
+        )}
+
         {error && (
           <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
             <b>Error:</b> {error}
@@ -84,7 +91,15 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-gray-700">Password</label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-semibold text-gray-700">Password</label>
+              <Link
+                to="/forgot-password"
+                className="text-xs font-medium text-[#FF633F] hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <input
               type="password"
               value={password}
