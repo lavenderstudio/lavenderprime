@@ -1,146 +1,136 @@
 // client/src/App.jsx
-// ----------------------------------------------------
-// App routes
-// ----------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+// App routes — all pages are lazy-loaded so the branded PageLoader shows
+// while JavaScript chunks are being fetched.
+// ─────────────────────────────────────────────────────────────────────────────
 
-import { Routes, Route, Navigate } from "react-router-dom";
-import ProductsPage from "./pages/ProductsPage.jsx";
-import EditorPrintPortrait from "./pages/EditorPrint&Frame.jsx";
-import EditorPrint from "./pages/EditorPrint.jsx";
-import EditorCanvas from "./pages/EditorCanvas.jsx";
-import CartPage from "./pages/CartPage.jsx";
-import CheckoutPage from "./pages/CheckoutPage.jsx";
-import OrderSuccessPage from "./pages/OrderSuccessPage.jsx";
-import AdminOrdersPage from "./pages/AdminOrdersPage.jsx";
-import LoginPage from "./pages/Login.jsx";
-import SignupPage from "./pages/Signup.jsx";
-import UserOrdersPage from "./pages/UserOrdersPage.jsx";
-import AccountPage from "./pages/AccountPage.jsx";
-import ContactPage from "./pages/ContactPage.jsx";
-import AboutPage from "./pages/AboutPage.jsx";
-import Delivery from "./pages/Delivery.jsx";
-import RequireAuth from "./components/RequireAuth.jsx";
+import { lazy, Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
+
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
-import GuestRoute from "./components/GuestRoute.jsx";
-import EditorMiniFrame from "./pages/EditorMiniFrame.jsx";
-import EditorCollage from "./pages/EditorCollage.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
-import EditorWeddingFrame from "./pages/EditorWeddingFrame.jsx";
-import EditorWeddingPrint from "./pages/EditorWeddingPrint.jsx";
-import EditorFineArtPrint from "./pages/EditorFineArtPrint.jsx";
-import EditorMultiplePrints from "./pages/EditorMultiplePrints.jsx";
-import BlogListPage from "./pages/BlogListPage.jsx";
-import BlogPostPage from "./pages/BlogPostPage.jsx";
-import AdminBlogsPage from "./pages/AdminBlogsPage.jsx";
-import AdminBlogEditorPage from "./pages/AdminBlogEditorPage.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
+import GuestRoute from "./components/GuestRoute.jsx";
 import RequireRole from "./components/auth/RequireRole.jsx";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
-import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
-import AdminPricingPage from "./pages/AdminPricingPage.jsx";
-import HomePage from "./pages/HomePage.jsx";
+import PageLoader from "./components/PageLoader.jsx";
 
+// ── Lazy page imports ─────────────────────────────────────────────────────────
+const HomePage               = lazy(() => import("./pages/HomePage.jsx"));
+const ProductsPage           = lazy(() => import("./pages/ProductsPage.jsx"));
+const CartPage               = lazy(() => import("./pages/CartPage.jsx"));
+const CheckoutPage           = lazy(() => import("./pages/CheckoutPage.jsx"));
+const OrderSuccessPage       = lazy(() => import("./pages/OrderSuccessPage.jsx"));
+const UserOrdersPage         = lazy(() => import("./pages/UserOrdersPage.jsx"));
+const AccountPage            = lazy(() => import("./pages/AccountPage.jsx"));
+const ContactPage            = lazy(() => import("./pages/ContactPage.jsx"));
+const AboutPage              = lazy(() => import("./pages/AboutPage.jsx"));
+const Delivery               = lazy(() => import("./pages/Delivery.jsx"));
 
+const LoginPage              = lazy(() => import("./pages/Login.jsx"));
+const SignupPage              = lazy(() => import("./pages/Signup.jsx"));
+const ForgotPasswordPage     = lazy(() => import("./pages/ForgotPasswordPage.jsx"));
+const ResetPasswordPage      = lazy(() => import("./pages/ResetPasswordPage.jsx"));
+
+const EditorPrintPortrait    = lazy(() => import("./pages/EditorPrint&Frame.jsx"));
+const EditorPrint            = lazy(() => import("./pages/EditorPrint.jsx"));
+const EditorCanvas           = lazy(() => import("./pages/EditorCanvas.jsx"));
+const EditorMiniFrame        = lazy(() => import("./pages/EditorMiniFrame.jsx"));
+const EditorCollage          = lazy(() => import("./pages/EditorCollage.jsx"));
+const EditorWeddingFrame     = lazy(() => import("./pages/EditorWeddingFrame.jsx"));
+const EditorWeddingPrint     = lazy(() => import("./pages/EditorWeddingPrint.jsx"));
+const EditorFineArtPrint     = lazy(() => import("./pages/EditorFineArtPrint.jsx"));
+const EditorMultiplePrints   = lazy(() => import("./pages/EditorMultiplePrints.jsx"));
+
+const BlogListPage           = lazy(() => import("./pages/BlogListPage.jsx"));
+const BlogPostPage           = lazy(() => import("./pages/BlogPostPage.jsx"));
+
+const AdminOrdersPage        = lazy(() => import("./pages/AdminOrdersPage.jsx"));
+const AdminBlogsPage         = lazy(() => import("./pages/AdminBlogsPage.jsx"));
+const AdminBlogEditorPage    = lazy(() => import("./pages/AdminBlogEditorPage.jsx"));
+const AdminPricingPage       = lazy(() => import("./pages/AdminPricingPage.jsx"));
+
+// ── 404 ───────────────────────────────────────────────────────────────────────
+function NotFound() {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+      <p className="text-7xl font-extrabold text-slate-200">404</p>
+      <p className="text-lg font-bold text-slate-700">Page not found</p>
+      <a href="/" className="text-sm font-semibold text-[#FF633F] hover:underline">
+        ← Back to Home
+      </a>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <>
       <ScrollToTop />
       <Navbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route
-          path="/login"
-          element={
-            <GuestRoute>
-              <LoginPage />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <GuestRoute>
-              <SignupPage />
-            </GuestRoute>
-          }
-        />
-        <Route
-          path="/account"
-          element={
-            <RequireAuth>
-              <AccountPage />
-            </RequireAuth>
-          }
-        />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
-        <Route path="/editor/print" element={<EditorPrint />} />
-        <Route path="/editor/canvas" element={<EditorCanvas />} />
-        <Route path="/editor/mini-frames" element={<EditorMiniFrame />} />
-        <Route path="/editor/collage-frame" element={<EditorCollage />} />
-        <Route path="/editor/wedding-frame" element={<EditorWeddingFrame />} />
-        <Route path="/editor/wedding-print" element={<EditorWeddingPrint />} />
-        <Route path="/editor/fine-art-print" element={<EditorFineArtPrint />} />
-        <Route path="/editor/multiple-prints" element={<EditorMultiplePrints />} />
-        <Route
-          path="/checkout"
-          element={
-            <RequireAuth>
-              <CheckoutPage />
-            </RequireAuth>
-          }
-        />
-        <Route path="/order/:id" element={<OrderSuccessPage />} />
-        <Route path="/orders" element={<UserOrdersPage />} />
-        <Route path="/admin" element={<AdminOrdersPage />} />
-        <Route path="/contact" element={<ContactPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="*" element={<div>404</div>} />
-        <Route path="/delivery" element={<Delivery />} />
 
-        {/* Public */}
-        <Route path="/blog" element={<BlogListPage />} />
-        <Route path="/blog/:slug" element={<BlogPostPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/delivery" element={<Delivery />} />
+          <Route path="/order/:id" element={<OrderSuccessPage />} />
+          <Route path="/orders" element={<UserOrdersPage />} />
 
-        {/* Admin/Manager */}
-        <Route
-          path="/admin/blogs"
-          element={
-            <RequireRole roles={["admin", "manager"]}>
-              <AdminBlogsPage />
-            </RequireRole>
-          }
-        />
-        <Route
-          path="/admin/blogs/new"
-          element={
-            <RequireRole roles={["admin", "manager"]}>
-              <AdminBlogEditorPage mode="create" />
-            </RequireRole>
-          }
-        />
-        <Route
-          path="/admin/blogs/:id/edit"
-          element={
-            <RequireRole roles={["admin", "manager"]}>
-              <AdminBlogEditorPage mode="edit" />
-            </RequireRole>
-          }
-        />
-        <Route
-          path="/admin/pricing"
-          element={
-            <RequireRole roles={["admin", "manager"]}>
-              <AdminPricingPage />
-            </RequireRole>
-          }
-        />
+          {/* Auth */}
+          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+          <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
+          {/* Protected */}
+          <Route path="/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
+          <Route path="/checkout" element={<RequireAuth><CheckoutPage /></RequireAuth>} />
 
-      </Routes>
+          {/* Editors */}
+          <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
+          <Route path="/editor/print" element={<EditorPrint />} />
+          <Route path="/editor/canvas" element={<EditorCanvas />} />
+          <Route path="/editor/mini-frames" element={<EditorMiniFrame />} />
+          <Route path="/editor/collage-frame" element={<EditorCollage />} />
+          <Route path="/editor/wedding-frame" element={<EditorWeddingFrame />} />
+          <Route path="/editor/wedding-print" element={<EditorWeddingPrint />} />
+          <Route path="/editor/fine-art-print" element={<EditorFineArtPrint />} />
+          <Route path="/editor/multiple-prints" element={<EditorMultiplePrints />} />
+
+          {/* Blog */}
+          <Route path="/blog" element={<BlogListPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
+
+          {/* Admin */}
+          <Route path="/admin" element={<AdminOrdersPage />} />
+          <Route
+            path="/admin/blogs"
+            element={<RequireRole roles={["admin", "manager"]}><AdminBlogsPage /></RequireRole>}
+          />
+          <Route
+            path="/admin/blogs/new"
+            element={<RequireRole roles={["admin", "manager"]}><AdminBlogEditorPage mode="create" /></RequireRole>}
+          />
+          <Route
+            path="/admin/blogs/:id/edit"
+            element={<RequireRole roles={["admin", "manager"]}><AdminBlogEditorPage mode="edit" /></RequireRole>}
+          />
+          <Route
+            path="/admin/pricing"
+            element={<RequireRole roles={["admin", "manager"]}><AdminPricingPage /></RequireRole>}
+          />
+
+          {/* 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+
       <Footer />
     </>
   );
