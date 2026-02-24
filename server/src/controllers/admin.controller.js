@@ -6,6 +6,7 @@
 // ----------------------------------------------------
 
 import Order from "../models/Order.js";
+import Product from "../models/Product.js";
 
 /**
  * Build a Mongo date filter for createdAt using "YYYY-MM-DD" strings.
@@ -84,5 +85,70 @@ export async function fulfillOrder(req, res) {
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });
+  }
+}
+
+/**
+ * GET /api/admin/products
+ */
+export async function listProducts(req, res) {
+  try {
+    const products = await Product.find().sort({ name: 1 });
+    return res.json({ ok: true, products });
+  } catch (err) {
+    return res.status(500).json({ ok: false, message: err.message });
+  }
+}
+
+/**
+ * PATCH /api/admin/products/:slug
+ * Body: { variants: [{ sku, basePrice }], options: { mounts, frames, mats, materials } }
+ */
+export async function updateProductPricing(req, res) {
+  try {
+    const { slug } = req.params;
+    const { variants: variantUpdates, options: optionUpdates } = req.body;
+
+    const product = await Product.findOne({ slug });
+    if (!product) return res.status(404).json({ ok: false, message: "Product not found" });
+
+    // Update variants by index — allows changing sku, size, orientation, and basePrice
+    if (Array.isArray(variantUpdates)) {
+      product.variants = product.variants.map((v, i) => {
+        const update = variantUpdates[i];
+        if (!update) return v;
+        const obj = v.toObject();
+        return {
+          ...obj,
+          sku: update.sku ?? obj.sku,
+          size: update.size ?? obj.size,
+          orientation: update.orientation ?? obj.orientation,
+          basePrice: update.basePrice != null ? Number(update.basePrice) : obj.basePrice,
+        };
+      });
+    }
+
+    // Update option prices by name
+    if (optionUpdates && typeof optionUpdates === "object") {
+      for (const key of ["mounts", "frames", "mats", "materials"]) {
+        if (Array.isArray(optionUpdates[key]) && Array.isArray(product.options[key])) {
+          const map = {};
+          optionUpdates[key].forEach((o) => { map[o.name] = o.price; });
+          product.options[key] = product.options[key].map((o) => {
+            const obj = o.toObject();
+            return map[obj.name] != null ? { ...obj, price: Number(map[obj.name]) } : obj;
+          });
+        }
+      }
+    }
+
+    product.markModified("variants");
+    product.markModified("options");
+    await product.save();
+
+    return res.json({ ok: true, product });
+  } catch (err) {
+    console.error("updateProductPricing error:", err);
+    return res.status(500).json({ ok: false, message: err.message });
   }
 }

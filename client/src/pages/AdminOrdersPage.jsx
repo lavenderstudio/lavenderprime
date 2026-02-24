@@ -296,6 +296,12 @@ export default function AdminOrdersPage() {
             >
               Users
             </button>
+            <Link
+              to="/admin/pricing"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-900 hover:bg-slate-50 transition"
+            >
+              Manage Pricing
+            </Link>
           </div>
         </div>
 

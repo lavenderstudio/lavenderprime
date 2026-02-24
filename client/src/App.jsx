@@ -38,6 +38,7 @@ import AdminBlogEditorPage from "./pages/AdminBlogEditorPage.jsx";
 import RequireRole from "./components/auth/RequireRole.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
+import AdminPricingPage from "./pages/AdminPricingPage.jsx";
 
 
 export default function App() {
@@ -126,6 +127,14 @@ export default function App() {
           element={
             <RequireRole roles={["admin", "manager"]}>
               <AdminBlogEditorPage mode="edit" />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/admin/pricing"
+          element={
+            <RequireRole roles={["admin", "manager"]}>
+              <AdminPricingPage />
             </RequireRole>
           }
         />
