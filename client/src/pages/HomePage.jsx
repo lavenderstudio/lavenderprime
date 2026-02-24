@@ -76,8 +76,8 @@ function Hero() {
       </AnimatePresence>
 
       {/* Gradients */}
-      <div className="absolute inset-0 bg-linear-to-r from-black/80 via-transparent to-transparent" />
-      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 xl:via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/30 xl:via-transparent to-transparent" />
 
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col justify-end pb-16 px-6 sm:px-14 max-w-2xl">
