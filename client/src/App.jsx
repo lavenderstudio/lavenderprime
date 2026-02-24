@@ -39,6 +39,7 @@ import RequireRole from "./components/auth/RequireRole.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import AdminPricingPage from "./pages/AdminPricingPage.jsx";
+import HomePage2 from "./pages/HomePage2.jsx";
 
 
 export default function App() {
@@ -48,6 +49,7 @@ export default function App() {
       <Navbar />   {/* 👈 always visible */}
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/home2" element={<HomePage2 />} />
         <Route
           path="/login"
           element={
