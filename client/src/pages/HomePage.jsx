@@ -13,35 +13,6 @@ import Newsletter from "../components/home/Newsletter.jsx";
 
 export default function Home() {
 
-  const promos = useMemo(
-    () => [
-      {
-        title: "Print & Frame Your Photos",
-        subtitle: "New arrivals",
-        cta: "Start Designing",
-        href: "/products",
-        imageUrl:
-          "./promo/promo1_converted.avif",
-      },
-      {
-        title: "Premium Canvas Prints",
-        subtitle: "Best seller",
-        cta: "Shop Canvas",
-        href: "/editor/canvas",
-        imageUrl:
-          "./promo/promo2_converted.avif",
-      },
-      {
-        title: "Fast Delivery, Safe Packaging",
-        subtitle: "Doorstep delivery",
-        cta: "How Delivery Works",
-        href: "/delivery",
-        imageUrl:
-          "./promo/promo3_converted.avif",
-      },
-    ],
-    []
-  );
 
   const products = useMemo(
     () => [
@@ -115,7 +86,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
 
-      <Hero promos={promos} />
+      <Hero />
 
       <FeaturedProducts products={products} />
       <AboutSection />
