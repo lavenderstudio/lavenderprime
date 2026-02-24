@@ -16,7 +16,6 @@ import LoginPage from "./pages/Login.jsx";
 import SignupPage from "./pages/Signup.jsx";
 import UserOrdersPage from "./pages/UserOrdersPage.jsx";
 import AccountPage from "./pages/AccountPage.jsx";
-import HomePage from "./pages/HomePage.jsx";
 import ContactPage from "./pages/ContactPage.jsx";
 import AboutPage from "./pages/AboutPage.jsx";
 import Delivery from "./pages/Delivery.jsx";
@@ -39,17 +38,16 @@ import RequireRole from "./components/auth/RequireRole.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import AdminPricingPage from "./pages/AdminPricingPage.jsx";
-import HomePage2 from "./pages/HomePage2.jsx";
+import HomePage from "./pages/HomePage.jsx";
 
 
 export default function App() {
   return (
     <>
       <ScrollToTop />
-      <Navbar />   {/* 👈 always visible */}
+      <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/home2" element={<HomePage2 />} />
         <Route
           path="/login"
           element={
