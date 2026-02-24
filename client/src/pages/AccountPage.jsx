@@ -1,27 +1,44 @@
 // client/src/pages/AccountPage.jsx
-// ----------------------------------------------------
-// Account Page (logged-in user)
-// - Loads profile via GET /api/users/me
-// - Updates profile via PATCH /api/users/me
-// - Allows user to save fullName, phone, and shipping address
-// ----------------------------------------------------
+// ─────────────────────────────────────────────────────────────────────────────
+// Modern Account Page — matches site theme.
+// ALL existing logic is preserved exactly. Only the UI is redesigned.
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import { User, Mail, Phone, ShieldCheck, MapPin, Package, CheckCircle, AlertCircle } from "lucide-react";
 import Page from "../components/Page.jsx";
 import api from "../lib/api.js";
 
+const ACCENT = "#FF633F";
+
 const UAE_CITIES = [
-  "Abu Dhabi",
-  "Dubai",
-  "Sharjah",
-  "Ajman",
-  "Ras Al Khaimah",
-  "Fujairah",
-  "Umm Al Quwain",
-  "Al Ain",
-  "Khorfakkan",
+  "Abu Dhabi", "Dubai", "Sharjah", "Ajman",
+  "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "Al Ain", "Khorfakkan",
 ];
 
+const INPUT =
+  "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#FF633F]/60 focus:bg-white focus:ring-2 focus:ring-[#FF633F]/10";
+
+const INPUT_DISABLED =
+  "w-full rounded-xl border border-slate-100 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed";
+
+function Field({ icon: Icon, label, children }) {
+  return (
+    <div>
+      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
+        {Icon && <Icon className="h-3.5 w-3.5" />}
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,14 +59,14 @@ export default function AccountPage() {
     },
   });
 
-  // ✅ Load profile once
+  // ── Load profile once ──────────────────────────────────────────────────────
   useEffect(() => {
     const load = async () => {
       try {
         setError("");
         setLoading(true);
 
-        const res = await api.get("/users/me"); // ✅ matches your backend
+        const res = await api.get("/users/me");
         const u = res.data?.user;
 
         setForm({
@@ -71,7 +88,6 @@ export default function AccountPage() {
         setLoading(false);
       }
     };
-
     load();
   }, []);
 
@@ -82,16 +98,12 @@ export default function AccountPage() {
   const updateAddr = (key, value) => {
     setForm((prev) => ({
       ...prev,
-      shippingAddress: {
-        ...prev.shippingAddress,
-        [key]: value,
-      },
+      shippingAddress: { ...prev.shippingAddress, [key]: value },
     }));
   };
 
   const onSave = async (e) => {
     e.preventDefault();
-
     try {
       setError("");
       setSuccess("");
@@ -105,7 +117,6 @@ export default function AccountPage() {
 
       const u = res.data?.user;
 
-      // ✅ keep UI in sync with server response
       setForm((prev) => ({
         ...prev,
         fullName: u?.fullName || prev.fullName,
@@ -126,161 +137,241 @@ export default function AccountPage() {
   const isUAE = useMemo(() => {
     const c = String(form.shippingAddress?.country || "").toLowerCase();
     return (
-      c === "united arab emirates" ||
-      c === "uae" ||
-      c === "u.a.e" ||
-      c.includes("emirates")
+      c === "united arab emirates" || c === "uae" || c === "u.a.e" || c.includes("emirates")
     );
   }, [form.shippingAddress?.country]);
 
+  // ── Initials avatar ────────────────────────────────────────────────────────
+  const initials = form.fullName
+    ? form.fullName.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+    : "?";
+
   return (
-    <Page title="My Account">
-      {loading ? (
-        <p className="text-gray-600">Loading…</p>
-      ) : (
-        <div className="mx-auto max-w-3xl space-y-4">
+    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
+
+      {/* ── Dark hero header ─────────────────────────────────────── */}
+      <div className="relative overflow-hidden bg-slate-950 px-4 py-12">
+        <div
+          className="pointer-events-none absolute right-1/4 top-0 h-40 w-40 rounded-full opacity-20 blur-3xl"
+          style={{ background: ACCENT }}
+        />
+        <div className="relative mx-auto max-w-3xl">
+          <div className="flex items-center gap-5">
+            {/* Avatar */}
+            <div
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-xl font-extrabold text-white shadow-lg"
+              style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #e8472a 100%)` }}
+            >
+              {loading ? "…" : initials}
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
+                My Account
+              </p>
+              <h1 className="mt-0.5 text-2xl font-extrabold text-white">
+                {loading ? "Loading…" : form.fullName || "Your Profile"}
+              </h1>
+              <p className="mt-0.5 text-sm text-white/40">
+                {form.email || "Manage your profile and shipping address"}
+              </p>
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              to="/orders"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+              <Package className="h-3.5 w-3.5" /> My Orders
+            </Link>
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+              Shop Now
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Body ────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-3xl px-4 py-10">
+
+        {/* Alerts */}
+        <AnimatePresence>
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              <b>Error:</b> {error}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mb-4 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              {error}
+            </motion.div>
           )}
-
           {success && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mb-4 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700"
+            >
+              <CheckCircle className="mt-0.5 h-4 w-4 shrink-0" />
               {success}
-            </div>
+            </motion.div>
           )}
+        </AnimatePresence>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 bg-linear-to-b from-[#FF633F]/10 via-white to-white shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900">Profile</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Update your name, phone number, and saved address for faster checkout.
-            </p>
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2].map((n) => (
+              <div key={n} className="h-40 animate-pulse rounded-3xl border border-slate-100 bg-white" />
+            ))}
+          </div>
+        ) : (
+          <form onSubmit={onSave} className="space-y-5">
 
-            <form onSubmit={onSave} className="mt-4 space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Full name</label>
+            {/* ── Profile details ────────────────────────────────── */}
+            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-6 py-4">
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
+                  Profile
+                </p>
+                <h2 className="mt-0.5 text-lg font-extrabold text-slate-900">Personal Details</h2>
+                <p className="text-sm text-slate-500">Update your name and phone for faster checkout.</p>
+              </div>
+
+              <div className="grid gap-4 p-6 sm:grid-cols-2">
+                <Field icon={User} label="Full Name">
                   <input
                     value={form.fullName}
                     onChange={(e) => updateField("fullName", e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
+                    className={INPUT}
                     placeholder="Your name"
                   />
-                </div>
+                </Field>
 
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Email</label>
-                  <input
-                    value={form.email}
-                    disabled
-                    className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600"
-                  />
-                </div>
+                <Field icon={Mail} label="Email">
+                  <input value={form.email} disabled className={INPUT_DISABLED} />
+                </Field>
 
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Phone</label>
+                <Field icon={Phone} label="Phone">
                   <input
                     value={form.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
+                    className={INPUT}
                     placeholder="+971..."
                   />
-                </div>
+                </Field>
 
-                <div>
-                  <label className="text-sm font-semibold text-gray-700">Role</label>
-                  <input
-                    value={form.role.toUpperCase()}
-                    disabled
-                    className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 p-3 text-sm text-gray-600"
-                  />
-                </div>
+                <Field icon={ShieldCheck} label="Role">
+                  <div className={INPUT_DISABLED}>
+                    <span
+                      className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-extrabold text-white"
+                      style={{ background: form.role === "admin" ? "#0f172a" : ACCENT }}
+                    >
+                      {form.role.toUpperCase()}
+                    </span>
+                  </div>
+                </Field>
+              </div>
+            </div>
+
+            {/* ── Shipping address ───────────────────────────────── */}
+            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+              <div className="border-b border-slate-100 px-6 py-4">
+                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
+                  Shipping
+                </p>
+                <h2 className="mt-0.5 text-lg font-extrabold text-slate-900">Saved Address</h2>
+                <p className="text-sm text-slate-500">Auto-filled at checkout to save you time.</p>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 bg-white p-5">
-                <h3 className="text-base font-semibold text-gray-900">Saved shipping address</h3>
-                <p className="mt-1 text-sm text-gray-600">
-                  This can be auto-filled in checkout.
-                </p>
-
-                <div className="mt-3 grid gap-3">
+              <div className="space-y-4 p-6">
+                <Field icon={MapPin} label="Address Line 1">
                   <input
                     value={form.shippingAddress.line1}
                     onChange={(e) => updateAddr("line1", e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                    className={INPUT}
                     placeholder="Address line 1"
                   />
+                </Field>
+
+                <Field label="Address Line 2">
                   <input
                     value={form.shippingAddress.line2}
                     onChange={(e) => updateAddr("line2", e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 p-3 text-sm"
+                    className={INPUT}
                     placeholder="Address line 2 (optional)"
                   />
+                </Field>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {/* ✅ City */}
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700">City</label>
-
-                      {isUAE ? (
-                        <select
-                          className="mt-1 w-full rounded-xl border border-gray-300 bg-white p-3 text-sm"
-                          value={form.shippingAddress.city}
-                          onChange={(e) => updateAddr("city", e.target.value)}
-                          required
-                        >
-                          <option value="">Select city *</option>
-                          {UAE_CITIES.map((city) => (
-                            <option key={city} value={city}>
-                              {city}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          value={form.shippingAddress.city}
-                          onChange={(e) => updateAddr("city", e.target.value)}
-                          className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
-                          placeholder="City"
-                          required
-                        />
-                      )}
-                    </div>
-
-                    {/* ✅ Postcode */}
-                    <div>
-                      <label className="text-sm font-semibold text-gray-700">Postcode</label>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="City">
+                    {isUAE ? (
+                      <select
+                        className={INPUT}
+                        value={form.shippingAddress.city}
+                        onChange={(e) => updateAddr("city", e.target.value)}
+                        required
+                      >
+                        <option value="">Select city *</option>
+                        {UAE_CITIES.map((city) => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
+                      </select>
+                    ) : (
                       <input
-                        value={form.shippingAddress.postcode}
-                        onChange={(e) => updateAddr("postcode", e.target.value)}
-                        className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm"
-                        placeholder="Postcode"
+                        value={form.shippingAddress.city}
+                        onChange={(e) => updateAddr("city", e.target.value)}
+                        className={INPUT}
+                        placeholder="City"
+                        required
                       />
-                    </div>
-                  </div>
+                    )}
+                  </Field>
 
+                  <Field label="Postcode">
+                    <input
+                      value={form.shippingAddress.postcode}
+                      onChange={(e) => updateAddr("postcode", e.target.value)}
+                      className={INPUT}
+                      placeholder="Postcode"
+                    />
+                  </Field>
+                </div>
+
+                <Field label="Country">
                   <input
                     value={form.shippingAddress.country}
-                    onChange={(e) => updateAddr("country", e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 p-3 text-sm bg-slate-100 text-slate-700"
-                    placeholder="Country"
                     disabled
+                    className={INPUT_DISABLED}
+                    placeholder="Country"
                   />
-                </div>
+                </Field>
               </div>
+            </div>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full rounded-2xl bg-[#FF633F] px-5 py-3 text-sm font-semibold text-white hover:bg-[#FF633F]/90 transition-all duration-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? "Saving…" : "Save changes"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </Page>
+            {/* ── Save ───────────────────────────────────────────── */}
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              disabled={saving}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-extrabold text-white shadow-sm transition-all duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+              style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #e8472a 100%)` }}
+            >
+              {saving ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  Saving…
+                </>
+              ) : "Save Changes"}
+            </motion.button>
+          </form>
+        )}
+      </div>
+    </div>
   );
 }

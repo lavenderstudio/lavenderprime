@@ -1,23 +1,31 @@
-// client/src/pages/admin/AdminBlogEditorPage.jsx
-// ----------------------------------------------------
-// Create/Edit blog page:
-// - mode="create": POST /api/admin/blogs
-// - mode="edit":   GET (admin list already has items, but we load by list + find) OR add GET-by-id endpoint later
-//                  PATCH /api/admin/blogs/:id
-//
-// For simplicity, we'll load all admin blogs and find by id.
-// (We can add GET /api/admin/blogs/:id later if you want.)
-// ----------------------------------------------------
+// client/src/pages/AdminBlogEditorPage.jsx
+// ─────────────────────────────────────────────────────────────────────────────
+// Modern Admin Blog Editor page — matches site theme.
+// ALL existing logic is preserved exactly. Only the UI is redesigned.
+// ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ImagePlus, Tag, Globe, FileEdit, X, AlertCircle } from "lucide-react";
 import Page from "../components/Page.jsx";
 import api from "../lib/api.js";
 import { uploadToCloudinary } from "../lib/uploadToCloudinary.js";
 import TiptapEditor from "../components/blog/TiptapEditor.jsx";
-import { Container, ACCENT_BG, ACCENT_HOVER } from "../components/home/ui.jsx";
 
+const ACCENT = "#FF633F";
 
+const INPUT =
+  "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#FF633F]/60 focus:bg-white focus:ring-2 focus:ring-[#FF633F]/10";
+
+function FieldLabel({ icon: Icon, children }) {
+  return (
+    <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
+      {Icon && <Icon className="h-3.5 w-3.5" />}
+      {children}
+    </label>
+  );
+}
 
 export default function AdminBlogEditorPage({ mode = "create" }) {
   const navigate = useNavigate();
@@ -34,13 +42,13 @@ export default function AdminBlogEditorPage({ mode = "create" }) {
     title: "",
     excerpt: "",
     content: "",
-    tagsText: "", // comma separated
+    tagsText: "",
     status: "draft",
     coverUrl: "",
     coverPublicId: "",
   });
 
-  // Load existing blog if edit
+  // ── Load existing blog if edit ─────────────────────────────────────────────
   useEffect(() => {
     let alive = true;
 
@@ -51,13 +59,11 @@ export default function AdminBlogEditorPage({ mode = "create" }) {
         setLoading(true);
         setErr("");
 
-        // ✅ quick approach: list admin blogs and find one
         const res = await api.get("/admin/blogs?limit=100");
         const items = res.data?.items || [];
         const found = items.find((x) => x._id === id);
 
         if (!found) throw new Error("Blog not found");
-
         if (!alive) return;
 
         setForm({
@@ -78,16 +84,11 @@ export default function AdminBlogEditorPage({ mode = "create" }) {
     }
 
     load();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [id, isEdit]);
 
   const tagsArray = useMemo(() => {
-    return form.tagsText
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
+    return form.tagsText.split(",").map((t) => t.trim()).filter(Boolean);
   }, [form.tagsText]);
 
   const onSave = async () => {
@@ -101,7 +102,7 @@ export default function AdminBlogEditorPage({ mode = "create" }) {
       const payload = {
         title: form.title.trim(),
         excerpt: form.excerpt.trim(),
-        content: form.content, // HTML for now
+        content: form.content,
         tags: tagsArray,
         status: form.status,
         coverImage: {
@@ -126,210 +127,266 @@ export default function AdminBlogEditorPage({ mode = "create" }) {
     }
   };
 
-  // Handle cover image upload directly to Cloudinary
-	const onCoverUpload = async (e) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
+  const onCoverUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-		try {
-			setUploadingCover(true);
-			setErr("");
+    try {
+      setUploadingCover(true);
+      setErr("");
 
-			// Basic client-side validation
-			if (!file.type.startsWith("image/")) {
-				throw new Error("Please select an image file");
-			}
+      if (!file.type.startsWith("image/")) {
+        throw new Error("Please select an image file");
+      }
 
-			// Upload to Cloudinary
-			const uploaded = await uploadToCloudinary(file, "blog-covers");
+      const uploaded = await uploadToCloudinary(file, "blog-covers");
 
-			// Save result into form state
-			setForm((f) => ({
-				...f,
-				coverUrl: uploaded.url,
-				coverPublicId: uploaded.publicId,
-			}));
-		} catch (err) {
-			setErr(err.message || "Image upload failed");
-		} finally {
-			setUploadingCover(false);
-		}
-	};
-
-
-  // ✅ Cover image upload: keep it simple for now (paste URL)
-  // If you want, we’ll swap this to your Cloudinary uploader component next.
-  const CoverHelp = () => (
-    <div className="text-xs text-slate-500">
-      Tip: Upload image to Cloudinary and paste the secure URL here. Later we’ll integrate your uploader button.
-    </div>
-  );
+      setForm((f) => ({
+        ...f,
+        coverUrl: uploaded.url,
+        coverPublicId: uploaded.publicId,
+      }));
+    } catch (error) {
+      setErr(error.message || "Image upload failed");
+    } finally {
+      setUploadingCover(false);
+    }
+  };
 
   return (
-    <Page>
-      <Container className="py-10">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
+
+      {/* ── Dark hero ──────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden bg-slate-950 px-4 py-10">
+        <div
+          className="pointer-events-none absolute right-1/4 top-0 h-40 w-40 rounded-full opacity-20 blur-3xl"
+          style={{ background: ACCENT }}
+        />
+        <div className="relative mx-auto max-w-6xl flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900">
-              {isEdit ? "Edit Blog" : "New Blog"}
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
+              Admin Panel
+            </p>
+            <h1 className="mt-1 text-3xl font-extrabold text-white">
+              {isEdit ? "Edit Blog Post" : "New Blog Post"}
             </h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Only Admin/Manager can publish.
+            <p className="mt-1 text-sm text-white/40">
+              Only Admin / Manager can publish.
             </p>
           </div>
 
-          <Link to="/admin/blogs" className="text-sm font-semibold text-slate-700 hover:underline">
-            ← Back
+          <Link
+            to="/admin/blogs"
+            className="inline-flex items-center gap-1.5 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to Blogs
           </Link>
         </div>
+      </div>
 
-        {err && (
-          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
-            {err}
-          </div>
-        )}
+      {/* ── Body ────────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-6xl px-4 py-10">
+
+        {/* Error */}
+        <AnimatePresence>
+          {err && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mb-5 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+              {err}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {loading ? (
-          <div className="mt-8 text-sm text-slate-600">Loading…</div>
+          <div className="space-y-4">
+            {[1, 2].map((n) => (
+              <div key={n} className="h-40 animate-pulse rounded-3xl border border-slate-100 bg-white" />
+            ))}
+          </div>
         ) : (
-          <div className="mt-8 grid gap-6 lg:grid-cols-3">
-            {/* Left: editor */}
-            <div className="lg:col-span-2 rounded-3xl border bg-white p-5 shadow-sm sm:p-6">
-              <label className="text-xs font-bold text-slate-700">Title</label>
-              <input
-                value={form.title}
-                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                className="mt-1 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-                placeholder="e.g. How to choose the perfect frame"
-              />
+          <div className="grid gap-5 lg:grid-cols-3">
 
-              <div className="mt-4">
-                <label className="text-xs font-bold text-slate-700">Excerpt</label>
-                <textarea
-                  value={form.excerpt}
-                  onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
-                  className="mt-1 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-                  rows={3}
-                  placeholder="Short summary shown on the blog list page…"
-                />
+            {/* ── Left: editor ──────────────────────────────────────── */}
+            <div className="space-y-5 lg:col-span-2">
+
+              {/* Title + Excerpt */}
+              <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+                <div>
+                  <FieldLabel icon={FileEdit}>Title</FieldLabel>
+                  <input
+                    value={form.title}
+                    onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                    className={INPUT}
+                    placeholder="e.g. How to choose the perfect frame"
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <FieldLabel>Excerpt</FieldLabel>
+                  <textarea
+                    value={form.excerpt}
+                    onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
+                    className={INPUT}
+                    rows={3}
+                    placeholder="Short summary shown on the blog list…"
+                  />
+                </div>
               </div>
 
-              <div className="mt-4">
-								<label className="text-xs font-bold text-slate-700">Content</label>
-
-								<div className="mt-1">
-									<TiptapEditor
-										value={form.content}
-										onChange={(html) => {
-											// ✅ Save HTML into form state
-											setForm((f) => ({ ...f, content: html }));
-										}}
-										placeholder="Write your blog post…"
-									/>
-								</div>
-
-								<p className="mt-2 text-xs text-slate-500">
-									Tip: use headings (H2/H3), bullet lists, and short paragraphs for readability.
-								</p>
-							</div>
+              {/* Content editor */}
+              <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+                <FieldLabel>Content</FieldLabel>
+                <div className="mt-1.5 overflow-hidden rounded-xl border border-slate-200">
+                  <TiptapEditor
+                    value={form.content}
+                    onChange={(html) => setForm((f) => ({ ...f, content: html }))}
+                    placeholder="Write your blog post…"
+                  />
+                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  Tip: use H2/H3 headings, bullet lists, and short paragraphs for readability.
+                </p>
+              </div>
             </div>
 
-            {/* Right: meta */}
-            <div className="rounded-3xl border bg-white p-5 shadow-sm sm:p-6">
-              <label className="text-xs font-bold text-slate-700">Status</label>
-              <select
-                value={form.status}
-                onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-                className="mt-1 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-              >
-                <option value="draft">Draft</option>
-                <option value="published">Published</option>
-              </select>
+            {/* ── Right: sidebar ────────────────────────────────────── */}
+            <div className="space-y-5">
 
-              <div className="mt-4">
-                <label className="text-xs font-bold text-slate-700">Tags (comma separated)</label>
-                <input
-                  value={form.tagsText}
-                  onChange={(e) => setForm((f) => ({ ...f, tagsText: e.target.value }))}
-                  className="mt-1 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-                  placeholder="e.g. frames, printing, tips"
-                />
-              </div>
-
-              <div className="mt-4">
-								<label className="text-xs font-bold text-slate-700">Cover Image</label>
-
-								{/* Upload button */}
-								<input
-									type="file"
-									accept="image/*"
-									onChange={onCoverUpload}
-									disabled={uploadingCover}
-									className="mt-1 block w-full text-sm"
-								/>
-
-								{uploadingCover && (
-									<div className="mt-2 text-xs font-semibold text-slate-600">
-										Uploading image…
-									</div>
-								)}
-
-								{/* Preview */}
-								{form.coverUrl && (
-									<div className="mt-4 overflow-hidden rounded-2xl border bg-slate-50">
-										<img
-											src={form.coverUrl}
-											alt="Cover preview"
-											className="h-44 w-full object-cover"
-										/>
-										<div className="flex items-center justify-between px-3 py-2 text-xs text-slate-600">
-											<span>Uploaded</span>
-											<button
-												type="button"
-												onClick={() =>
-													setForm((f) => ({
-														...f,
-														coverUrl: "",
-														coverPublicId: "",
-													}))
-												}
-												className="font-bold text-red-600 hover:underline"
-											>
-												Remove
-											</button>
-										</div>
-									</div>
-								)}
-							</div>
-
-              <div className="mt-4">
-                <label className="text-xs font-bold text-slate-700">Cover publicId (optional)</label>
-                <input
-                  value={form.coverPublicId}
-                  onChange={(e) => setForm((f) => ({ ...f, coverPublicId: e.target.value }))}
-                  className="mt-1 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-slate-400"
-                  placeholder="user-uploads/xxxx"
-                />
-              </div>
-
-              {form.coverUrl && (
-                <div className="mt-4 overflow-hidden rounded-2xl border bg-slate-50">
-                  <img src={form.coverUrl} alt="cover preview" className="h-44 w-full object-cover" />
+              {/* Status + tags */}
+              <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+                <div>
+                  <FieldLabel icon={Globe}>Status</FieldLabel>
+                  <select
+                    value={form.status}
+                    onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+                    className={INPUT}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                  </select>
+                  <div className="mt-2">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+                        form.status === "published"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {form.status}
+                    </span>
+                  </div>
                 </div>
-              )}
 
-              <button
+                <div className="mt-4">
+                  <FieldLabel icon={Tag}>Tags (comma separated)</FieldLabel>
+                  <input
+                    value={form.tagsText}
+                    onChange={(e) => setForm((f) => ({ ...f, tagsText: e.target.value }))}
+                    className={INPUT}
+                    placeholder="frames, printing, tips"
+                  />
+                  {tagsArray.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {tagsArray.map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-full px-2.5 py-0.5 text-[11px] font-bold"
+                          style={{ background: `${ACCENT}18`, color: ACCENT }}
+                        >
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Cover image */}
+              <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+                <FieldLabel icon={ImagePlus}>Cover Image</FieldLabel>
+
+                {!form.coverUrl ? (
+                  <label
+                    className={`mt-2 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center transition hover:border-[#FF633F]/40 hover:bg-slate-100 ${
+                      uploadingCover ? "opacity-60 pointer-events-none" : ""
+                    }`}
+                  >
+                    <ImagePlus className="h-7 w-7 text-slate-300" />
+                    <span className="text-xs font-semibold text-slate-500">
+                      {uploadingCover ? "Uploading…" : "Click to upload cover image"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={onCoverUpload}
+                      disabled={uploadingCover}
+                      className="sr-only"
+                    />
+                  </label>
+                ) : (
+                  <div className="mt-2 overflow-hidden rounded-2xl border border-slate-100">
+                    <img
+                      src={form.coverUrl}
+                      alt="Cover preview"
+                      className="h-44 w-full object-cover"
+                    />
+                    <div className="flex items-center justify-between border-t border-slate-100 px-4 py-2">
+                      <span className="text-xs font-semibold text-slate-500">Cover uploaded</span>
+                      <button
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, coverUrl: "", coverPublicId: "" }))}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:underline"
+                      >
+                        <X className="h-3.5 w-3.5" /> Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {uploadingCover && (
+                  <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-500">
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-200 border-t-[#FF633F]" />
+                    Uploading image…
+                  </div>
+                )}
+
+                {/* Hidden publicId field */}
+                <div className="mt-4">
+                  <FieldLabel>Cover Public ID (optional)</FieldLabel>
+                  <input
+                    value={form.coverPublicId}
+                    onChange={(e) => setForm((f) => ({ ...f, coverPublicId: e.target.value }))}
+                    className={INPUT}
+                    placeholder="user-uploads/xxxx"
+                  />
+                </div>
+              </div>
+
+              {/* Save button */}
+              <motion.button
+                whileTap={{ scale: 0.97 }}
                 type="button"
                 onClick={onSave}
                 disabled={saving}
-                className={`mt-6 w-full rounded-2xl ${ACCENT_BG} ${ACCENT_HOVER} px-5 py-3 text-sm font-extrabold text-white disabled:opacity-60`}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #e8472a 100%)` }}
               >
-                {saving ? "Saving…" : isEdit ? "Update Blog" : "Create Blog"}
-              </button>
+                {saving ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Saving…
+                  </>
+                ) : isEdit ? "Update Blog" : "Publish Blog"}
+              </motion.button>
             </div>
           </div>
         )}
-      </Container>
-    </Page>
+      </div>
+    </div>
   );
 }
