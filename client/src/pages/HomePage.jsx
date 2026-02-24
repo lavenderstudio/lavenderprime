@@ -286,7 +286,7 @@ const PRODUCTS = [
     price: "from 29 AED",
     tag: "Premium",
     img: "./feature/feature2_converted.avif",
-    href: "/editor/print",
+    href: "/editor/fine-art-print",
     tagBg: "#1E293B",
   },
   {
