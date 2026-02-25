@@ -158,9 +158,9 @@ export default function Footer() {
             © {new Date().getFullYear()} Golden Art Frames. All rights reserved.
           </p>
           <div className="flex items-center gap-1.5 text-xs text-white/25">
-            <span>Made with</span>
+            <span>Made With</span>
             <span style={{ color: ACCENT }}>♥</span>
-            <span>in UAE</span>
+            <span>by Fazeel Khan</span>
           </div>
         </div>
       </div>
