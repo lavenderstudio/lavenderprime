@@ -225,11 +225,52 @@ export default function AdminOrdersPage() {
   // ── Auth loading screen ───────────────────────────────────────────────────
   if (checkingAuth) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950">
-        <div className="text-center">
-          <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-700 border-t-[#FF633F] mx-auto" />
-          <p className="text-sm font-semibold text-slate-400">Checking access…</p>
-        </div>
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950">
+        {/* Ambient glow */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `radial-gradient(ellipse 60% 40% at 50% 55%, ${ACCENT}18 0%, transparent 70%)`,
+          }}
+        />
+
+        {/* Logo */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="relative flex flex-col items-center"
+        >
+          <img
+            src="/logo.png"
+            alt="Golden Art Frames"
+            className="h-14 w-auto object-contain"
+            style={{ filter: "brightness(0) invert(1)" }}
+          />
+
+          {/* Spinner ring */}
+          <div className="mt-8 relative h-10 w-10">
+            {/* Track */}
+            <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+            {/* Rotating arc */}
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-transparent"
+              style={{ borderTopColor: ACCENT }}
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 0.9, ease: "linear" }}
+            />
+          </div>
+
+          {/* Label */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-5 text-xs font-bold uppercase tracking-widest text-white/30"
+          >
+            Checking Access...
+          </motion.p>
+        </motion.div>
       </div>
     );
   }
