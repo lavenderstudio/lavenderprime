@@ -54,10 +54,15 @@ const AdminPricingPage       = lazy(() => import("./pages/AdminPricingPage.jsx")
 function NotFound() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+      <img
+        src="/logo.png"
+        alt="Golden Art Frames"
+        className="h-24 w-auto object-contain"
+      />
       <p className="text-7xl font-extrabold text-slate-200">404</p>
-      <p className="text-lg font-bold text-slate-700">Page not found</p>
+      <p className="text-lg font-bold text-slate-700">Page Not Found</p>
       <a href="/" className="text-sm font-semibold text-[#FF633F] hover:underline">
-        ← Back to Home
+        ← Back To Home
       </a>
     </div>
   );
