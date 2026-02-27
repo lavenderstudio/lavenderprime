@@ -323,7 +323,7 @@ const STATS = [
 
 function StatsStrip() {
   return (
-    <section className="relative overflow-hidden border-y border-slate-100 bg-white pb-12 px-4">
+    <section className="relative overflow-hidden border-y border-slate-100 bg-white py-12 px-4">
       {/* Radial glow */}
       <div
         className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-3xl"
@@ -614,7 +614,7 @@ const DELIVERY_CARDS = [
 
 function DeliverySection() {
   return (
-    <section className="bg-white py-20 px-4">
+    <section className="bg-white pt-20 pb-10 px-4">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-10 text-center">
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>Delivery</p>
