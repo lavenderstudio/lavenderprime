@@ -339,7 +339,7 @@ export default function MultiUploadWizardModal({ isOpen, onClose, onComplete }) 
 
                   {/* Pending dim */}
                   {!uploading && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/30 to-transparent py-1.5 px-2 opacity-0 group-hover:opacity-100 transition">
+                    <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/30 to-transparent py-1.5 px-2 opacity-0 group-hover:opacity-100 transition">
                       <p className="truncate text-[10px] font-semibold text-white">
                         {item.file.name}
                       </p>
