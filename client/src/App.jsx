@@ -14,6 +14,7 @@ import RequireAuth from "./components/RequireAuth.jsx";
 import GuestRoute from "./components/GuestRoute.jsx";
 import RequireRole from "./components/auth/RequireRole.jsx";
 import PageLoader from "./components/PageLoader.jsx";
+import SplashScreen from "./components/SplashScreen.jsx";
 
 // ── Lazy page imports ─────────────────────────────────────────────────────────
 const HomePage               = lazy(() => import("./pages/HomePage.jsx"));
@@ -72,6 +73,7 @@ function NotFound() {
 export default function App() {
   return (
     <>
+      <SplashScreen />
       <ScrollToTop />
       <Navbar />
 
