@@ -8,6 +8,13 @@ import { Link } from "react-router-dom";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import api from "../lib/api.js";
 
+// ─── ReactBits animated components ───────────────────────────────────────────
+import ShinyText from "../components/reactbits/ShinyText.jsx";
+import RotatingText from "../components/reactbits/RotatingText.jsx";
+import CountUp from "../components/reactbits/CountUp.jsx";
+import BlurText from "../components/reactbits/BlurText.jsx";
+import CurvedLoop from "../components/reactbits/CurvedLoop.jsx";
+
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const ACCENT = "#FF633F";
 
@@ -87,10 +94,10 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/25
-                     bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white backdrop-blur"
+                     bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest backdrop-blur"
         >
           <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          Crafted In The UAE
+          <ShinyText text="Crafted In The UAE" speed={2.5} color="rgba(255,255,255,0.3)" shineColor="#ffffff" spread={80} />
         </motion.span>
 
         {/* Headline */}
@@ -100,7 +107,15 @@ function Hero() {
           transition={{ delay: 0.35, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl"
         >
-          Luxury Framing<br />
+          Luxury{" "}
+          <RotatingText
+            texts={["Framing", "Canvas", "Prints", "Art"]}
+            interval={2600}
+            mainClassName="align-bottom"
+            style={{ color: ACCENT }}
+            transition={{ type: "spring", damping: 22, stiffness: 280 }}
+          />
+          <br />
           <span style={{ color: ACCENT }}>For Modern Living.</span>
         </motion.h1>
 
@@ -249,7 +264,7 @@ const TRUST = [
   "📍  Delivered across all Emirates",
 ];
 
-function TrustBar() {
+function TrustMarquee() {
   return (
     <div className="overflow-hidden border-y border-slate-100 bg-white py-4">
       <motion.div
@@ -263,6 +278,31 @@ function TrustBar() {
           </span>
         ))}
       </motion.div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. CURVED LOOP BANNER
+// ─────────────────────────────────────────────────────────────────────────────
+const LOOP_TEXT =
+  "Premium Frames  ✦  UAE-Wide Delivery  ✦  Archival Inks  ✦  Custom Sizes  ✦  Gallery Quality  ✦  Fast Turnaround  ✦ ";
+
+function TrustBar() {
+  return (
+    <div
+      className="overflow-hidden pt-2"
+    >
+      <CurvedLoop
+        marqueeText={LOOP_TEXT}
+        speed={2}
+        curveAmount={-70}
+        direction="left"
+        interactive
+        fill="#FF633F"
+        fontSize="2.6rem"
+        fontWeight="800"
+      />
     </div>
   );
 }
@@ -311,7 +351,7 @@ const PRODUCTS = [
 
 function ProductsSection() {
   return (
-    <section className="bg-[#fafafa] py-20 px-4">
+    <section className="bg-[#fafafa] pb-20 px-4">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <Reveal className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -415,7 +455,10 @@ function AboutSplit() {
               className="absolute left-4 bottom-8 rounded-2xl px-5 py-3 text-white shadow-lg"
               style={{ background: ACCENT }}
             >
-              <p className="text-2xl font-extrabold">500+</p>
+              <p className="text-2xl font-extrabold">
+                <CountUp from={0} to={500} duration={2} />
+                <span>+</span>
+              </p>
               <p className="text-xs font-semibold opacity-80">Frames crafted</p>
             </div>
           </div>
@@ -482,7 +525,12 @@ function HowItWorks() {
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-12 text-center">
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>Process</p>
-          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">How It Works</h2>
+          <BlurText
+            text="How It Works"
+            tag="h2"
+            className="mt-2 text-3xl font-extrabold text-white sm:text-4xl"
+            delay={70}
+          />
         </Reveal>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => (
@@ -532,9 +580,12 @@ function DeliverySection() {
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-10 text-center">
           <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>Delivery</p>
-          <h2 className="mt-2 text-3xl font-extrabold text-slate-900 sm:text-4xl">
-            Fast, Safe, Across The UAE
-          </h2>
+          <BlurText
+            text="Fast, Safe, Across The UAE"
+            tag="h2"
+            className="mt-2 text-3xl font-extrabold text-slate-900 sm:text-4xl"
+            delay={60}
+          />
           <p className="mt-3 text-sm text-slate-500 max-w-lg mx-auto">
             From our studio to your home — every order is handled with care from start to finish.
           </p>
@@ -590,7 +641,12 @@ function Testimonials() {
         <Reveal className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>Reviews</p>
-            <h2 className="mt-1 text-3xl font-extrabold text-slate-900 sm:text-4xl">What Our Customers Say</h2>
+            <BlurText
+              text="What Our Customers Say"
+              tag="h2"
+              className="mt-1 text-3xl font-extrabold text-slate-900 sm:text-4xl"
+              delay={55}
+            />
           </div>
           <div className="flex items-center gap-2">
             <Stars />
@@ -879,6 +935,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white font-sans text-slate-900 antialiased">
       <FloatingContact />
       <Hero />
+      {/* <TrustMarquee /> */}
       <TrustBar />
       <ProductsSection />
       <AboutSplit />
