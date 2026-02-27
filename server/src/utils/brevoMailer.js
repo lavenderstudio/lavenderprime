@@ -120,7 +120,7 @@ export async function sendOrderConfirmation(order) {
         <p style="margin:0 0 8px;font-size:14px;color:#475569;">
           We'll send you another email once your order is on its way. In the meantime, feel free to reach out.
         </p>
-        <a href="https://goldenartframes.com/contact"
+        <a href="https://goldenartframe.com/contact"
            style="display:inline-block;margin-top:12px;background:#FF633F;color:#fff;text-decoration:none;
                   padding:14px 28px;border-radius:8px;font-weight:700;font-size:14px;">
           Contact Support
@@ -131,7 +131,7 @@ export async function sendOrderConfirmation(order) {
       <!-- Footer -->
       <div style="border-top:1px solid #f1f5f9;padding:20px 32px;background:#f8fafc;">
         <p style="margin:0;font-size:12px;color:#94a3b8;text-align:center;">
-          © Golden Art Frames · UAE · <a href="https://goldenartframes.com" style="color:#FF633F;text-decoration:none;">goldenartframes.com</a>
+          © Golden Art Frames · UAE · <a href="https://goldenartframe.com" style="color:#FF633F;text-decoration:none;">goldenartframes.com</a>
         </p>
       </div>
     </div>
