@@ -14,6 +14,8 @@ import RotatingText from "../components/reactbits/RotatingText.jsx";
 import CountUp from "../components/reactbits/CountUp.jsx";
 import BlurText from "../components/reactbits/BlurText.jsx";
 import CurvedLoop from "../components/reactbits/CurvedLoop.jsx";
+import Magnet from "../components/reactbits/Magnet.jsx";
+import TiltCard from "../components/reactbits/TiltCard.jsx";
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const ACCENT = "#FF633F";
@@ -97,7 +99,7 @@ function Hero() {
                      bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest backdrop-blur"
         >
           <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: ACCENT }} />
-          <ShinyText text="Crafted In The UAE" speed={2.5} color="rgba(255,255,255,0.3)" shineColor="#ffffff" spread={80} />
+          <ShinyText text="Crafted In The UAE" speed={2.5} color="rgba(255, 255, 255, 0.9)" shineColor="#FF633F" spread={120} />
         </motion.span>
 
         {/* Headline */}
@@ -136,17 +138,19 @@ function Hero() {
           transition={{ delay: 0.62 }}
           className="mt-8 flex flex-wrap gap-3"
         >
-          {/* Primary — accent fill */}
-          <motion.div whileTap={{ scale: 0.97 }}>
-            <Link
-              to="/products"
-              style={{ background: ACCENT }}
-              className="inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 text-sm font-extrabold text-white shadow-lg
-                         transition-all duration-300 hover:brightness-110 hover:scale-[1.04] hover:shadow-xl"
-            >
-              Start Designing
-            </Link>
-          </motion.div>
+          {/* Primary — magnetic accent fill */}
+          <Magnet padding={60} magnetStrength={10}>
+            <motion.div whileTap={{ scale: 0.97 }}>
+              <Link
+                to="/products"
+                style={{ background: ACCENT }}
+                className="inline-flex items-center gap-2 rounded-2xl px-7 py-3.5 text-sm font-extrabold text-white shadow-lg
+                           transition-all duration-300 hover:brightness-110 hover:scale-[1.04] hover:shadow-xl"
+              >
+                Start Designing
+              </Link>
+            </motion.div>
+          </Magnet>
 
           {/* Secondary ghost — orange border on hover */}
           <motion.div whileTap={{ scale: 0.97 }}>
@@ -308,7 +312,41 @@ function TrustBar() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. PRODUCTS — Clean uniform 4-card grid
+// 3. STATS STRIP
+// ─────────────────────────────────────────────────────────────────────────────
+const STATS = [
+  { value: 500,  suffix: "+", label: "Frames Crafted",    icon: "🖼️" },
+  { value: 4.9,  suffix: "★", label: "Average Rating",     icon: "⭐" },
+  { value: 70,    suffix: "+",  label: "Emirates Delivered", icon: "📦" },
+  { value: 48,   suffix: "h", label: "Avg. Turnaround",    icon: "⚡" },
+];
+
+function StatsStrip() {
+  return (
+    <section className="relative overflow-hidden border-y border-slate-100 bg-white pb-12 px-4">
+      {/* Radial glow */}
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-3xl"
+        style={{ background: ACCENT }}
+      />
+      <div className="relative mx-auto grid max-w-5xl grid-cols-2 gap-8 sm:grid-cols-4">
+        {STATS.map((s, i) => (
+          <Reveal key={s.label} delay={i * 0.09} className="flex flex-col items-center gap-1.5 text-center">
+            <span className="text-3xl">{s.icon}</span>
+            <p className="tabular-nums text-4xl font-extrabold text-slate-900 sm:text-5xl">
+              <CountUp from={0} to={s.value} duration={2.2} delay={0.1} />
+              <span>{s.suffix}</span>
+            </p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">{s.label}</p>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. PRODUCTS — Clean uniform 4-card grid
 // ─────────────────────────────────────────────────────────────────────────────
 const PRODUCTS = [
   {
@@ -386,43 +424,43 @@ function ProductsSection() {
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {PRODUCTS.map((p, i) => (
             <Reveal key={p.name} delay={i * 0.07}>
-              <motion.div whileTap={{ scale: 0.98 }}>
-              <Link
-                to={p.href}
-                className="group flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm
-                           transition-all duration-300 hover:shadow-lg hover:border-[#FF633F]/25 hover:-translate-y-1"
-              >
-                {/* Image */}
-                <div className="relative h-52 overflow-hidden bg-slate-100">
-                  <img
-                    src={p.img}
-                    alt={p.name}
-                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]"
-                  />
-                  <span
-                    className="absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-extrabold text-white shadow"
-                    style={{ background: p.tagBg }}
-                  >
-                    {p.tag}
-                  </span>
-                </div>
-
-                {/* Info */}
-                <div className="flex flex-1 flex-col p-5">
-                  <p className="text-base font-extrabold text-slate-900">{p.name}</p>
-                  <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-500">{p.desc}</p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm font-extrabold" style={{ color: ACCENT }}>
-                      {p.price}
-                    </span>
-                    <span className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700
-                                    transition-all duration-300 group-hover:bg-[#FF633F] group-hover:text-white group-hover:scale-105">
-                      Design →
+              <TiltCard rotateAmplitude={8} scaleOnHover={1.02}>
+                <Link
+                  to={p.href}
+                  className="group flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm
+                             transition-all duration-300 hover:shadow-xl hover:border-[#FF633F]/25"
+                >
+                  {/* Image */}
+                  <div className="relative h-52 overflow-hidden bg-slate-100">
+                    <img
+                      src={p.img}
+                      alt={p.name}
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.05]"
+                    />
+                    <span
+                      className="absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-extrabold text-white shadow"
+                      style={{ background: p.tagBg }}
+                    >
+                      {p.tag}
                     </span>
                   </div>
-                </div>
-              </Link>
-              </motion.div>
+
+                  {/* Info */}
+                  <div className="flex flex-1 flex-col p-5">
+                    <p className="text-base font-extrabold text-slate-900">{p.name}</p>
+                    <p className="mt-1 flex-1 text-xs leading-relaxed text-slate-500">{p.desc}</p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-sm font-extrabold" style={{ color: ACCENT }}>
+                        {p.price}
+                      </span>
+                      <span className="rounded-xl bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700
+                                      transition-all duration-300 group-hover:bg-[#FF633F] group-hover:text-white group-hover:scale-105">
+                        Design →
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </TiltCard>
             </Reveal>
           ))}
         </div>
@@ -941,6 +979,7 @@ export default function HomePage() {
       <AboutSplit />
       <HowItWorks />
       <DeliverySection />
+      <StatsStrip />
       <Testimonials />
       <BlogSection />
       <Newsletter />
