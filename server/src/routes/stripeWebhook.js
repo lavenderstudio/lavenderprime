@@ -2,7 +2,7 @@ import express from "express";
 import Stripe from "stripe";
 import Order from "../models/Order.js";
 import Cart from "../models/Cart.js";
-import { sendOrderConfirmation } from "../utils/brevoMailer.js";
+import { sendOrderConfirmation, sendOwnerOrderAlert } from "../utils/brevoMailer.js";
 
 const router = express.Router();
 
@@ -44,18 +44,24 @@ router.post(
             };
 
             await order.save();
-            // Send confirmation email
+
+            // 1. Customer confirmation — send once per order
             if (!order.email?.confirmationSent) {
               try {
                 await sendOrderConfirmation(order);
-
                 order.email.confirmationSent = true;
                 order.email.confirmationSentAt = new Date();
                 await order.save();
               } catch (err) {
-                console.error("Brevo email failed:", err.response?.data || err.message);
+                console.error("[brevo] customer confirmation failed:", err.response?.data || err.message);
               }
             }
+
+            // 2. Owner alert — always fires when payment first confirmed
+            //    (safe: outer guard already checks order.status !== "paid")
+            sendOwnerOrderAlert(order).catch((err) =>
+              console.error("[ownerAlert] email failed:", err.message)
+            );
 
             await Cart.updateOne(
               { sessionId: order.sessionId },
