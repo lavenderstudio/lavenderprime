@@ -333,7 +333,7 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
               <div className="my-5 flex justify-center">
                 <div
                   style={{ borderColor: ACCENT, background: `${ACCENT}08` }}
-                  className="flex h-36 w-48 items-center justify-center rounded-2xl border-2"
+                  className="flex h-36 w-48 py-20 items-center justify-center rounded-2xl border-2"
                 >
                   <div
                     style={{
@@ -344,7 +344,7 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
                     }}
                     className="rounded border-2 transition-all duration-300 flex items-center justify-center"
                   >
-                    <span className="text-[11px] font-bold" style={{ color: ACCENT }}>
+                    <span className="text-[11px] font-bold " style={{ color: ACCENT }}>
                       {selectedRatio.label}
                     </span>
                   </div>

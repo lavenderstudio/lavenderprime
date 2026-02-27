@@ -1,16 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/static-components */
 // client/src/pages/EditorWeddingFrame.jsx
-// Tailwind version: responsive editor UI
-// - Mobile: stacks editor + options
-// - Desktop: 2 columns
-//
-// ✅ Updates made:
-// - Loads product: /products/wedding-frame
-// - Quotes use productSlug: "wedding-frame"
-// - Cart item uses productSlug: "wedding-frame" (NOT "print and frame")
-// - Adds personalization form driven by product.personalizationConfig.fields
-// - Locks upload ratio to portrait (best-effort + enforced in onComplete)
 
 import { useEffect, useMemo, useState } from "react";
 import api from "../lib/api.js";
@@ -22,524 +12,321 @@ import WeddingFramePreview from "../components/WeddingFramePreview.jsx";
 import PersonalisationForm from "../components/PersonalisationForm.jsx";
 import { FRAME_OPTIONS } from "../lib/optionsUi.js";
 
-// ✅ Theme tokens
 import { ACCENT, ACCENT_BG, ACCENT_HOVER, Container } from "../components/home/ui.jsx";
+
+function parseCmSize(sizeStr) {
+  if (!sizeStr) return null;
+  const cleaned = sizeStr.toLowerCase().replace("cm", "").replace("×", "x").trim();
+  const [w, h] = cleaned.split("x").map((n) => Number(n));
+  if (!Number.isFinite(w) || !Number.isFinite(h)) return null;
+  return { w, h };
+}
+
+function SectionLabel({ children }) {
+  return <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">{children}</p>;
+}
+
+function SizePills({ variants, value, onChange }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {variants.map((v) => {
+        const active = v.sku === value;
+        return (
+          <button key={v.sku} type="button" onClick={() => onChange(v.sku)}
+            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95
+              ${active ? `${ACCENT_BG} text-white shadow-md shadow-[#FF633F]/25` : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
+            {v.size}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function FrameTiles({ options, value, onChange }) {
+  return (
+    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+      {options.map((opt) => {
+        const active = opt.id === value;
+        return (
+          <button key={opt.id} type="button" onClick={() => onChange(opt.id)}
+            className={`group flex flex-col items-center gap-1.5 rounded-xl p-2 transition-all duration-200 active:scale-95
+              ${active ? "ring-2 ring-[#FF633F] bg-[#FF633F]/8 border border-[#FF633F]/30" : "border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"}`}>
+            <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 shadow-sm">
+              <img src={opt.img} alt={opt.id} className="h-full w-full object-cover" loading="lazy" />
+            </div>
+            <span className={`text-[9px] font-bold uppercase leading-tight tracking-wide text-center ${active ? "text-[#FF633F]" : "text-slate-500"}`}>
+              {opt.id.replace(" Wood", "").replace(" Metal", "")}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function UploadPlaceholder({ onUpload }) {
+  return (
+    <button type="button" onClick={onUpload} aria-label="Upload photo"
+      className="group relative flex w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center transition-all duration-200 hover:border-[#FF633F]/50 hover:bg-[#FF633F]/5 active:scale-[0.99]">
+      <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-200 group-hover:scale-105">
+        <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#FF633F]/30 animate-spin [animation-duration:8s]" />
+        <svg className="h-8 w-8 text-[#FF633F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div>
+        <p className="text-base font-extrabold text-slate-900">Upload Your Wedding Photo</p>
+        <p className="mt-1 text-sm text-slate-500">Portrait Ratio → Crop → Preview</p>
+      </div>
+      <span className="rounded-full bg-[#FF633F] px-5 py-2 text-sm font-bold text-white shadow-md shadow-[#FF633F]/30 transition-transform group-hover:scale-105">Choose Photo</span>
+    </button>
+  );
+}
 
 export default function EditorWeddingFrame() {
   const navigate = useNavigate();
-
-  const [product, setProduct] = useState(null);
+  const [product, setProduct]   = useState(null);
   const [variantSku, setVariantSku] = useState("");
-  const [frame, setFrame] = useState("Black Wood");
-  const [quantity, setQuantity] = useState(1);
-
+  const [frame, setFrame]       = useState("Black Wood");
+  const [quantity]              = useState(1);
   const [originalUrl, setOriginalUrl] = useState("");
-  const [quote, setQuote] = useState(null);
-  const [error, setError] = useState("");
-
+  const [quote, setQuote]       = useState(null);
+  const [error, setError]       = useState("");
   const [isUploadWizardOpen, setIsUploadWizardOpen] = useState(false);
-  const [selectedRatio, setSelectedRatio] = useState(null); // {id,w,h,label}
-
-  // ✅ NEW: holds actual customer inputs (these belong to cart/order, not Product)
-  // Example:
-  // personalization = { groomName: "Areez", brideName: "Mehmuna", weddingDate: "2025-08-14", ... }
+  const [selectedRatio, setSelectedRatio] = useState(null);
   const [personalization, setPersonalization] = useState({});
+  const lockedRatioId = "2:3";
 
-  // ------------------------------
-  // Load Wedding product
-  // ------------------------------
   useEffect(() => {
     const load = async () => {
       try {
         setError("");
-
-        // ✅ Must match your backend route.
-        // If your backend route is different, adjust this endpoint accordingly.
         const res = await api.get("/products/wedding-frame");
         setProduct(res.data);
-
-        // Default SKU to first portrait variant
         const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
         if (firstPortrait) setVariantSku(firstPortrait.sku);
-
-        // Initialize personalization defaults (optional)
-        // If the product defines fields, we set empty strings for them.
         const fields = res.data?.personalizationConfig?.fields || [];
         if (fields.length) {
           const initial = {};
-          fields.forEach((f) => {
-            // Use empty string defaults for form inputs
-            initial[f.key] = "";
-          });
+          fields.forEach((f) => { initial[f.key] = ""; });
           setPersonalization(initial);
         }
-      } catch (err) {
-        setError(err?.response?.data?.message || err.message);
-      }
+      } catch (err) { setError(err?.response?.data?.message || err.message); }
     };
     load();
   }, []);
 
-  // ------------------------------
-  // Variants
-  // ------------------------------
-  const portraitVariants = useMemo(() => {
-    return (product?.variants || []).filter((v) => v.orientation === "portrait");
-  }, [product]);
-
-  const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
-
-  // ------------------------------
-  // Quote
-  // ------------------------------
-  useEffect(() => {
-    const getQuote = async () => {
-      if (!variantSku) return;
-
-      try {
-        setError("");
-
-        const res = await api.post("/pricing/quote", {
-          // ✅ IMPORTANT: slug should be exact
-          productSlug: "wedding-frame",
-          variantSku,
-          options: {
-            frame,
-          },
-          quantity,
-        });
-
-        setQuote(res.data);
-      } catch (err) {
-        setQuote(null);
-        setError(err?.response?.data?.message || err.message);
-      }
-    };
-
-    getQuote();
-  }, [variantSku, frame, quantity]);
-
-  // ------------------------------
-  // Mat calculations
-  // ------------------------------
-  const parsedPrint = parseCmSize(selectedVariant?.size);
-
-  // ------------------------------
-  // Personalization config helpers
-  // ------------------------------
+  const portraitVariants = useMemo(() => (product?.variants || []).filter((v) => v.orientation === "portrait"), [product]);
+  const selectedVariant  = portraitVariants.find((v) => v.sku === variantSku);
+  const parsedPrint      = parseCmSize(selectedVariant?.size);
   const personalizationEnabled = !!product?.personalizationConfig?.enabled;
-  const personalizationFields = useMemo(() => {
+  const personalizationFields  = useMemo(() => {
     const fields = product?.personalizationConfig?.fields || [];
-    // Sort by sortOrder so it renders in the right UI order
     return [...fields].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   }, [product]);
 
+  useEffect(() => {
+    const getQuote = async () => {
+      if (!variantSku) return;
+      try {
+        setError("");
+        const res = await api.post("/pricing/quote", { productSlug: "wedding-frame", variantSku, options: { frame }, quantity });
+        setQuote(res.data);
+      } catch (err) { setQuote(null); setError(err?.response?.data?.message || err.message); }
+    };
+    getQuote();
+  }, [variantSku, frame, quantity]);
+
   function validatePersonalization() {
     if (!personalizationEnabled) return { ok: true };
-
     for (const f of personalizationFields) {
       const val = String(personalization?.[f.key] ?? "").trim();
-
-      // Required check
-      if (f.required && !val) {
-        return { ok: false, message: `Please fill: ${f.label}` };
-      }
-
-      // Length checks
+      if (f.required && !val) return { ok: false, message: `Please fill: ${f.label}` };
       if (val) {
-        const minL = Number(f.minLength ?? 0);
-        const maxL = Number(f.maxLength ?? 9999);
-        if (minL && val.length < minL) {
-          return { ok: false, message: `${f.label} must be at least ${minL} characters.` };
-        }
-        if (maxL && val.length > maxL) {
-          return { ok: false, message: `${f.label} must be under ${maxL} characters.` };
-        }
+        const minL = Number(f.minLength ?? 0); const maxL = Number(f.maxLength ?? 9999);
+        if (minL && val.length < minL) return { ok: false, message: `${f.label} must be at least ${minL} characters.` };
+        if (maxL && val.length > maxL) return { ok: false, message: `${f.label} must be under ${maxL} characters.` };
       }
-
-      // Regex pattern check (optional)
       if (val && f.pattern) {
-        try {
-          const re = new RegExp(f.pattern);
-          if (!re.test(val)) {
-            return { ok: false, message: `${f.label} format is invalid.` };
-          }
-        } catch {
-          // If someone saved a bad regex in DB, we skip validation to avoid blocking checkout.
-        }
+        try { const re = new RegExp(f.pattern); if (!re.test(val)) return { ok: false, message: `${f.label} format is invalid.` }; }
+        catch { /* skip bad regex */ }
       }
     }
-
     return { ok: true };
   }
 
-  // ------------------------------
-  // Add to cart
-  // ------------------------------
+  const canOrder = !!(originalUrl && quote && selectedRatio);
+
   const handleAddToCart = async () => {
     try {
       setError("");
-
-      if (!originalUrl || !quote || !selectedVariant || !selectedRatio) {
+      if (!originalUrl || !quote || !selectedVariant || !selectedRatio)
         return setError("Missing image, ratio selection, or price.");
-      }
-
-      // ✅ Validate wedding personalization inputs (if enabled)
       const pv = validatePersonalization();
       if (!pv.ok) return setError(pv.message);
-
       const sessionId = getSessionId();
-
       await api.post("/cart/items", {
         sessionId,
         item: {
-          // ✅ Must be slug, consistent everywhere
-          productSlug: "wedding-frame",
-          variantSku,
-
-          // Product configuration selections
-          config: {
-            orientation: "portrait",
-            size: selectedVariant.size,
-            frame,
-            quantity,
-            transform: {
-              ratio: selectedRatio.id,
-              ratioW: selectedRatio.w,
-              ratioH: selectedRatio.h,
-            },
-          },
-
-          // ✅ NEW: store user-entered values here (belongs to cart/order)
+          productSlug: "wedding-frame", variantSku,
+          config: { orientation: "portrait", size: selectedVariant.size, frame, quantity, transform: { ratio: selectedRatio.id, ratioW: selectedRatio.w, ratioH: selectedRatio.h } },
           personalization: personalizationEnabled ? personalization : undefined,
-
-          assets: {
-            originalUrl,
-            previewUrl: "", // may be blank if popup opened; that’s okay for now
-          },
-
-          price: {
-            unit: quote.unit,
-            total: quote.total,
-            currency: quote.currency,
-          },
+          assets: { originalUrl, previewUrl: "" },
+          price: { unit: quote.unit, total: quote.total, currency: quote.currency },
         },
       });
-
       navigate("/cart");
-    } catch (err) {
-      setError(err?.response?.data?.message || err.message);
-    }
+    } catch (err) { setError(err?.response?.data?.message || err.message); }
   };
 
-  // ------------------------------
-  // UI Components
-  // ------------------------------
-  function SizePills({ variants, value, onChange }) {
-    return (
-      <div className="mt-2 flex flex-wrap gap-2">
-        {variants.map((v) => {
-          const active = v.sku === value;
-
-          return (
-            <button
-              key={v.sku}
-              type="button"
-              onClick={() => onChange(v.sku)}
-              className={`rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.99]
-                ${
-                  active
-                    ? `${ACCENT_BG} text-white`
-                    : "bg-white text-slate-900 border border-slate-200 hover:bg-slate-50"
-                }`}
-            >
-              {v.size}
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  function FrameTiles({ options, value, onChange }) {
-    return (
-      <div className="mt-3 grid grid-cols-3 gap-3 transition">
-        {options.map((opt) => {
-          const active = opt.id === value;
-
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => onChange(opt.id)}
-              className={`group rounded-2xl p-2 text-center transition active:scale-[0.99]
-                ${
-                  active
-                    ? "ring-2 ring-[#FF633F]/60 bg-[#FF633F]/10 border border-[#FF633F]/20"
-                    : "border border-slate-200 bg-white hover:bg-slate-50"
-                }`}
-            >
-              <div className="mx-auto h-14 w-14 overflow-hidden rounded-full bg-slate-100 border border-slate-200">
-                <img src={opt.img} alt={opt.id} className="h-full w-full object-cover" loading="lazy" />
-              </div>
-
-              <div className="mt-2 text-[10px] font-bold uppercase tracking-wide text-slate-700">
-                {opt.id}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  // ------------------------------
-  // Utils
-  // ------------------------------
-  function parseCmSize(sizeStr) {
-    // Accepts "12x18" or "12x18cm" or "12×18"
-    if (!sizeStr) return null;
-
-    const cleaned = sizeStr.toLowerCase().replace("cm", "").replace("×", "x").trim();
-    const [w, h] = cleaned.split("x").map((n) => Number(n));
-
-    if (!Number.isFinite(w) || !Number.isFinite(h)) return null;
-    return { w, h };
-  }
-
-  const lockedRatioId = "2:3";
-
   return (
-    <Page title="Editor — Wedding Print & Frame">
+    <Page title="Editor — Wedding Frame">
       <Container className="px-0">
+        <div className="px-4 pt-4">
+          <Link to="/products" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+            Products
+          </Link>
+        </div>
+
         {error && (
-          <div className="rounded-2xl bg-red-50 p-4 text-red-700 border border-red-200">
-            <b>Error:</b> {error}
+          <div className="mx-4 mt-3 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <svg className="h-4 w-4 shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            {error}
           </div>
         )}
 
+        <div className="px-4 pt-4 pb-2">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Wedding Frame</h1>
+          <p className="mt-0.5 text-sm text-slate-500">Personalised Wedding Portrait Frame — Beautifully Framed &amp; Delivered.</p>
+        </div>
+
         {!product ? (
-          <div className="mt-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-slate-600">Loading product…</p>
+          <div className="mx-4 mt-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm animate-pulse">
+            <div className="h-4 w-32 rounded bg-slate-200 mb-3" /><div className="h-48 w-full rounded-2xl bg-slate-100" />
           </div>
         ) : (
-          <div className="mt-4 grid gap-6 lg:grid-cols-12">
-            {/* LEFT: Editor */}
-            <div className="relative overflow-hidden rounded-3xl lg:col-span-7 border border-slate-200 bg-linear-to-b from-[#FF633F]/5 via-white to-white shadow-sm">
-              <div className="p-5">
-                {!originalUrl ? (
-                  <div className="flex flex-col items-center justify-center">
-                    <button
-                      type="button"
-                      onClick={() => setIsUploadWizardOpen(true)}
-                      className="group relative w-full max-w-md rounded-3xl bg-white p-6 shadow-[0_18px_50px_rgba(0,0,0,0.10)] border border-slate-200 transition active:scale-[0.99]"
-                      aria-label="Upload image"
-                    >
-                      <div className="relative rounded-2xl bg-white p-4">
-                        <div className="rounded-xl border-2 border-slate-200 bg-white">
-                          <div className="flex aspect-square items-center justify-center">
-                            <div className="text-center">
-                              <svg
-                                className="mx-auto h-10 w-10 text-slate-700 transition group-hover:scale-[1.03]"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                              >
-                                <path
-                                  d="M12 3v10"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                />
-                                <path
-                                  d="M8 7l4-4 4 4"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                                <path
-                                  d="M4 14v4a3 3 0 003 3h10a3 3 0 003-3v-4"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                />
-                              </svg>
-
-                              <div className="mt-3 text-sm font-extrabold text-slate-900">
-                                Tap to upload your photo
-                              </div>
-
-                              <div className="mt-2 text-xs font-semibold text-slate-500">
-                                Portrait ratio → crop → preview
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <span className="absolute right-3 top-3 h-3 w-3 rounded-full bg-[#FF633F] shadow" />
-                      </div>
-                    </button>
-
-                    <p className="mt-4 text-xs font-semibold text-slate-600 text-center max-w-md">
-                      Golden Art Frames prints and frames your photo with premium packaging and doorstep delivery.
-                    </p>
+          <div className="mt-2 flex flex-col gap-0 lg:grid lg:grid-cols-12 lg:gap-6 lg:px-4 lg:pb-8">
+            <div className="lg:col-span-7">
+              <div className="sticky top-20 overflow-hidden rounded-none lg:rounded-3xl border-0 border-b border-slate-200 lg:border bg-white shadow-sm">
+                <div className="flex items-center justify-between px-5 pt-5 pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2.5 w-2.5 rounded-full bg-[#FF633F] shadow-sm shadow-[#FF633F]/50" />
+                    <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Live Preview</span>
                   </div>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-semibold text-slate-700">
-                        <b>Ratio:</b> <span className={`${ACCENT}`}>{selectedRatio?.id || "-"}</span>
-                      </div>
-
-                      <button
-                        onClick={() => setIsUploadWizardOpen(true)}
-                        className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-extrabold text-slate-900 hover:bg-slate-50 active:scale-[0.99]"
-                      >
-                        Change Image
-                      </button>
-                    </div>
-
-                    <div className="mt-4">
-                      <WeddingFramePreview
-                        imageUrl={originalUrl}
-                        frame={frame}
-                        groomName={personalization.groomName}
-                        brideName={personalization.brideName}
-                        locationText={personalization.location}
-                        weddingDateText={personalization.weddingDate}
-                        message={personalization.message}
-                      />
-
-                    </div>
-                  </>
+                  {originalUrl && (
+                    <button onClick={() => setIsUploadWizardOpen(true)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all active:scale-95">↺ Change Photo</button>
+                  )}
+                </div>
+                <div className="px-5 pb-5">
+                  {!originalUrl ? (
+                    <div className="rounded-2xl bg-slate-50 p-4"><UploadPlaceholder onUpload={() => setIsUploadWizardOpen(true)} /></div>
+                  ) : (
+                    <WeddingFramePreview
+                      imageUrl={originalUrl} frame={frame}
+                      groomName={personalization.groomName} brideName={personalization.brideName}
+                      locationText={personalization.location} weddingDateText={personalization.weddingDate}
+                      message={personalization.message}
+                    />
+                  )}
+                </div>
+                {originalUrl && (
+                  <div className="flex items-center gap-3 border-t border-slate-100 px-5 py-3 flex-wrap">
+                    {selectedRatio && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Ratio: {selectedRatio.id}</span>}
+                    {parsedPrint && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Print: {parsedPrint.w}×{parsedPrint.h}cm</span>}
+                    <span className="rounded-full bg-[#FF633F]/10 px-3 py-1 text-xs font-bold text-[#FF633F] capitalize">{frame}</span>
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* RIGHT: Options */}
-            <div className="rounded-3xl border border-slate-200 bg-white lg:col-span-5 p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-extrabold text-slate-900">Options</h3>
-                  <p className="mt-1 text-sm font-semibold text-slate-600">
-                    Choose size, frame, mat, quantity and personalise.
-                  </p>
+            <div className="lg:col-span-5">
+              <div className="flex flex-col gap-0">
+                <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 lg:rounded-t-3xl lg:border lg:border-b-0">
+                  <div>
+                    <h2 className="text-lg font-extrabold text-slate-900">Customise</h2>
+                    <p className="text-xs text-slate-500">Size, Frame &amp; Personalisation</p>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-2xl font-black ${quote ? "text-slate-900" : "text-slate-300"}`}>{quote ? `${quote.total}` : "—"}</div>
+                    {quote && <div className="text-xs font-semibold text-slate-400">{quote.currency} · Per Piece</div>}
+                  </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-[#FF633F]/10 px-3 py-2 text-sm font-extrabold text-slate-900">
-                  {quote ? `${quote.total} ${quote.currency}` : "—"}
+                <div className="divide-y divide-slate-100 border border-t-0 border-slate-200 bg-white lg:rounded-b-3xl overflow-hidden">
+                  <div className="px-5 py-4">
+                    <div className="flex items-baseline justify-between mb-3">
+                      <SectionLabel>Frame Size</SectionLabel>
+                      {parsedPrint && <span className="text-xs font-semibold text-slate-400">{parsedPrint.w}×{parsedPrint.h}cm</span>}
+                    </div>
+                    <SizePills variants={portraitVariants} value={variantSku} onChange={setVariantSku} />
+                  </div>
+
+                  <div className="px-5 py-4">
+                    <div className="flex items-baseline justify-between mb-3">
+                      <SectionLabel>Frame Style</SectionLabel>
+                      <span className={`text-xs font-bold ${ACCENT}`}>{frame}</span>
+                    </div>
+                    <FrameTiles options={FRAME_OPTIONS} value={frame} onChange={setFrame} />
+                  </div>
+
+                  {personalizationEnabled && (
+                    <div className="px-5 py-4">
+                      <SectionLabel>{product?.personalizationConfig?.title || "Personalisation"}</SectionLabel>
+                      <PersonalisationForm
+                        enabled={personalizationEnabled}
+                        title={product?.personalizationConfig?.title}
+                        fields={product?.personalizationConfig?.fields || []}
+                        values={personalization}
+                        onChange={(key, value) => setPersonalization((prev) => ({ ...prev, [key]: value }))}
+                      />
+                    </div>
+                  )}
+
+                  <div className="bg-slate-50 px-5 py-4">
+                    <SectionLabel>Order Summary</SectionLabel>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                      {[["Size", selectedVariant?.size || "—"], ["Frame", frame], ["Total", quote ? `${quote.total} ${quote.currency}` : "—"]].map(([label, val]) => (
+                        <div key={label} className="flex items-baseline justify-between col-span-2 sm:col-span-1">
+                          <span className="font-semibold text-slate-400">{label}</span>
+                          <span className="font-bold text-slate-700">{val}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Sizes */}
-              <div className="mt-6 pt-2">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-extrabold text-slate-900">Total Frame Sizes (CM)</span>
-
-                  <span className="text-sm font-semibold text-slate-700">
-                    Print Size:{" "}
-                    <b className="text-slate-900">
-                      {parsedPrint ? `${parsedPrint.w}x${parsedPrint.h}cm` : selectedVariant?.size || "-"}
-                    </b>
-                  </span>
+                <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur-sm px-5 py-4 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:pb-0 lg:pt-4">
+                  {!originalUrl && (
+                    <p className="mb-3 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-700">
+                      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      Upload A Portrait Photo Above To Continue
+                    </p>
+                  )}
+                  <button disabled={!canOrder} onClick={handleAddToCart}
+                    className={`w-full rounded-2xl py-3.5 text-sm font-extrabold tracking-wide shadow-sm transition-all duration-300 active:scale-[0.98]
+                      ${canOrder ? `${ACCENT_BG} ${ACCENT_HOVER} text-white shadow-lg shadow-[#FF633F]/30 hover:scale-[1.01]` : "cursor-not-allowed bg-slate-100 text-slate-400"}`}>
+                    {canOrder ? `Add To Cart · ${quote?.total ?? ""} ${quote?.currency ?? ""}` : "Add To Cart"}
+                  </button>
+                  <p className="mt-2 text-center text-[10px] font-semibold text-slate-400">🔒 Secure Checkout &nbsp;·&nbsp; Premium Packaging &nbsp;·&nbsp; Doorstep Delivery</p>
                 </div>
-
-                <div className="mt-2">
-                  <SizePills variants={portraitVariants} value={variantSku} onChange={setVariantSku} />
-                </div>
-              </div>
-
-              {/* Frame */}
-              <div className="mt-6">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-extrabold text-slate-900">
-                    Frame: <span className={`${ACCENT}`}>{frame}</span>
-                  </label>
-                </div>
-
-                <FrameTiles options={FRAME_OPTIONS} value={frame} onChange={setFrame} />
-              </div>
-
-              {/* ✅ NEW: Wedding personalisation */}
-              <PersonalisationForm
-                enabled={!!product?.personalizationConfig?.enabled}
-                title={product?.personalizationConfig?.title}
-                fields={product?.personalizationConfig?.fields || []}
-                values={personalization}
-                onChange={(key, value) =>
-                  setPersonalization((prev) => ({ ...prev, [key]: value }))
-                }
-              />
-
-              {/* Summary */}
-              <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <div className="text-sm font-semibold text-slate-700">
-                  <b className="text-slate-900">Selected:</b> {selectedVariant ? `${selectedVariant.size}` : "-"}
-                </div>
-                <div className="mt-1 text-sm font-semibold text-slate-700">
-                  <b className="text-slate-900">SKU:</b> {selectedVariant ? `${selectedVariant.sku}` : "-"}
-                </div>
-                <div className="mt-1 text-sm font-semibold text-slate-700">
-                  <b className="text-slate-900">Frame:</b> {frame}
-                </div>
-                <div className="mt-1 text-sm font-semibold text-slate-700">
-                  <b className="text-slate-900">Price:</b> {quote ? `${quote.total} ${quote.currency}` : "—"}
-                </div>
-              </div>
-
-              {/* Sticky CTA area (desktop) */}
-              <div className="mt-6 lg:sticky lg:top-24">
-                <button
-                  disabled={!originalUrl || !quote || !selectedRatio}
-                  onClick={handleAddToCart}
-                  className={`w-full rounded-2xl px-4 py-3 font-extrabold shadow-sm transition active:scale-[0.99]
-                    ${
-                      !originalUrl || !quote || !selectedRatio
-                        ? "cursor-not-allowed bg-slate-100 text-slate-500 border border-slate-200"
-                        : `${ACCENT_BG} ${ACCENT_HOVER} text-white transition-all duration-300 hover:scale-105`
-                    }`}
-                >
-                  Add to Cart
-                </button>
-
-                <p className="mt-2 text-xs font-semibold text-slate-600">
-                  Secure checkout • Premium packaging • Doorstep delivery
-                </p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Upload wizard */}
         <UploadWizardModal
           isOpen={isUploadWizardOpen}
           onClose={() => setIsUploadWizardOpen(false)}
-          // ✅ Best-effort: if your UploadWizardModal supports this prop, it will lock to portrait.
-          // If it doesn't, no harm done — we still enforce portrait in onComplete below.
           lockedRatioId={lockedRatioId}
           onComplete={({ ratio, imageUrl }) => {
-            // ✅ Enforce portrait ratio at the point we receive it.
-            // Portrait means height > width (e.g., 4x5, 2x3 etc.)
             if (ratio && Number(ratio.h) <= Number(ratio.w)) {
-              setError("Please choose a portrait ratio for Wedding Frame.");
-              return;
+              setError("Please choose a portrait ratio for Wedding Frame."); return;
             }
-
-            setSelectedRatio(ratio);
-            setOriginalUrl(imageUrl);
+            setSelectedRatio(ratio); setOriginalUrl(imageUrl);
           }}
         />
-
-        <div className="mb-3">
-          <Link to="/products" className="text-sm font-semibold text-slate-700 hover:text-slate-900">
-            <button
-              type="button"
-              className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-900 shadow-sm hover:bg-slate-50 active:scale-[0.99]"
-            >
-              &#8592; Back to Products
-            </button>
-          </Link>
-        </div>
       </Container>
     </Page>
   );
