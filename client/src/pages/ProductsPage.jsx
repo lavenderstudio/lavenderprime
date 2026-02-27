@@ -155,7 +155,7 @@ function ProductCard({ product, i }) {
         >
           {/* Image */}
           <div className="relative overflow-hidden bg-slate-50">
-            <div className="aspect-4/3 w-full">
+            <div className="aspect-3/4 w-full p-5">
               <img
                 src={product.img}
                 alt={product.name}
