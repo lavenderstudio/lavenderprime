@@ -7,6 +7,8 @@
 
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
+import User from "../models/User.js";
+import PageView from "../models/PageView.js";
 
 /**
  * Build a Mongo date filter for createdAt using "YYYY-MM-DD" strings.
@@ -149,6 +151,110 @@ export async function updateProductPricing(req, res) {
     return res.json({ ok: true, product });
   } catch (err) {
     console.error("updateProductPricing error:", err);
+    return res.status(500).json({ ok: false, message: err.message });
+  }
+}
+
+/**
+ * GET /api/admin/analytics
+ * Admin-only: returns aggregated stats for the dashboard.
+ */
+export async function getAnalytics(req, res) {
+  try {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // ── Run all aggregations in parallel ─────────────────────────────────────
+    const [
+      revenuePaid,
+      ordersByStatus,
+      dailyOrders,
+      topProducts,
+      totalUsers,
+      trafficBySource,
+      dailyVisits,
+      topPages,
+    ] = await Promise.all([
+      // 1. Total revenue (paid + completed orders)
+      Order.aggregate([
+        { $match: { status: { $in: ["paid", "completed"] } } },
+        { $group: { _id: null, total: { $sum: "$totals.grandTotal" } } },
+      ]),
+
+      // 2. Order count per status
+      Order.aggregate([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+
+      // 3. Daily orders for last 30 days
+      Order.aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo }, status: { $ne: "requires_payment" } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            orders: { $sum: 1 },
+            revenue: { $sum: "$totals.grandTotal" },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+
+      // 4. Top products by item count
+      Order.aggregate([
+        { $match: { status: { $in: ["paid", "completed"] } } },
+        { $unwind: "$items" },
+        { $group: { _id: "$items.productSlug", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 8 },
+      ]),
+
+      // 5. Total users
+      User.countDocuments(),
+
+      // 6. Traffic by source (last 30 days)
+      PageView.aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        { $group: { _id: "$source", visits: { $sum: 1 } } },
+        { $sort: { visits: -1 } },
+        { $limit: 8 },
+      ]),
+
+      // 7. Daily visits for last 30 days
+      PageView.aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            visits: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+
+      // 8. Top pages by view count
+      PageView.aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        { $group: { _id: "$path", views: { $sum: 1 } } },
+        { $sort: { views: -1 } },
+        { $limit: 10 },
+      ]),
+    ]);
+
+    return res.json({
+      ok: true,
+      totalRevenue: revenuePaid[0]?.total ?? 0,
+      ordersByStatus,
+      dailyOrders,
+      topProducts,
+      totalUsers,
+      trafficBySource,
+      dailyVisits,
+      topPages,
+    });
+  } catch (err) {
+    console.error("getAnalytics error:", err);
     return res.status(500).json({ ok: false, message: err.message });
   }
 }

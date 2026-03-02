@@ -16,6 +16,7 @@ import userRoutes from "./routes/users.js";
 import newsletterRoutes from "./routes/newsletter.js";
 import blogRoutes from "./routes/blog.js";
 import adminBlogRoutes from "./routes/admin.blog.js";
+import analyticsRouter from "./routes/analytics.js";
 
 
 dotenv.config();
@@ -56,6 +57,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/admin/blogs", adminBlogRoutes);
+app.use("/api/analytics", analyticsRouter);
 
 // Start server only after DB is connected
 const PORT = process.env.PORT || 5000;

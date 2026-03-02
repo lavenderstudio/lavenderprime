@@ -15,6 +15,7 @@ import GuestRoute from "./components/GuestRoute.jsx";
 import RequireRole from "./components/auth/RequireRole.jsx";
 import PageLoader from "./components/PageLoader.jsx";
 import SplashScreen from "./components/SplashScreen.jsx";
+import { usePageTracker } from "./lib/usePageTracker.js";
 
 // ── Lazy page imports ─────────────────────────────────────────────────────────
 const HomePage               = lazy(() => import("./pages/HomePage.jsx"));
@@ -50,6 +51,7 @@ const AdminOrdersPage        = lazy(() => import("./pages/AdminOrdersPage.jsx"))
 const AdminBlogsPage         = lazy(() => import("./pages/AdminBlogsPage.jsx"));
 const AdminBlogEditorPage    = lazy(() => import("./pages/AdminBlogEditorPage.jsx"));
 const AdminPricingPage       = lazy(() => import("./pages/AdminPricingPage.jsx"));
+const AdminDashboardPage     = lazy(() => import("./pages/AdminDashboardPage.jsx"));
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 function NotFound() {
@@ -71,6 +73,7 @@ function NotFound() {
 
 // ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
+  usePageTracker();
   return (
     <>
       <SplashScreen />
@@ -116,6 +119,10 @@ export default function App() {
 
           {/* Admin */}
           <Route path="/admin" element={<AdminOrdersPage />} />
+          <Route
+            path="/admin/dashboard"
+            element={<RequireRole roles={["admin"]}><AdminDashboardPage /></RequireRole>}
+          />
           <Route
             path="/admin/blogs"
             element={<RequireRole roles={["admin", "manager"]}><AdminBlogsPage /></RequireRole>}

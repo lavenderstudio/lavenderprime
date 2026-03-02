@@ -5,7 +5,7 @@
 
 import express from "express";
 import { requireAuth, requireRole } from "../middleware/requireAuth.js";
-import { listOrders, fulfillOrder, listProducts, updateProductPricing } from "../controllers/admin.controller.js";
+import { listOrders, fulfillOrder, listProducts, updateProductPricing, getAnalytics } from "../controllers/admin.controller.js";
 import { listUsers, updateUserRole } from "../controllers/admin.users.controller.js";
 
 const router = express.Router();
@@ -21,5 +21,8 @@ router.patch("/users/:id/role", requireAuth, requireRole("admin"), updateUserRol
 // Product pricing
 router.get("/products", requireAuth, requireRole("admin", "manager"), listProducts);
 router.patch("/products/:slug", requireAuth, requireRole("admin"), updateProductPricing);
+
+// Analytics — admin only
+router.get("/analytics", requireAuth, requireRole("admin"), getAnalytics);
 
 export default router;

@@ -290,7 +290,7 @@ function TrustMarquee() {
 // 2. CURVED LOOP BANNER
 // ─────────────────────────────────────────────────────────────────────────────
 const LOOP_TEXT =
-  "Premium Frames  ✦  UAE-Wide Delivery  ✦  Archival Inks  ✦  Custom Sizes  ✦  Gallery Quality  ✦  Fast Turnaround  ✦ ";
+  "Premium Frames  ✦  UAE-Wide Delivery  ✦  Archival Prints  ✦  Custom Sizes  ✦  Gallery Quality  ✦  Fast Turnaround  ✦ ";
 
 function TrustBar() {
   return (

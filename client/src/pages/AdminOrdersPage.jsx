@@ -70,6 +70,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [zipping, setZipping] = useState({});
+  const [orderSearch, setOrderSearch] = useState("");
 
   // ── Auth check ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -302,13 +303,24 @@ export default function AdminOrdersPage() {
               )}
             </div>
 
-            {/* Manage pricing link */}
-            <Link
-              to="/admin/pricing"
-              className="mb-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-extrabold text-white/80 transition-all duration-200 hover:bg-white/10 hover:text-white"
-            >
-              Manage Pricing →
-            </Link>
+            {/* Header actions */}
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <Link
+                to="/admin/pricing"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-extrabold text-white/80 transition-all duration-200 hover:bg-white/10 hover:text-white"
+              >
+                Manage Pricing →
+              </Link>
+              {me?.role === "admin" && (
+                <Link
+                  to="/admin/dashboard"
+                  className="rounded-2xl px-4 py-2 text-sm font-extrabold text-white transition-all duration-200 hover:brightness-110"
+                  style={{ background: ACCENT }}
+                >
+                  📊 Overview Dashboard →
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* ── Tab nav ──────────────────────────────────────────────── */}
@@ -381,14 +393,31 @@ export default function AdminOrdersPage() {
               Apply
             </button>
             <button
-              onClick={() => { setFromDate(""); setToDate(""); fetchOrders(activeStatus); }}
+              onClick={() => { setFromDate(""); setToDate(""); setOrderSearch(""); fetchOrders(activeStatus); }}
               className="rounded-xl border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
             >
               Reset
             </button>
 
+            {/* ── Order number search ── */}
+            <div className="ml-auto flex flex-col gap-1">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Search Order #</label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                  🔍
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. 42 or 000042"
+                  value={orderSearch}
+                  onChange={e => setOrderSearch(e.target.value)}
+                  className="w-48 rounded-xl border border-slate-200 py-2 pl-8 pr-3 text-sm font-semibold text-slate-700 outline-none focus:border-[#FF633F]/60 focus:ring-2 focus:ring-[#FF633F]/10"
+                />
+              </div>
+            </div>
+
             {loading && (
-              <div className="ml-auto flex items-center gap-2 text-xs font-semibold text-slate-400">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-[#FF633F]" />
                 Loading…
               </div>
@@ -452,15 +481,22 @@ export default function AdminOrdersPage() {
         {/* ══════════════════════════════════════════════════════════════
             ORDERS VIEW
         ══════════════════════════════════════════════════════════════ */}
-        {activeView === "orders" && (
+        {activeView === "orders" && (() => {
+          const q = orderSearch.trim().toLowerCase();
+          const filteredOrders = q
+            ? orders.filter(o => String(o.orderNumber).padStart(6, "0").includes(q) || String(o.orderNumber).includes(q))
+            : orders;
+          return (
           <div className="space-y-5">
-            {orders.length === 0 && !loading && (
+            {filteredOrders.length === 0 && !loading && (
               <div className="rounded-3xl border border-slate-100 bg-white p-12 text-center shadow-sm">
-                <p className="text-sm text-slate-400">No orders found for this filter.</p>
+                <p className="text-sm text-slate-400">
+                  {q ? `No orders match "${q}".` : "No orders found for this filter."}
+                </p>
               </div>
             )}
 
-            {orders.map((o, oIdx) => {
+            {filteredOrders.map((o, oIdx) => {
               const orderNo = String(o.orderNumber).padStart(6, "0");
               const st = statusUi(o.status);
               const shippingAddr = [o.shippingAddress?.line1, o.shippingAddress?.line2, o.shippingAddress?.city, o.shippingAddress?.postcode, o.shippingAddress?.country].filter(Boolean).join(", ") || "—";
@@ -662,7 +698,9 @@ export default function AdminOrdersPage() {
               );
             })}
           </div>
-        )}
+          );
+        })()}
+
 
       </div>
     </div>

@@ -464,7 +464,7 @@ export default function EditorPrintPortrait() {
                     </p>
                   </div>
 
-                  {/* ─ Quantity ─ */}
+                  {/* ─ Quantity ─
                   <div className="px-5 py-4">
                     <SectionLabel>Quantity</SectionLabel>
                     <div className="flex items-center gap-3">
@@ -484,7 +484,7 @@ export default function EditorPrintPortrait() {
                         +
                       </button>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* ─ Order Summary ─ */}
                   <div className="bg-slate-50 px-5 py-4">
