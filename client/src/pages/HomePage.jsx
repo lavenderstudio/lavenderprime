@@ -355,7 +355,7 @@ const PRODUCTS = [
     price: "from 89 AED",
     tag: "Most Popular",
     img: "./feature/11.avif",
-    href: "/feature/print-frame",
+    href: "/editor/print-frame",
     tagBg: ACCENT,
   },
   {
@@ -364,7 +364,7 @@ const PRODUCTS = [
     price: "from 29 AED",
     tag: "Premium",
     img: "./feature/12.avif",
-    href: "/feature/fine-art-print",
+    href: "/editor/fine-art-print",
     tagBg: "#1E293B",
   },
   {
@@ -373,7 +373,7 @@ const PRODUCTS = [
     price: "from 149 AED",
     tag: "Best Seller",
     img: "./feature/8.avif",
-    href: "/feature/canvas",
+    href: "/editor/canvas",
     tagBg: "#059669",
   },
   {
