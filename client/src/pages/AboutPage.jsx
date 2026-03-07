@@ -190,7 +190,7 @@ export default function About() {
             <div className="grid grid-cols-2 gap-4">
               <div className="aspect-4/5 overflow-hidden rounded-3xl border border-slate-100 bg-slate-100 shadow-sm">
                 <img
-                  src="./about/about1_converted.avif"
+                  src="./about/13.avif"
                   alt="Golden Art Frames - framed wall art example"
                   className="h-full w-full object-cover"
                   loading="lazy"
@@ -198,7 +198,7 @@ export default function About() {
               </div>
               <div className="aspect-4/5 mt-10 overflow-hidden rounded-3xl border border-slate-100 bg-slate-100 shadow-sm">
                 <img
-                  src="./about/about2_converted.avif"
+                  src="./about/1.avif"
                   alt="Golden Art Frames - modern frames in interior"
                   className="h-full w-full object-cover"
                   loading="lazy"

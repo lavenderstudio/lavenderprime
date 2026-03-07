@@ -354,8 +354,8 @@ const PRODUCTS = [
     desc: "Your photo, custom-framed and ready to hang.",
     price: "from 89 AED",
     tag: "Most Popular",
-    img: "./feature/feature1_converted.avif",
-    href: "/editor/print-frame",
+    img: "./feature/11.avif",
+    href: "/feature/print-frame",
     tagBg: ACCENT,
   },
   {
@@ -363,8 +363,8 @@ const PRODUCTS = [
     desc: "High-resolution printing on premium paper.",
     price: "from 29 AED",
     tag: "Premium",
-    img: "./feature/feature2_converted.avif",
-    href: "/editor/fine-art-print",
+    img: "./feature/12.avif",
+    href: "/feature/fine-art-print",
     tagBg: "#1E293B",
   },
   {
@@ -372,8 +372,8 @@ const PRODUCTS = [
     desc: "Gallery-wrapped canvas with solid timber frame.",
     price: "from 149 AED",
     tag: "Best Seller",
-    img: "./feature/feature3_converted.avif",
-    href: "/editor/canvas",
+    img: "./feature/8.avif",
+    href: "/feature/canvas",
     tagBg: "#059669",
   },
   {
@@ -381,7 +381,7 @@ const PRODUCTS = [
     desc: "Multiple photos in one beautiful frame.",
     price: "from 179 AED",
     tag: "Value",
-    img: "./promo/promo1_converted.avif",
+    img: "./feature/3.avif",
     href: "/editor/collage-frame",
     tagBg: "#7C3AED",
   },
@@ -480,12 +480,12 @@ function AboutSplit() {
         <Reveal>
           <div className="relative h-80 lg:h-[460px]">
             <img
-              src="./promo/promo2_converted.avif"
+              src="./about/13.avif"
               alt="workshop"
               className="absolute left-0 top-0 h-4/5 w-3/4 rounded-3xl object-cover shadow-xl"
             />
             <img
-              src="./promo/promo3_converted.avif"
+              src="./about/1.avif"
               alt="frame detail"
               className="absolute bottom-0 right-0 h-1/2 w-1/2 rounded-3xl border-4 border-white object-cover shadow-xl"
             />
