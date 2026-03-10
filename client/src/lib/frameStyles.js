@@ -23,14 +23,6 @@ export const FRAME_STYLES = {
     border: "18px",
     background: `url(${zoomNatural})`,
   },
-  "Black Metal": {
-    border: "8px",
-    background: "#0B0A0A",
-  },
-  "Gold Metal": {
-    border: "8px",
-    background: "#DAA520",
-  },
   "Print Frame": {
     border: "7px",
     background: "#F3F3F3",

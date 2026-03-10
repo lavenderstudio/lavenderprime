@@ -45,7 +45,7 @@ function SizePills({ variants, value, onChange }) {
 
 function FrameTiles({ options, value, onChange }) {
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       {options.map((opt) => {
         const active = opt.id === value;
         return (

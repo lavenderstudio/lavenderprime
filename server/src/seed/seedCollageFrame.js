@@ -45,8 +45,6 @@ async function run() {
           { name: "White Wood", price: 0 },
           { name: "Walnut Wood", price: 0 },
           { name: "Natural Wood", price: 0 },
-          { name: "Black Metal", price: 0 },
-          { name: "Gold Metal", price: 0 },
         ],
         mats: [],
         mounts: [],

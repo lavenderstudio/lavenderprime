@@ -15,8 +15,6 @@ export const FRAME_OPTIONS = [
   { id: "White Wood", img: woodWhite },
   { id: "Walnut Wood", img: woodWalnut },
   { id: "Natural Wood", img: woodNatural },
-  { id: "Black Metal", img: metalBlack },
-  { id: "Gold Metal", img: metalGold },
 ];
 
 export const MINIFRAME_FRAME_OPTIONS = [

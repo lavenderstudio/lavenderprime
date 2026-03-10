@@ -66,7 +66,7 @@ function SizePills({ variants, value, onChange }) {
 
 function FrameTiles({ options, value, onChange }) {
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       {options.map((opt) => {
         const active = opt.id === value;
         return (
@@ -463,28 +463,6 @@ export default function EditorPrintPortrait() {
                       {matCm > 0 && <> &nbsp;·&nbsp; {matCm}cm Border</>}
                     </p>
                   </div>
-
-                  {/* ─ Quantity ─
-                  <div className="px-5 py-4">
-                    <SectionLabel>Quantity</SectionLabel>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-lg font-bold text-slate-700 hover:bg-slate-50 active:scale-90 transition-all"
-                      >
-                        −
-                      </button>
-                      <span className="w-8 text-center text-base font-extrabold text-slate-900">{quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => setQuantity((q) => q + 1)}
-                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-lg font-bold text-slate-700 hover:bg-slate-50 active:scale-90 transition-all"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div> */}
 
                   {/* ─ Order Summary ─ */}
                   <div className="bg-slate-50 px-5 py-4">
