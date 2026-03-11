@@ -953,7 +953,7 @@ function FloatingContact() {
       className="fixed bottom-6 left-6 z-50"
     >
       <a
-        href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Golden%20Art%20Frames! I%27m%20interested%20in%20ordering%20a%20custom%20frame%20and%20would%20love%20some%20help%20with%20sizes%2C%20finishes%2C%20and%20pricing.%20Could%20you%20guide%20me%3F`}
+        href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi Golden Art Frames! I'm interested in ordering a custom frame and would love some help with sizes, finishes, and pricing. Could you guide me?`}
         target="_blank"
         rel="noreferrer"
         className="text-sm font-extrabold group flex items-center gap-2 rounded-full py-3 pl-4 pr-5 text-white shadow-xl transition hover:brightness-110 hover:scale-[1.05] hover:shadow-2xl"
