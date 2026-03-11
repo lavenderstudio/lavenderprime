@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useRef } from "react";
+import Lenis from "lenis";
 import { Link } from "react-router-dom";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import api from "../lib/api.js";
@@ -970,6 +971,28 @@ function FloatingContact() {
 // PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomePage() {
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+    });
+
+    let raf;
+    function onFrame(time) {
+      lenis.raf(time);
+      raf = requestAnimationFrame(onFrame);
+    }
+    raf = requestAnimationFrame(onFrame);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 antialiased">
       <FloatingContact />
