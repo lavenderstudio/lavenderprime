@@ -13,14 +13,12 @@ import { MatNone, MatThin, MatClassic, MatGallery } from "../components/MatIcon.
 export const FRAME_OPTIONS = [
   { id: "Black Wood", img: woodBlack },
   { id: "White Wood", img: woodWhite },
-  { id: "Walnut Wood", img: woodWalnut },
   { id: "Natural Wood", img: woodNatural },
 ];
 
 export const MINIFRAME_FRAME_OPTIONS = [
   { id: "Black Wood", img: woodBlack },
   { id: "White Wood", img: woodWhite },
-  { id: "Walnut Wood", img: woodWalnut },
   { id: "Natural Wood", img: woodNatural },
 ];
 

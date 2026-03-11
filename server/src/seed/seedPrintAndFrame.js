@@ -33,17 +33,10 @@ async function run() {
         { sku: "PRINT&FRAME_63x93", orientation: "portrait", size: "63x93", basePrice: 489 },
       ],
       options: {
-        // Mount options (existing)
-        mounts: [
-          { name: "No Mount", price: 0 },
-          { name: "White Mount", price: 20 },
-        ],
-
         // NEW: Frame options (names MUST match your UI strings)
         frames: [
           { name: "Black Wood", price: 0 },
           { name: "White Wood", price: 0 },
-          { name: "Walnut Wood", price: 0 },
           { name: "Natural Wood", price: 0 },
         ],
 

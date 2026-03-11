@@ -16,9 +16,11 @@ import BlurText from "../components/reactbits/BlurText.jsx";
 import CurvedLoop from "../components/reactbits/CurvedLoop.jsx";
 import Magnet from "../components/reactbits/Magnet.jsx";
 import TiltCard from "../components/reactbits/TiltCard.jsx";
+import { MessageCircle } from "lucide-react";
 
 // ─── Theme ───────────────────────────────────────────────────────────────────
 const ACCENT = "#FF633F";
+const WHATSAPP_NUMBER = "971522640871";
 
 // ─── Shared: scroll-triggered reveal ─────────────────────────────────────────
 function Reveal({ children, delay = 0, className = "" }) {
@@ -69,7 +71,7 @@ function Hero() {
   }, []);
 
   return (
-    <section className="relative h-[88vh] min-h-[560px] overflow-hidden">
+    <section className="relative h-[86vh] min-h-[560px] overflow-hidden">
       {/* Slideshow */}
       <AnimatePresence mode="crossfade">
         <motion.img
@@ -950,17 +952,16 @@ function FloatingContact() {
       transition={{ delay: 1.2, type: "spring", stiffness: 260, damping: 20 }}
       className="fixed bottom-6 left-6 z-50"
     >
-      <Link
-        to="/contact"
+      <a
+        href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20Golden%20Art%20Frames! I%27m%20interested%20in%20ordering%20a%20custom%20frame%20and%20would%20love%20some%20help%20with%20sizes%2C%20finishes%2C%20and%20pricing.%20Could%20you%20guide%20me%3F`}
+        target="_blank"
+        rel="noreferrer"
+        className="text-sm font-extrabold group flex items-center gap-2 rounded-full py-3 pl-4 pr-5 text-white shadow-xl transition hover:brightness-110 hover:scale-[1.05] hover:shadow-2xl"
         style={{ background: ACCENT }}
-        className="group flex items-center gap-2 rounded-full py-3 pl-4 pr-5 text-white shadow-xl transition hover:brightness-110 hover:scale-[1.05] hover:shadow-2xl"
       >
-        {/* Chat bubble icon */}
-        <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        <span className="text-sm font-extrabold">Contact Us</span>
-      </Link>
+        <MessageCircle className="h-4 w-4" />
+        Contact Us
+      </a>
     </motion.div>
   );
 }

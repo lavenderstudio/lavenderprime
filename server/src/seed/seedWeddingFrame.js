@@ -42,7 +42,6 @@ async function run() {
         frames: [
           { name: "Black Wood", price: 0 },
           { name: "White Wood", price: 0 },
-          { name: "Walnut Wood", price: 0 },
           { name: "Natural Wood", price: 0 },
         ],
 

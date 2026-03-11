@@ -15,10 +15,6 @@ export const FRAME_STYLES = {
     border: "18px",
     background: "#F3F3F3",
   },
-  "Walnut Wood": {
-    border: "18px",
-    background: `url(${zoomWalnut})`,
-  },
   "Natural Wood": {
     border: "18px",
     background: `url(${zoomNatural})`,
