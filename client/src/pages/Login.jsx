@@ -1,43 +1,43 @@
-// client/src/pages/Login.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Modern Login page — split-screen layout.
-// ALL existing logic preserved exactly.
+// Museum Design — Cyan × Magenta pure on White
+// Full-bleed · Vietnamese · Gallery Experience
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Eye, EyeOff, Mail, Lock, CheckCircle, AlertCircle } from "lucide-react";
-import Page from "../components/Page.jsx";
+import { Eye, EyeOff, Mail, Lock, CheckCircle, AlertCircle, ArrowRight } from "lucide-react";
 import api from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
-const ACCENT = "#FF633F";
+// ─── Bảng màu ────────────────────────────────────────────────────────────────
+const C = "#00e5ff";   // cyan thuần
+const M = "#e040fb";   // magenta thuần
+const CM = C;
 
-const INPUT =
-  "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pl-10 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#FF633F]/60 focus:bg-white focus:ring-2 focus:ring-[#FF633F]/10 disabled:opacity-60";
+const INPUT_STYLE = 
+  "w-full border-b-2 border-slate-100 bg-transparent py-4 pl-10 text-sm font-bold text-slate-900 outline-none transition-all placeholder:text-slate-300 focus:border-[#00e5ff] disabled:opacity-50";
 
 export default function LoginPage() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const redirectTo     = location.state?.from || "/";
-  const resetSuccess   = location.state?.resetSuccess || false;
+  const redirectTo = location.state?.from || "/";
+  const resetSuccess = location.state?.resetSuccess || false;
 
   const { setUser } = useAuth();
 
-  const [email,    setEmail]    = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPw,   setShowPw]   = useState(false);
-  const [loading,  setLoading]  = useState(false);
-  const [error,    setError]    = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
       setError("");
       setLoading(true);
-
       await api.post("/auth/login", { email, password });
       const meRes = await api.get("/auth/me");
       setUser(meRes.data?.user || null);
@@ -51,177 +51,176 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] bg-[#fafafa] font-sans antialiased">
-
-      {/* ── Left dark panel ──────────────────────────────────────── */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-slate-950 px-12 py-14 lg:flex lg:w-5/12 xl:w-2/5">
-        {/* Accent glow */}
-        <div
-          className="pointer-events-none absolute -left-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full opacity-25 blur-3xl"
-          style={{ background: ACCENT }}
+    <div className="flex min-h-screen bg-white font-sans antialiased overflow-hidden">
+      
+      {/* ── Khối trái: Editorial Image ────────────────────────────── */}
+      <div className="relative hidden lg:flex lg:w-1/2 overflow-hidden border-r border-slate-100">
+        <motion.img
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          src="./hero/hero-2.avif" // Dùng chung asset với HomePage
+          className="absolute inset-0 h-full w-full object-cover"
+          alt="Gallery View"
         />
-        <div
-          className="pointer-events-none absolute bottom-0 right-0 h-48 w-48 rounded-full opacity-10 blur-2xl"
-          style={{ background: ACCENT }}
-        />
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
+        
+        {/* Overlay nội dung kiểu bảo tàng */}
+        <div className="relative z-10 flex flex-col justify-between p-16 w-full">
+          <Link to="/" className="w-fit">
+             <span className="font-mono text-xs tracking-[0.4em] font-bold text-slate-900 border-b-2 border-cyan-400 pb-1">
+               GOLDEN ART
+             </span>
+          </Link>
 
-        {/* Logo */}
-        <img
-          src="/logo.png"
-          alt="Golden Art Frames"
-          className="relative h-10 w-auto object-contain"
-          style={{ filter: "brightness(0) invert(1)" }}
-        />
+          <div>
+            <span className="font-mono text-[10px] tracking-[0.5em] text-slate-500 uppercase mb-4 block">
+              Thành viên / Truy cập
+            </span>
+            <h2 className="text-6xl font-extrabold tracking-tighter leading-[0.9] text-slate-900">
+              Chào mừng<br />
+              <span style={{ color: "transparent", WebkitTextStroke: `1.5px ${M}` }}>Trở lại</span><br />
+              Phòng tranh.
+            </h2>
+          </div>
 
-        {/* Tagline */}
-        <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-            Welcome back
-          </p>
-          <h2 className="mt-3 text-3xl font-extrabold leading-snug text-white">
-            Frames That Tell<br />Your Story.
-          </h2>
-          <p className="mt-3 text-sm leading-relaxed text-white/40">
-            Login to continue to your orders, favourites, and personalised frames.
-          </p>
+          <div className="flex items-center gap-4">
+            <div className="h-px w-12 bg-slate-900" />
+            <p className="text-xs font-mono tracking-widest text-slate-400 italic">
+              Est. 2025 — UAE Quality
+            </p>
+          </div>
         </div>
-
-        {/* Bottom quote */}
-        <p className="relative text-xs text-white/20">
-          © {new Date().getFullYear()} Golden Art Frames
-        </p>
       </div>
 
-      {/* ── Right form panel ─────────────────────────────────────── */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+      {/* ── Khối phải: Minimal Form ──────────────────────────────── */}
+      <div className="flex flex-1 flex-col justify-center px-8 sm:px-16 lg:px-24 py-12 relative">
+        
+        {/* Accent line chuẩn HomePage */}
+        <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: C }} />
+
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-sm"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md mx-auto"
         >
-          {/* Mobile logo */}
-          <img
-            src="/logo.png"
-            alt="Golden Art Frames"
-            className="mx-auto mb-8 h-9 w-auto object-contain lg:hidden"
-          />
+          <header className="mb-12">
+            <h1 className="text-4xl font-extrabold tracking-tighter text-slate-900">Đăng Nhập</h1>
+            <div className="mt-2 flex items-center gap-3">
+               <div className="h-px w-6" style={{ background: M }} />
+               <p className="text-sm text-slate-400 font-medium">
+                Chưa có tài khoản?{" "}
+                <Link to="/signup" className="text-slate-900 font-bold hover:underline decoration-cyan-400 underline-offset-4">
+                  Đăng ký ngay
+                </Link>
+              </p>
+            </div>
+          </header>
 
-          <h1 className="text-2xl font-extrabold text-slate-900">Log In</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Don&apos;t have an account?{" "}
-            <Link
-              to="/signup"
-              state={{ from: redirectTo }}
-              className="font-bold hover:underline"
-              style={{ color: ACCENT }}
-            >
-              Sign Up
-            </Link>
-          </p>
-
-          {/* Banners */}
-          <AnimatePresence>
+          {/* Thông báo lỗi / Thành công */}
+          <AnimatePresence mode="wait">
             {resetSuccess && (
               <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="mt-5 flex items-start gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-6 flex items-center gap-3 bg-emerald-50 p-4 text-xs font-bold text-emerald-700 border-l-4 border-emerald-500"
               >
-                <CheckCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                <span><b>Password reset!</b> You can now log in with your new password.</span>
+                <CheckCircle className="h-4 w-4" />
+                <span>Mật khẩu đã được đặt lại! Bạn có thể đăng nhập.</span>
               </motion.div>
             )}
             {error && (
               <motion.div
-                key={error}
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="mt-5 flex items-start gap-2.5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-6 flex items-center gap-3 bg-rose-50 p-4 text-xs font-bold text-rose-700 border-l-4 border-rose-500"
               >
-                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                {error}
+                <AlertCircle className="h-4 w-4" />
+                <span>{error}</span>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="mt-7 space-y-4">
+          <form onSubmit={handleLogin} className="space-y-8">
             {/* Email */}
-            <div>
-              <label className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-                Email
+            <div className="relative group">
+              <label className="absolute -top-6 left-0 text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-slate-400 transition-colors group-focus-within:text-cyan-500">
+                Địa chỉ Email
               </label>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className={INPUT}
-                  required
-                  autoComplete="email"
-                  disabled={loading}
-                />
-              </div>
+              <Mail className="absolute left-0 top-4 h-4 w-4 text-slate-300 group-focus-within:text-cyan-500" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ten-cua-ban@vi-du.com"
+                className={INPUT_STYLE}
+                required
+                disabled={loading}
+              />
             </div>
 
             {/* Password */}
-            <div>
-              <div className="mb-1.5 flex items-center justify-between">
-                <label className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-                  Password
+            <div className="relative group">
+              <div className="absolute -top-6 left-0 right-0 flex justify-between">
+                <label className="text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-slate-400 group-focus-within:text-magenta-500">
+                  Mật mã
                 </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs font-bold hover:underline"
-                  style={{ color: ACCENT }}
-                >
-                  Forgot?
+                <Link to="/forgot-password" style={{ color: M }} className="text-[10px] font-bold uppercase tracking-widest hover:opacity-70">
+                  Quên?
                 </Link>
               </div>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type={showPw ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={INPUT + " pr-10"}
-                  required
-                  autoComplete="current-password"
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
-                  tabIndex={-1}
-                >
-                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+              <Lock className="absolute left-0 top-4 h-4 w-4 text-slate-300 group-focus-within:text-purple-500" />
+              <input
+                type={showPw ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className={INPUT_STYLE + " pr-10"}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw(!showPw)}
+                className="absolute right-0 top-4 text-slate-300 hover:text-slate-600"
+              >
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
 
-            {/* Submit */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
-              type="submit"
-              disabled={loading}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-extrabold text-white shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #e8472a 100%)` }}
-            >
-              {loading ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Logging In…
-                </>
-              ) : "Log In"}
-            </motion.button>
+            {/* Submit Button - Chuẩn Magnet/Museum Style */}
+            <div className="pt-4">
+              <motion.button
+                whileHover={{ x: 5 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                disabled={loading}
+                className="group flex w-full items-center justify-between bg-slate-900 px-8 py-5 text-xs font-extrabold uppercase tracking-[0.3em] text-white transition-all hover:bg-black disabled:opacity-50"
+                style={{ borderRadius: 2 }}
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Đang xác thực...
+                  </span>
+                ) : (
+                  <>
+                    Tiếp tục vào Gallery
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </>
+                )}
+              </motion.button>
+            </div>
           </form>
+
+          <footer className="mt-16 pt-8 border-t border-slate-100">
+            <p className="font-mono text-[9px] text-slate-300 tracking-[0.3em] uppercase">
+              Bảo mật bởi SSL Layer / © 2025 Golden Art UAE
+            </p>
+          </footer>
         </motion.div>
       </div>
     </div>
