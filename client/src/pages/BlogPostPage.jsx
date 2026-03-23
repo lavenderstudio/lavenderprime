@@ -1,177 +1,160 @@
 // client/src/pages/BlogPostPage.jsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import { 
-  ArrowLeft, 
-  Clock, 
-  Share2, 
-  Bookmark,
-  ChevronRight,
-  Fingerprint // Biểu tượng mang tính "Identity"
-} from "lucide-react";
+import { motion, useScroll, useSpring, useInView } from "framer-motion";
+import { ArrowLeft, Clock, Share2, Bookmark, Calendar } from "lucide-react";
 import api from "../lib/api.js";
 
-// Import các component từ thư viện reactbits (giả định bạn đã có hoặc tương tự)
-// Nếu chưa có, có thể thay bằng motion.div đơn giản
-import ShinyText from "../components/ShinyText"; 
+// Import các hiệu ứng từ trang chủ để đồng bộ
+import ShinyText from "../components/reactbits/ShinyText.jsx";
+import BlurText from "../components/reactbits/BlurText.jsx";
 
-const CYAN = "#00ffff";
-const MAGENTA = "#ff00ff";
+const C = "#00e5ff"; // Cyan thuần từ trang chủ
+const M = "#e040fb"; // Magenta thuần từ trang chủ
+
+function Hairline({ gradient = false }) {
+  return <div className="w-full h-px" style={{ background: gradient ? `linear-gradient(to right, ${C}, ${M})` : `${C}30` }} />;
+}
 
 export default function BlogPostPage() {
   const { slug } = useParams();
   const [loading, setLoading] = useState(true);
   const [blog, setBlog] = useState(null);
-  
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  const yImage = useTransform(scrollYProgress, [0, 1], [0, 200]);
 
   useEffect(() => {
-    // Logic fetch API giữ nguyên như cũ
-    // ... (fetch logic)
+    async function load() {
+      try {
+        const res = await api.get(`/blogs/${slug}`);
+        if (res.data?.ok) setBlog(res.data.blog);
+      } catch (e) { console.error(e); } 
+      finally { setLoading(false); }
+    }
+    load();
     window.scrollTo(0, 0);
   }, [slug]);
 
-  if (loading) return <div className="min-h-screen bg-white" />;
+  if (loading) return <div className="h-screen bg-white" />;
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans antialiased selection:bg-[#00ffff]/30">
-      {/* 1. Progress Bar Kỹ thuật */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 z-[100] h-1 bg-gradient-to-r from-[#00ffff] via-[#ff00ff] to-[#00ffff] bg-[length:200%_100%]"
-        style={{ scaleX }}
-      />
+    <div className="min-h-screen bg-white font-sans antialiased selection:bg-[#00e5ff]/20">
+      {/* Progress Bar kiểu Museum */}
+      <motion.div className="fixed top-0 left-0 right-0 z-[100] h-1 origin-left" style={{ scaleX, background: C }} />
 
-      {/* 2. Navigation "Archive Mode" */}
-      <nav className="fixed top-0 left-0 right-0 z-[90] flex items-center justify-between px-6 py-6 mix-blend-difference text-white">
-        <Link to="/blog" className="flex items-center gap-4 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 transition-all group-hover:bg-white group-hover:text-black">
-            <ArrowLeft size={16} />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.3em]">Back to Index</span>
-        </Link>
-        <div className="hidden md:block text-[10px] font-black uppercase tracking-[0.3em] opacity-50">
-          Classification: {blog?.tags?.[0] || "Art Journal"} // {new Date().getFullYear()}
-        </div>
-      </nav>
+      {/* 1. HERO SECTION - Kế thừa phong cách tràn viền bất đối xứng */}
+      <header className="relative pt-20 border-l-4" style={{ borderColor: M }}>
+        <div className="px-10 sm:px-16 lg:px-24">
+          <Link to="/blog" className="group flex items-center gap-3 font-mono text-[10px] tracking-[0.3em] text-slate-400 hover:text-black transition-colors">
+            <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-2" />
+            BACK TO ARCHIVE
+          </Link>
 
-      {/* 3. Hero Section - Thừa hưởng Typography từ trang chủ */}
-      <header className="relative overflow-hidden pt-40 pb-20 md:pt-56 md:pb-32">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="mt-12 mb-16 max-w-5xl">
+            <div className="flex items-center gap-4 mb-6">
+              <span className="font-mono text-[10px] tracking-[0.2em] text-slate-400 uppercase">
+                {new Date(blog?.createdAt).toLocaleDateString("vi-VN")}
+              </span>
+              <div className="h-px w-8" style={{ background: C }} />
+              <span className="rounded-full px-3 py-1 text-[10px] font-bold text-white" style={{ background: M }}>
+                {blog?.tags?.[0] || "ART JOURNAL"}
+              </span>
+            </div>
+
+            <h1 className="font-extrabold leading-[0.95] tracking-tighter text-slate-900" style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
+              {blog?.title}
+            </h1>
             
-            {/* Cột trái: Metadata kiểu Technical */}
-            <div className="lg:col-span-3 flex flex-col justify-end border-l border-slate-200 pl-6 order-2 lg:order-1">
-               <div className="space-y-8">
-                  <div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Author_ID</p>
-                    <p className="text-sm font-bold uppercase">{blog?.author?.fullName || "Editorial"}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Reading_Time</p>
-                    <p className="text-sm font-bold uppercase flex items-center gap-2">
-                       <Clock size={14} style={{color: CYAN}} /> 08 Min
-                    </p>
-                  </div>
-                  <div className="pt-8">
-                    <Fingerprint size={40} strokeWidth={1} className="text-slate-200" />
-                  </div>
-               </div>
-            </div>
+            <p className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-500 font-light border-l-2 pl-6" style={{ borderColor: C }}>
+              {blog?.excerpt}
+            </p>
+          </div>
+        </div>
 
-            {/* Cột phải: Tiêu đề cực đại (Brutalism) */}
-            <div className="lg:col-span-9 order-1 lg:order-2">
-              <motion.h1 
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="text-[12vw] md:text-[8vw] font-black leading-[0.85] tracking-tighter text-[#1a1a1a] uppercase italic"
-              >
-                {blog?.title?.split(' ').map((word, i) => (
-                  <span key={i} className={i % 2 === 1 ? "text-stroke-custom" : ""}>
-                    {word}{' '}
-                  </span>
-                ))}
-              </motion.h1>
-              
-              <style jsx>{`
-                .text-stroke-custom {
-                  -webkit-text-stroke: 1.5px #1a1a1a;
-                  color: transparent;
-                }
-              `}</style>
-            </div>
+        {/* Ảnh Cover Tràn Viền - Giống Hero trang chủ */}
+        <div className="relative h-[60vh] w-full overflow-hidden bg-slate-100">
+          <img src={blog?.coverImage?.url} alt="" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/20" />
+          {/* Label góc ảnh kiểu bảo tàng */}
+          <div className="absolute bottom-8 right-10 flex items-center gap-3 bg-white/90 backdrop-blur px-4 py-2">
+            <span className="font-mono text-[10px] tracking-widest text-slate-900 uppercase">Exhibit No. 042</span>
+            <div className="h-px w-8" style={{ background: M }} />
           </div>
         </div>
       </header>
 
-      {/* 4. Parallax Image Section */}
-      <section className="relative h-[60vh] md:h-[80vh] overflow-hidden bg-slate-900">
-        <motion.img
-          style={{ y: yImage }}
-          src={blog?.coverImage?.url}
-          className="h-[120%] w-full object-cover opacity-80"
-          alt="Cover"
-        />
-        <div className="absolute bottom-10 left-10 right-10 flex justify-between items-end text-white">
-           <div className="max-w-md italic text-lg font-light opacity-80">
-              "{blog?.excerpt}"
-           </div>
-           <div className="hidden md:block h-32 w-[1px] bg-gradient-to-t from-[#ff00ff] to-transparent" />
-        </div>
-      </section>
-
-      {/* 5. Main Content - Bố cục lệch tâm (Off-grid) */}
-      <main className="mx-auto max-w-7xl px-6 py-32 grid grid-cols-1 lg:grid-cols-12 gap-12">
-        
-        {/* Sidebar công cụ bên trái */}
-        <aside className="lg:col-span-1 flex lg:flex-col gap-4 sticky top-32 h-fit">
-           <button className="h-12 w-12 flex items-center justify-center rounded-none border border-slate-200 hover:bg-black hover:text-white transition-colors">
-              <Share2 size={18} />
-           </button>
-           <button className="h-12 w-12 flex items-center justify-center rounded-none border border-slate-200 hover:bg-[#ff00ff] hover:text-white transition-colors">
-              <Bookmark size={18} />
-           </button>
+      {/* 2. CONTENT SECTION - Editorial Layout */}
+      <div className="grid lg:grid-cols-[1fr_minmax(auto,800px)_1fr] gap-0">
+        {/* Sidebar Left - Metadata */}
+        <aside className="hidden lg:block border-r border-slate-100 p-10">
+          <div className="sticky top-32 space-y-12">
+            <div>
+              <p className="font-mono text-[9px] tracking-[0.3em] text-slate-400 mb-4 uppercase">Author</p>
+              <p className="font-bold text-sm tracking-tight">{blog?.author?.fullName || "Editorial Team"}</p>
+            </div>
+            <div>
+              <p className="font-mono text-[9px] tracking-[0.3em] text-slate-400 mb-4 uppercase">Reading Time</p>
+              <p className="font-bold text-sm tracking-tight flex items-center gap-2">
+                <Clock className="h-4 w-4" style={{ color: C }} /> 6 MINS
+              </p>
+            </div>
+            <div className="pt-8 border-t border-slate-100 space-y-4">
+              <button className="flex items-center gap-3 text-[10px] font-bold tracking-widest uppercase hover:text-[#e040fb] transition-colors">
+                <Share2 className="h-4 w-4" /> Share
+              </button>
+            </div>
+          </div>
         </aside>
 
-        {/* Nội dung chính bài viết */}
-        <article className="lg:col-span-8 lg:col-start-3">
-          <div 
-            className="prose prose-xl prose-slate max-w-none 
-              prose-p:font-light prose-p:leading-[2] prose-p:text-slate-700
-              prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter
-              prose-blockquote:border-l-4 prose-blockquote:border-[#00ffff] prose-blockquote:italic
-              prose-img:shadow-[40px_40px_0px_0px_rgba(0,255,255,0.1)] prose-img:border prose-img:border-slate-100"
+        {/* Main Article */}
+        <main className="px-10 py-24 sm:px-16 lg:px-20 bg-white">
+          <article className="prose prose-slate prose-lg max-w-none 
+            prose-headings:font-extrabold prose-headings:tracking-tighter prose-headings:text-slate-900
+            prose-p:text-slate-600 prose-p:leading-[1.8] prose-p:mb-8
+            prose-strong:text-slate-900 prose-strong:font-bold
+            prose-blockquote:border-l-4 prose-blockquote:border-[#00e5ff] prose-blockquote:bg-slate-50 prose-blockquote:py-4 prose-blockquote:px-8 prose-blockquote:not-italic
+            prose-img:shadow-none prose-img:border prose-img:border-slate-100
+            [&>p:first-of-type]:text-xl [&>p:first-of-type]:text-slate-800"
             dangerouslySetInnerHTML={{ __html: blog?.content }}
           />
 
-          {/* Tags mang phong cách nhãn mác vật lý */}
-          <div className="mt-20 flex flex-wrap gap-2">
-            {blog?.tags?.map(tag => (
-              <span key={tag} className="bg-black text-white px-4 py-1 text-[10px] font-black uppercase tracking-widest">
-                #{tag}
-              </span>
-            ))}
-          </div>
-        </article>
-      </main>
+          {/* Tags */}
+          <footer className="mt-20 pt-10 border-t border-slate-100">
+            <div className="flex flex-wrap gap-2">
+              {blog?.tags?.map(t => (
+                <span key={t} className="bg-slate-50 px-4 py-2 font-mono text-[10px] tracking-wider text-slate-400 uppercase">
+                  #{t}
+                </span>
+              ))}
+            </div>
+          </footer>
+        </main>
 
-      {/* 6. Footer "Next Article" - Giống Section trang chủ */}
-      <section className="bg-black py-40 text-white relative overflow-hidden">
-         <div className="mx-auto max-w-7xl px-6 relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#ff00ff] mb-4">Continue Reading</p>
-            <Link to="#" className="group">
-               <h2 className="text-5xl md:text-8xl font-black uppercase leading-none tracking-tighter transition-all group-hover:italic group-hover:text-[#00ffff]">
-                  Nghệ thuật chạm khắc vàng ta <ChevronRight className="inline h-16 w-16" strokeWidth={3} />
-               </h2>
+        {/* Sidebar Right - Empty or Decor */}
+        <aside className="hidden lg:block border-l border-slate-100" />
+      </div>
+
+      <Hairline gradient />
+
+      {/* 3. NEXT STEPS - Đồng bộ với CTA trang chủ */}
+      <section className="bg-slate-950 py-32 text-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 font-black text-[20vw] text-white pointer-events-none select-none flex items-center justify-center">
+            GALLERY
+        </div>
+        
+        <div className="relative z-10 px-10">
+          <BlurText text="Tiếp Tục Khám Phá" tag="h2" className="text-white font-extrabold tracking-tighter text-5xl mb-10" />
+          
+          <div className="flex flex-wrap justify-center gap-6">
+            <Link to="/products" className="px-10 py-4 font-extrabold text-sm tracking-widest text-white transition-all hover:scale-105" style={{ background: C, borderRadius: 2 }}>
+                THIẾT KẾ NGAY →
             </Link>
-         </div>
-         {/* Decor nền */}
-         <div className="absolute top-1/2 left-0 -translate-y-1/2 text-[30vw] font-black text-white/5 whitespace-nowrap pointer-events-none">
-            NEXT STORY
-         </div>
-      </section>
+            <Link to="/blog" className="px-10 py-4 font-extrabold text-sm tracking-widest text-white border border-white/20 hover:border-white transition-all" style={{ borderRadius: 2 }}>
+                XEM BLOG KHÁC
+            </Link>
+          </div>
+        </div>
+      </header>
     </div>
   );
 }
