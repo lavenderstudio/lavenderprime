@@ -96,7 +96,7 @@ function DropZone({ onFile }) {
         className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }}
       />
-      <div className="mb-4 text-3xl opacity-40 group-hover:opacity-100 transition-opacity">📸</div>
+      <div className="mb-4 text-3xl opacity-40 group-hover:opacity-100 transition-opacity">[ ◉¯]</div>
       <p className="font-mono text-[11px] uppercase tracking-widest text-slate-500">
         Kéo thả hoặc <span className="text-slate-900 font-bold underline">Chọn ảnh</span>
       </p>
