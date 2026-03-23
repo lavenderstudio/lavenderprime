@@ -1,10 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-hooks/static-components */
 // client/src/components/UploadWizardModal.jsx
-// ----------------------------------------------------
-// 3-step modal — modernised design, same logic
-// 1) Choose Ratio  2) Crop & Upload  3) Preview
-// ----------------------------------------------------
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
@@ -12,57 +8,40 @@ import { RATIOS } from "../lib/ratios.js";
 import { getCroppedBlob } from "../lib/cropImage.js";
 import { uploadToCloudinary } from "../lib/cloudinaryUpload.js";
 
-const ACCENT = "#FF633F";
-const DARK   = "#0f172a";
+// ─── Bảng màu đồng bộ trang chủ ─────────────────────────────────────────────
+const C  = "#00e5ff";   // Cyan thuần
+const M  = "#e040fb";   // Magenta thuần
+const DARK = "#020617"; // Slate 950
 
-// ─── Step indicator ──────────────────────────────────────────────────────────
+// ─── Stepper: Tối giản kiểu bảo tàng ────────────────────────────────────────
 function Stepper({ step, totalSteps }) {
   const labels =
     totalSteps === 2
-      ? ["Choose Image", "Preview"]
-      : ["Orientation", "Crop & Upload", "Preview"];
+      ? ["Chọn Ảnh", "Hoàn Tất"]
+      : ["Định Dạng", "Cắt & Tải Lên", "Xem Trước"];
 
   return (
-    <div className="flex items-center gap-0">
+    <div className="flex items-center gap-6">
       {labels.map((label, i) => {
-        const num     = i + 1;
-        const done    = step > num;
-        const active  = step === num;
-        const pending = step < num;
+        const num = i + 1;
+        const active = step === num;
+        const done = step > num;
 
         return (
-          <div key={label} className="flex items-center">
-            {/* Node */}
-            <div className="flex flex-col items-center gap-1.5">
-              <div
-                style={{
-                  background: done ? DARK : active ? ACCENT : "transparent",
-                  borderColor: done || active ? "transparent" : "#cbd5e1",
-                  color: done || active ? "#fff" : "#94a3b8",
-                }}
-                className="flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-all duration-300"
-              >
-                {done ? (
-                  <svg viewBox="0 0 12 12" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                    <polyline points="2,6 5,9 10,3" />
-                  </svg>
-                ) : (
-                  num
-                )}
-              </div>
-              <span
-                style={{ color: active ? ACCENT : done ? DARK : "#94a3b8" }}
-                className="hidden whitespace-nowrap text-[11px] font-semibold sm:block"
-              >
-                {label}
-              </span>
-            </div>
-
-            {/* Connector */}
-            {i < labels.length - 1 && (
-              <div className="mx-2 mb-5 h-0.5 w-10 sm:w-16 rounded-full transition-all duration-500"
-                style={{ background: step > num ? DARK : "#e2e8f0" }} />
-            )}
+          <div key={label} className="flex items-center gap-3">
+            <span 
+              className="font-mono text-[10px] tracking-widest transition-colors duration-300"
+              style={{ color: active ? M : done ? C : "#475569" }}
+            >
+              {String(num).padStart(2, "0")}
+            </span>
+            <span 
+              className="hidden lg:block font-mono text-[10px] uppercase tracking-[0.2em] transition-colors duration-300"
+              style={{ color: active ? "white" : "#475569" }}
+            >
+              {label}
+            </span>
+            {i < labels.length - 1 && <div className="h-px w-4 bg-slate-800" />}
           </div>
         );
       })}
@@ -70,71 +49,45 @@ function Stepper({ step, totalSteps }) {
   );
 }
 
-// ─── Ratio card ───────────────────────────────────────────────────────────────
+// ─── Ratio Card: Đẳng cấp Gallery ──────────────────────────────────────────
 function RatioCard({ ratio, selected, onClick }) {
-  const boxW = 44;
+  const boxW = 40;
   const boxH = Math.max(16, Math.round((boxW * ratio.h) / ratio.w));
 
   return (
     <button
       type="button"
       onClick={onClick}
-      style={{
-        borderColor: selected ? ACCENT : "#e2e8f0",
-        background: selected ? `${ACCENT}10` : "#fff",
-        boxShadow: selected ? `0 0 0 2px ${ACCENT}` : "none",
-      }}
-      className="group flex flex-col items-center gap-3 rounded-2xl border-2 p-4 transition-all duration-200 hover:border-[#FF633F]/60 active:scale-[0.98]"
+      className="group relative flex flex-col items-center justify-center border-r border-slate-100 py-8 last:border-r-0 transition-all hover:bg-slate-50"
     >
-      {/* Aspect preview */}
-      <div className="flex h-14 w-16 items-center justify-center">
+      {selected && (
+        <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: C }} />
+      )}
+      <div className="mb-4 flex h-16 items-center justify-center">
         <div
           style={{
             width: boxW,
             height: boxH,
-            borderColor: selected ? ACCENT : "#64748b",
-            background: selected ? `${ACCENT}18` : "#f1f5f9",
+            borderColor: selected ? C : "#cbd5e1",
+            background: selected ? `${C}10` : "transparent",
           }}
-          className="rounded border-2 transition-all duration-200"
+          className="border-2 transition-all duration-300"
         />
       </div>
-
-      <span
-        style={{
-          background: selected ? ACCENT : "#f1f5f9",
-          color: selected ? "#fff" : "#475569",
-        }}
-        className="rounded-full px-2.5 py-0.5 text-xs font-bold transition-all duration-200"
-      >
+      <span className={`font-mono text-[10px] tracking-widest uppercase ${selected ? "font-bold text-slate-900" : "text-slate-400"}`}>
         {ratio.label}
       </span>
     </button>
   );
 }
 
-// ─── Drag-drop file zone ───────────────────────────────────────────────────────
+// ─── DropZone ──────────────────────────────────────────────────────────────
 function DropZone({ onFile }) {
   const inputRef = useRef(null);
-  const [dragging, setDragging] = useState(false);
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragging(false);
-    const f = e.dataTransfer.files?.[0];
-    if (f && f.type.startsWith("image/")) onFile(f);
-  };
-
   return (
     <div
-      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-      onDragLeave={() => setDragging(false)}
-      onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
-      style={{
-        borderColor: dragging ? ACCENT : "#cbd5e1",
-        background: dragging ? `${ACCENT}08` : "#f8fafc",
-      }}
-      className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed py-10 transition-all duration-200 hover:border-[#FF633F]/70 hover:bg-[#FF633F]/5"
+      className="group flex cursor-pointer flex-col items-center justify-center border-2 border-dashed border-slate-200 py-16 transition-all hover:border-cyan-400 hover:bg-cyan-50/30"
     >
       <input
         ref={inputRef}
@@ -143,106 +96,58 @@ function DropZone({ onFile }) {
         className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }}
       />
-
-      {/* Cloud upload icon */}
-      <div
-        style={{ background: `${ACCENT}15` }}
-        className="flex h-14 w-14 items-center justify-center rounded-2xl"
-      >
-        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke={ACCENT} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="16 16 12 12 8 16" />
-          <line x1="12" y1="12" x2="12" y2="21" />
-          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
-        </svg>
-      </div>
-
-      <div className="text-center">
-        <p className="text-sm font-semibold text-slate-700">
-          Drop your photo here, or <span style={{ color: ACCENT }}>browse</span>
-        </p>
-        <p className="mt-1 text-xs text-slate-400">JPG, PNG, WEBP — up to 20 MB</p>
-      </div>
+      <div className="mb-4 text-3xl opacity-40 group-hover:opacity-100 transition-opacity">📸</div>
+      <p className="font-mono text-[11px] uppercase tracking-widest text-slate-500">
+        Kéo thả hoặc <span className="text-slate-900 font-bold underline">Chọn ảnh</span>
+      </p>
+      <p className="mt-2 text-[10px] text-slate-300">JPG, PNG, WEBP (Tối đa 20MB)</p>
     </div>
   );
 }
 
-// ─── Main modal ───────────────────────────────────────────────────────────────
+// ─── Main Modal ─────────────────────────────────────────────────────────────
 export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedRatioId = null }) {
   const totalSteps = lockedRatioId ? 2 : 3;
-
-  const [step,            setStep]            = useState(1);
+  const [step, setStep] = useState(1);
   const [selectedRatioId, setSelectedRatioId] = useState("3:2");
-  const [fileMeta,        setFileMeta]        = useState(null);
-  const [imageUrl,        setImageUrl]        = useState("");
+  const [fileMeta, setFileMeta] = useState(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [localSrc, setLocalSrc] = useState("");
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedPixels, setCroppedPixels] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
-  const [localSrc,     setLocalSrc]     = useState("");
-  const [crop,         setCrop]         = useState({ x: 0, y: 0 });
-  const [zoom,         setZoom]         = useState(1);
-  const [croppedPixels,setCroppedPixels]= useState(null);
-  const [uploading,    setUploading]    = useState(false);
-  const [uploadError,  setUploadError]  = useState("");
-
-  const effectiveRatioId = useMemo(
-    () => (lockedRatioId ? lockedRatioId : selectedRatioId),
-    [lockedRatioId, selectedRatioId]
-  );
-
-  const selectedRatio = useMemo(
-    () => RATIOS.find((r) => r.id === effectiveRatioId) || RATIOS[0],
-    [effectiveRatioId]
-  );
+  const effectiveRatioId = useMemo(() => lockedRatioId || selectedRatioId, [lockedRatioId, selectedRatioId]);
+  const selectedRatio = useMemo(() => RATIOS.find((r) => r.id === effectiveRatioId) || RATIOS[0], [effectiveRatioId]);
 
   const reset = () => {
-    setStep(1);
-    setSelectedRatioId("3:2");
-    setFileMeta(null);
-    setImageUrl("");
+    setStep(1); setSelectedRatioId("3:2"); setFileMeta(null); setImageUrl("");
     if (localSrc) URL.revokeObjectURL(localSrc);
-    setLocalSrc("");
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-    setCroppedPixels(null);
-    setUploading(false);
-    setUploadError("");
+    setLocalSrc(""); setCrop({ x: 0, y: 0 }); setZoom(1); setUploading(false);
   };
 
   const close = () => { reset(); onClose(); };
-
-  useEffect(() => {
-    if (!isOpen) return;
-    setStep(1);
-  }, [isOpen, lockedRatioId]);
-
+  useEffect(() => { if (isOpen) setStep(1); }, [isOpen]);
   if (!isOpen) return null;
 
   const onPickFile = (file) => {
-    setUploadError("");
     if (localSrc) URL.revokeObjectURL(localSrc);
     setLocalSrc(URL.createObjectURL(file));
-    setCrop({ x: 0, y: 0 });
-    setZoom(1);
-    setCroppedPixels(null);
   };
-
-  const onCropComplete = (_, croppedAreaPixels) => setCroppedPixels(croppedAreaPixels);
 
   const saveCropAndUpload = async () => {
     try {
       setUploading(true);
-      setUploadError("");
-      if (!localSrc || !croppedPixels) {
-        setUploadError("Please choose and crop an image first.");
-        return;
-      }
-      const blob       = await getCroppedBlob(localSrc, croppedPixels, "image/jpeg", 0.92);
-      const croppedFile= new File([blob], `cropped-${Date.now()}.jpg`, { type: "image/jpeg" });
-      const uploaded   = await uploadToCloudinary({ file: croppedFile, folder: "user-uploads" });
+      const blob = await getCroppedBlob(localSrc, croppedPixels, "image/jpeg", 0.95);
+      const croppedFile = new File([blob], `art-${Date.now()}.jpg`, { type: "image/jpeg" });
+      const uploaded = await uploadToCloudinary({ file: croppedFile, folder: "gallery-prints" });
       setFileMeta(uploaded);
       setImageUrl(uploaded.url);
-      if (lockedRatioId) setStep(2); else setStep(3);
+      setStep(lockedRatioId ? 2 : 3);
     } catch (err) {
-      console.error(err);
-      setUploadError(err?.message || "Upload failed. Please try again.");
+      setUploadError("Không thể tải ảnh lên. Vui lòng thử lại.");
     } finally {
       setUploading(false);
     }
@@ -252,307 +157,126 @@ export default function UploadWizardModal({ isOpen, onClose, onComplete, lockedR
   const previewStep = (lockedRatioId && step === 2) || (!lockedRatioId && step === 3);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
-      {/* Backdrop */}
-      <button
-        type="button"
-        onClick={close}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        aria-label="Close"
-      />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-4">
+      <div className="absolute inset-0 bg-white/90 backdrop-blur-xl" onClick={close} />
 
-      {/* Modal */}
-      <div className="relative flex w-full max-w-[420px] sm:max-w-3xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl max-h-[92svh]"
-           style={{ boxShadow: "0 32px 80px rgba(0,0,0,0.35)" }}>
-
-        {/* ── Header ── */}
-        <div style={{ background: DARK }} className="shrink-0 px-5 py-4 sm:px-8 sm:py-5">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-                Upload Wizard
-              </p>
-              <h2 className="mt-0.5 text-lg font-extrabold text-white">
-                {!lockedRatioId && step === 1 && "Choose Orientation"}
-                {cropStep && "Crop Your Photo"}
-                {previewStep && "Looking Great!"}
-              </h2>
-            </div>
-
-            {/* Stepper (desktop) */}
-            <div className="hidden sm:block">
-              <Stepper step={step} totalSteps={totalSteps} />
-            </div>
-
-            {/* Mobile step badge */}
-            <div className="sm:hidden flex items-center gap-2">
-              <span className="rounded-full px-2.5 py-1 text-[11px] font-bold text-white/70">
-                {step}/{totalSteps}
-              </span>
-              <button
-                type="button"
-                onClick={close}
-                style={{ background: "rgba(255,255,255,0.1)" }}
-                className="flex h-8 w-8 items-center justify-center rounded-xl text-white/80 transition hover:bg-white/20"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Desktop close */}
-            <button
-              type="button"
-              onClick={close}
-              style={{ background: "rgba(255,255,255,0.1)" }}
-              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl text-white/80 transition hover:bg-white/20"
-            >
-              ✕
-            </button>
+      <div className="relative flex h-full w-full max-w-5xl flex-col bg-white shadow-[0_40px_100px_rgba(0,0,0,0.1)] sm:h-[85vh] sm:border sm:border-slate-100">
+        
+        {/* Header: Thanh điều hướng tối tối giản */}
+        <div className="flex shrink-0 items-center justify-between bg-slate-950 px-6 py-4 sm:px-10">
+          <div className="flex items-center gap-8">
+            <h2 className="font-extrabold tracking-tighter text-white text-xl">
+              ART <span style={{ color: C }}>WIZARD</span>
+            </h2>
+            <div className="h-4 w-px bg-slate-800" />
+            <Stepper step={step} totalSteps={totalSteps} />
           </div>
-
-          {/* Mobile progress bar */}
-          <div className="mt-3 h-1 w-full rounded-full bg-white/10 sm:hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${(step / totalSteps) * 100}%`, background: ACCENT }}
-            />
-          </div>
+          <button onClick={close} className="text-white/40 hover:text-white transition-colors font-mono text-xs tracking-widest">
+            [ ĐÓNG ]
+          </button>
         </div>
 
-        {/* ── Body ── */}
-        <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-8 sm:py-7">
-
-          {/* ── STEP 1: Choose ratio ── */}
+        {/* Body: Tràn viền và kẻ ô */}
+        <div className="flex-1 overflow-y-auto">
+          
+          {/* STEP 1: Chọn tỉ lệ */}
           {!lockedRatioId && step === 1 && (
-            <div>
-              <p className="text-sm text-slate-500">
-                Select the aspect ratio that matches your desired print format.
-              </p>
-
-              {/* Live ratio preview */}
-              <div className="my-5 flex justify-center">
-                <div
-                  style={{ borderColor: ACCENT, background: `${ACCENT}08` }}
-                  className="flex h-36 w-48 py-20 items-center justify-center rounded-2xl border-2"
-                >
-                  <div
-                    style={{
-                      width: 100,
-                      height: Math.round((100 * selectedRatio.h) / selectedRatio.w),
-                      borderColor: ACCENT,
-                      background: `${ACCENT}20`,
-                    }}
-                    className="rounded border-2 transition-all duration-300 flex items-center justify-center"
-                  >
-                    <span className="text-[11px] font-bold " style={{ color: ACCENT }}>
-                      {selectedRatio.label}
-                    </span>
-                  </div>
-                </div>
+            <div className="h-full flex flex-col">
+              <div className="p-10 text-center">
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-cyan-500">Giai đoạn 01</span>
+                <h3 className="mt-2 text-3xl font-extrabold tracking-tighter text-slate-900">Chọn Định Dạng Khung</h3>
               </div>
-
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid flex-1 grid-cols-2 border-t border-b border-slate-100 lg:grid-cols-3">
                 {RATIOS.map((r) => (
-                  <RatioCard
-                    key={r.id}
-                    ratio={r}
-                    selected={r.id === selectedRatioId}
-                    onClick={() => setSelectedRatioId(r.id)}
-                  />
+                  <RatioCard key={r.id} ratio={r} selected={r.id === selectedRatioId} onClick={() => setSelectedRatioId(r.id)} />
                 ))}
               </div>
-
-              <div className="mt-6 flex justify-end">
-                <button
-                  type="button"
+              <div className="p-8 flex justify-center">
+                <button 
                   onClick={() => setStep(2)}
-                  style={{ background: ACCENT }}
-                  className="flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-110 active:scale-[0.98]"
+                  className="bg-slate-950 px-12 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white transition-all hover:scale-105 active:scale-95"
                 >
-                  Continue
-                  <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
-                    <polyline points="4,8 12,8 9,5" /><polyline points="9,11 12,8" />
-                  </svg>
+                  Tiếp Tục →
                 </button>
               </div>
             </div>
           )}
 
-          {/* ── STEP 2: Crop & Upload ── */}
+          {/* STEP 2: Cắt ảnh */}
           {cropStep && (
-            <div className="space-y-4">
-              {/* Ratio badge */}
-              <div className="flex items-center gap-2">
-                <span
-                  style={{ background: `${ACCENT}15`, color: ACCENT }}
-                  className="rounded-full px-3 py-1 text-xs font-bold"
-                >
-                  {selectedRatio.label}
-                </span>
-                <span className="text-xs text-slate-400">Aspect ratio locked for your print</span>
-              </div>
-
-              {/* Drop zone or Cropper */}
+            <div className="h-full flex flex-col p-6 sm:p-10">
               {!localSrc ? (
                 <DropZone onFile={onPickFile} />
               ) : (
-                <div className="space-y-3">
-                  <div className="relative h-72 w-full overflow-hidden rounded-2xl border border-slate-200 bg-black shadow-inner">
+                <div className="flex h-full flex-col gap-6 lg:flex-row">
+                  <div className="relative flex-1 min-h-[300px] border border-slate-200 bg-slate-50">
                     <Cropper
-                      image={localSrc}
-                      crop={crop}
-                      zoom={zoom}
+                      image={localSrc} crop={crop} zoom={zoom}
                       aspect={selectedRatio.w / selectedRatio.h}
-                      onCropChange={setCrop}
-                      onZoomChange={setZoom}
-                      onCropComplete={onCropComplete}
+                      onCropChange={setCrop} onZoomChange={setZoom}
+                      onCropComplete={(_, pix) => setCroppedPixels(pix)}
                     />
                   </div>
-
-                  {/* Zoom */}
-                  <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-2.5">
-                    <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth={1.8}>
-                      <circle cx="8" cy="8" r="5" /><line x1="13" y1="13" x2="18" y2="18" />
-                    </svg>
-                    <input
-                      type="range" min={1} max={3} step={0.01}
-                      value={zoom}
-                      onChange={(e) => setZoom(Number(e.target.value))}
-                      className="w-full accent-[#FF633F]"
-                    />
-                    <span className="text-xs font-semibold text-slate-500 w-8 text-right">
-                      {zoom.toFixed(1)}×
-                    </span>
+                  <div className="w-full lg:w-72 space-y-6">
+                    <div>
+                      <label className="font-mono text-[10px] uppercase tracking-widest text-slate-400">Độ Phóng Đại</label>
+                      <input 
+                        type="range" min={1} max={3} step={0.01} value={zoom}
+                        onChange={(e) => setZoom(Number(e.target.value))}
+                        className="mt-2 w-full accent-cyan-400"
+                      />
+                    </div>
+                    <div className="border-l-2 border-cyan-400 pl-4 py-2">
+                      <p className="text-[11px] font-bold uppercase tracking-wider">Tỉ lệ đã chọn</p>
+                      <p className="text-2xl font-black text-slate-900">{selectedRatio.label}</p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button 
+                        onClick={saveCropAndUpload}
+                        disabled={uploading}
+                        className="w-full bg-slate-950 py-4 text-[11px] font-bold uppercase tracking-widest text-white transition-all hover:bg-cyan-500"
+                      >
+                        {uploading ? "ĐANG XỬ LÝ..." : "XÁC NHẬN & TẢI LÊN"}
+                      </button>
+                      <button onClick={() => setLocalSrc("")} className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-red-500 transition-colors">
+                        Thay đổi ảnh khác
+                      </button>
+                    </div>
                   </div>
-
-                  {/* Change photo */}
-                  <button
-                    type="button"
-                    onClick={() => { if (localSrc) URL.revokeObjectURL(localSrc); setLocalSrc(""); }}
-                    className="text-xs font-semibold text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline"
-                  >
-                    Choose a different photo
-                  </button>
                 </div>
               )}
-
-              {uploadError && (
-                <div className="flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-xs font-semibold text-red-600">
-                  <span className="mt-0.5">⚠️</span>
-                  {uploadError}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between pt-1">
-                {!lockedRatioId ? (
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    ← Back
-                  </button>
-                ) : <span />}
-
-                <button
-                  type="button"
-                  onClick={saveCropAndUpload}
-                  disabled={!localSrc || uploading}
-                  style={{ background: localSrc && !uploading ? DARK : undefined }}
-                  className="flex items-center gap-2.5 rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-slate-300 active:scale-[0.98]"
-                >
-                  {uploading ? (
-                    <>
-                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
-                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
-                      </svg>
-                      Uploading…
-                    </>
-                  ) : (
-                    <>
-                      Save & Continue →
-                    </>
-                  )}
-                </button>
-              </div>
             </div>
           )}
 
-          {/* ── STEP 3: Preview ── */}
+          {/* STEP 3: Xem trước */}
           {previewStep && (
-            <div className="space-y-5">
-              <div className="grid gap-5 lg:grid-cols-5">
-                {/* Image preview */}
-                <div className="lg:col-span-3">
-                  <div
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm"
-                    style={{ aspectRatio: `${selectedRatio.w} / ${selectedRatio.h}` }}
-                  >
-                    {imageUrl ? (
-                      <img src={imageUrl} alt="preview" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                        No image found
-                      </div>
-                    )}
+            <div className="h-full flex flex-col items-center justify-center p-10">
+               <div className="relative mb-10 max-w-lg shadow-2xl border-[12px] border-white shadow-slate-200">
+                  <img src={imageUrl} alt="Final" className="max-h-[50vh] w-auto object-contain" />
+                  <div className="absolute -bottom-6 -right-6 bg-magenta-500 p-4 text-white" style={{ background: M }}>
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-tighter">Verified Art</p>
                   </div>
-                </div>
-
-                {/* Details panel */}
-                <div className="flex flex-col justify-between lg:col-span-2">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Details</p>
-                    <div className="mt-3 space-y-2">
-                      <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2.5">
-                        <span className="text-xs font-semibold text-slate-500">Ratio</span>
-                        <span
-                          style={{ background: `${ACCENT}15`, color: ACCENT }}
-                          className="rounded-full px-2.5 py-0.5 text-xs font-bold"
-                        >
-                          {selectedRatio.label}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2.5">
-                        <span className="text-xs font-semibold text-slate-500">Status</span>
-                        <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-600">
-                          <span className="h-2 w-2 rounded-full bg-emerald-500" /> Ready to use
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 rounded-xl bg-[#FF633F]/6 border border-[#FF633F]/15 px-4 py-3">
-                      <p className="text-xs font-semibold text-[#FF633F]">
-                        ✓ Your photo has been cropped and uploaded successfully.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex flex-col gap-3">
-                    <button
-                      type="button"
-                      onClick={() => { if (lockedRatioId) setStep(1); else setStep(2); }}
-                      className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+               </div>
+               <div className="text-center">
+                 <h3 className="text-2xl font-black tracking-tighter text-slate-900 uppercase">Tác phẩm đã sẵn sàng</h3>
+                 <p className="mt-2 font-mono text-[11px] text-slate-400 uppercase tracking-widest">Chất lượng in: Fine Art Archive</p>
+                 <div className="mt-8 flex gap-4 justify-center">
+                    <button onClick={() => setStep(lockedRatioId ? 1 : 2)} className="border border-slate-200 px-8 py-3 text-[11px] font-bold uppercase tracking-widest hover:bg-slate-50">Làm lại</button>
+                    <button 
+                      onClick={() => { onComplete({ ratio: selectedRatio, imageUrl, fileMeta }); close(); }}
+                      className="bg-cyan-400 px-8 py-3 text-[11px] font-bold uppercase tracking-widest text-white shadow-lg shadow-cyan-200"
                     >
-                      ← Use Different Photo
+                      Sử dụng ảnh này →
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onComplete({ ratio: selectedRatio, imageUrl, fileMeta });
-                        close();
-                      }}
-                      style={{ background: ACCENT }}
-                      className="rounded-2xl px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:brightness-110 active:scale-[0.98]"
-                    >
-                      Use This Photo →
-                    </button>
-                  </div>
-                </div>
-              </div>
+                 </div>
+               </div>
             </div>
           )}
+
         </div>
+
+        {/* Footer: Đường kẻ mảnh bảo tàng */}
+        <div className="h-px w-full bg-slate-100" />
       </div>
     </div>
   );
