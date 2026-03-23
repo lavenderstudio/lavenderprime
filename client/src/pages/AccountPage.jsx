@@ -1,34 +1,58 @@
-// client/src/pages/AccountPage.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Modern Account Page — matches site theme.
-// ALL existing logic is preserved exactly. Only the UI is redesigned.
+// Account Page — Thiết kế Bảo tàng (Cyan × Magenta)
+// Tràn viền · Việt ngữ · Đẳng cấp Gallery
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
-import { User, Mail, Phone, ShieldCheck, MapPin, Package, CheckCircle, AlertCircle } from "lucide-react";
-import Page from "../components/Page.jsx";
+import { User, Mail, Phone, ShieldCheck, MapPin, Package, CheckCircle, AlertCircle, ArrowRight } from "lucide-react";
 import api from "../lib/api.js";
 
-const ACCENT = "#FF633F";
+import ShinyText from "../components/reactbits/ShinyText.jsx";
+
+// ─── Bảng màu ────────────────────────────────────────────────────────────────
+const C = "#00e5ff";   // cyan thuần
+const M = "#e040fb";   // magenta thuần
+const CM = C;
 
 const UAE_CITIES = [
   "Abu Dhabi", "Dubai", "Sharjah", "Ajman",
   "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "Al Ain", "Khorfakkan",
 ];
 
+// ─── Styles ──────────────────────────────────────────────────────────────────
 const INPUT =
-  "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#FF633F]/60 focus:bg-white focus:ring-2 focus:ring-[#FF633F]/10";
+  "w-full border-b border-slate-200 bg-transparent px-0 py-3 text-base font-bold text-slate-900 outline-none transition-all focus:border-[#00e5ff] placeholder:text-slate-300";
 
 const INPUT_DISABLED =
-  "w-full rounded-xl border border-slate-100 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-400 cursor-not-allowed";
+  "w-full border-b border-slate-100 bg-transparent px-0 py-3 text-base font-bold text-slate-400 cursor-not-allowed";
 
-function Field({ icon: Icon, label, children }) {
+// ─── Components bổ trợ ───────────────────────────────────────────────────────
+function Reveal({ children, delay = 0 }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
   return (
-    <div>
-      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
-        {Icon && <Icon className="h-3.5 w-3.5" />}
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function Hairline({ className = "" }) {
+  return <div className={`h-px w-full bg-slate-100 ${className}`} />;
+}
+
+function Field({ icon: Icon, label, children, className = "" }) {
+  return (
+    <div className={className}>
+      <label className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">
+        {Icon && <Icon size={12} style={{ color: C }} />}
         {label}
       </label>
       {children}
@@ -37,7 +61,7 @@ function Field({ icon: Icon, label, children }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PAGE
+// MAIN PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
@@ -46,29 +70,16 @@ export default function AccountPage() {
   const [success, setSuccess] = useState("");
 
   const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    role: "user",
-    shippingAddress: {
-      line1: "",
-      line2: "",
-      city: "",
-      postcode: "",
-      country: "",
-    },
+    fullName: "", email: "", phone: "", role: "user",
+    shippingAddress: { line1: "", line2: "", city: "", postcode: "", country: "" },
   });
 
-  // ── Load profile once ──────────────────────────────────────────────────────
   useEffect(() => {
     const load = async () => {
       try {
-        setError("");
         setLoading(true);
-
         const res = await api.get("/users/me");
         const u = res.data?.user;
-
         setForm({
           fullName: u?.fullName || "",
           email: u?.email || "",
@@ -91,42 +102,16 @@ export default function AccountPage() {
     load();
   }, []);
 
-  const updateField = (key, value) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const updateAddr = (key, value) => {
-    setForm((prev) => ({
-      ...prev,
-      shippingAddress: { ...prev.shippingAddress, [key]: value },
-    }));
-  };
-
   const onSave = async (e) => {
     e.preventDefault();
     try {
-      setError("");
-      setSuccess("");
-      setSaving(true);
-
+      setError(""); setSuccess(""); setSaving(true);
       const res = await api.patch("/users/me", {
         fullName: form.fullName,
         phone: form.phone,
         shippingAddress: form.shippingAddress,
       });
-
-      const u = res.data?.user;
-
-      setForm((prev) => ({
-        ...prev,
-        fullName: u?.fullName || prev.fullName,
-        phone: u?.phone || prev.phone,
-        shippingAddress: u?.shippingAddress || prev.shippingAddress,
-        role: u?.role || prev.role,
-        email: u?.email || prev.email,
-      }));
-
-      setSuccess("Saved ✅");
+      setSuccess("Đã lưu thay đổi thành công ✅");
     } catch (err) {
       setError(err?.response?.data?.message || err.message);
     } finally {
@@ -136,242 +121,189 @@ export default function AccountPage() {
 
   const isUAE = useMemo(() => {
     const c = String(form.shippingAddress?.country || "").toLowerCase();
-    return (
-      c === "united arab emirates" || c === "uae" || c === "u.a.e" || c.includes("emirates")
-    );
+    return c === "united arab emirates" || c === "uae" || c.includes("emirates");
   }, [form.shippingAddress?.country]);
 
-  // ── Initials avatar ────────────────────────────────────────────────────────
-  const initials = form.fullName
-    ? form.fullName.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
-    : "?";
-
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
-
-      {/* ── Dark hero header ─────────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-slate-950 px-4 py-12">
-        <div
-          className="pointer-events-none absolute right-1/4 top-0 h-40 w-40 rounded-full opacity-20 blur-3xl"
-          style={{ background: ACCENT }}
-        />
-        <div className="relative mx-auto max-w-3xl">
-          <div className="flex items-center gap-5">
-            {/* Avatar */}
-            <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-xl font-extrabold text-white shadow-lg"
-              style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #e8472a 100%)` }}
-            >
-              {loading ? "…" : initials}
-            </div>
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-                My Account
-              </p>
-              <h1 className="mt-0.5 text-2xl font-extrabold text-white">
-                {loading ? "Loading…" : form.fullName || "Your Profile"}
+    <div className="min-h-screen bg-white font-sans text-slate-900 antialiased">
+      
+      {/* ── Section 1: Hero Header (Tràn viền) ────────────────── */}
+      <section className="relative border-b border-slate-100 bg-white pt-32 pb-20 px-10 sm:px-16 lg:px-24">
+        {/* Accent line dọc đúng chất bảo tàng */}
+        <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: C }} />
+        
+        <Reveal>
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-10">
+            <div className="max-w-2xl">
+              <div className="mb-6 flex items-center gap-4">
+                <span className="font-mono text-xs tracking-[0.3em] text-slate-400">ID: {form.role?.toUpperCase()}</span>
+                <div className="h-px w-12" style={{ background: M }} />
+                <span className="rounded-full px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest" style={{ background: C }}>
+                   Tài khoản xác thực
+                </span>
+              </div>
+              
+              <h1 className="font-extrabold leading-[0.9] tracking-tighter text-slate-900" style={{ fontSize: "clamp(3rem, 7vw, 6rem)" }}>
+                Hồ Sơ<br />
+                <span style={{ color: "transparent", WebkitTextStroke: `2px ${M}` }}>Của Bạn.</span>
               </h1>
-              <p className="mt-0.5 text-sm text-white/40">
-                {form.email || "Manage your profile and shipping address"}
+              
+              <p className="mt-8 max-w-md text-base leading-relaxed text-slate-500 sm:text-lg">
+                Quản lý thông tin cá nhân, địa chỉ giao hàng và theo dõi các tác phẩm nghệ thuật bạn đã đặt chế tác.
               </p>
             </div>
-          </div>
 
-          {/* Quick links */}
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              to="/orders"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
-            >
-              <Package className="h-3.5 w-3.5" /> My Orders
-            </Link>
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
-            >
-              Shop Now
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Body ────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-3xl px-4 py-10">
-
-        {/* Alerts */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-4 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"
-            >
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              {error}
-            </motion.div>
-          )}
-          {success && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-4 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-700"
-            >
-              <CheckCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              {success}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {loading ? (
-          <div className="space-y-4">
-            {[1, 2].map((n) => (
-              <div key={n} className="h-40 animate-pulse rounded-3xl border border-slate-100 bg-white" />
-            ))}
-          </div>
-        ) : (
-          <form onSubmit={onSave} className="space-y-5">
-
-            {/* ── Profile details ────────────────────────────────── */}
-            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-              <div className="border-b border-slate-100 px-6 py-4">
-                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-                  Profile
-                </p>
-                <h2 className="mt-0.5 text-lg font-extrabold text-slate-900">Personal Details</h2>
-                <p className="text-sm text-slate-500">Update your name and phone for faster checkout.</p>
-              </div>
-
-              <div className="grid gap-4 p-6 sm:grid-cols-2">
-                <Field icon={User} label="Full Name">
-                  <input
-                    value={form.fullName}
-                    onChange={(e) => updateField("fullName", e.target.value)}
-                    className={INPUT}
-                    placeholder="Your name"
-                  />
-                </Field>
-
-                <Field icon={Mail} label="Email">
-                  <input value={form.email} disabled className={INPUT_DISABLED} />
-                </Field>
-
-                <Field icon={Phone} label="Phone">
-                  <input
-                    value={form.phone}
-                    onChange={(e) => updateField("phone", e.target.value)}
-                    className={INPUT}
-                    placeholder="+971..."
-                  />
-                </Field>
-
-                <Field icon={ShieldCheck} label="Role">
-                  <div className={INPUT_DISABLED}>
-                    <span
-                      className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-extrabold text-white"
-                      style={{ background: form.role === "admin" ? "#0f172a" : ACCENT }}
-                    >
-                      {form.role.toUpperCase()}
-                    </span>
-                  </div>
-                </Field>
-              </div>
+            <div className="flex flex-wrap gap-4 shrink-0">
+              <Link to="/orders" className="group flex items-center gap-3 border border-slate-200 px-8 py-4 text-xs font-extrabold tracking-widest uppercase transition-all hover:border-slate-900">
+                <Package size={16} /> Đơn hàng của tôi
+              </Link>
             </div>
+          </div>
+        </Reveal>
+      </section>
 
-            {/* ── Shipping address ───────────────────────────────── */}
-            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-              <div className="border-b border-slate-100 px-6 py-4">
-                <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-                  Shipping
-                </p>
-                <h2 className="mt-0.5 text-lg font-extrabold text-slate-900">Saved Address</h2>
-                <p className="text-sm text-slate-500">Auto-filled at checkout to save you time.</p>
-              </div>
+      {/* ── Section 2: Form Body (Grid bất đối xứng) ───────────── */}
+      <section className="grid lg:grid-cols-12 border-b border-slate-100">
+        
+        {/* Sidebar Title */}
+        <div className="lg:col-span-4 border-r border-slate-100 p-10 sm:p-16 lg:p-24 bg-slate-50/50">
+          <Reveal>
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-400 block mb-4">01 — Chi tiết</span>
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-6">Thông Tin Cá Nhân</h2>
+            <p className="text-sm leading-relaxed text-slate-400">
+              Thông tin này được sử dụng để xác thực đơn hàng và in chứng nhận tác phẩm cho bạn.
+            </p>
+          </Reveal>
+        </div>
 
-              <div className="space-y-4 p-6">
-                <Field icon={MapPin} label="Address Line 1">
-                  <input
-                    value={form.shippingAddress.line1}
-                    onChange={(e) => updateAddr("line1", e.target.value)}
-                    className={INPUT}
-                    placeholder="Address line 1"
-                  />
-                </Field>
+        {/* Form Fields */}
+        <div className="lg:col-span-8 p-10 sm:p-16 lg:p-24">
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div exit={{ opacity: 0 }} className="space-y-12">
+                {[1, 2, 3].map(i => <div key={i} className="h-16 w-full animate-pulse bg-slate-50" />)}
+              </motion.div>
+            ) : (
+              <motion.form initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={onSave} className="space-y-12">
+                
+                {/* Thông báo Alert */}
+                <div className="space-y-4">
+                  {error && (
+                    <div className="flex items-center gap-3 bg-rose-50 p-4 text-xs font-bold text-rose-600 border-l-2 border-rose-600">
+                      <AlertCircle size={14} /> {error}
+                    </div>
+                  )}
+                  {success && (
+                    <div className="flex items-center gap-3 bg-emerald-50 p-4 text-xs font-bold text-emerald-600 border-l-2 border-emerald-600">
+                      <CheckCircle size={14} /> {success}
+                    </div>
+                  )}
+                </div>
 
-                <Field label="Address Line 2">
-                  <input
-                    value={form.shippingAddress.line2}
-                    onChange={(e) => updateAddr("line2", e.target.value)}
-                    className={INPUT}
-                    placeholder="Address line 2 (optional)"
-                  />
-                </Field>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="City">
-                    {isUAE ? (
-                      <select
-                        className={INPUT}
-                        value={form.shippingAddress.city}
-                        onChange={(e) => updateAddr("city", e.target.value)}
-                        required
-                      >
-                        <option value="">Select city *</option>
-                        {UAE_CITIES.map((city) => (
-                          <option key={city} value={city}>{city}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        value={form.shippingAddress.city}
-                        onChange={(e) => updateAddr("city", e.target.value)}
-                        className={INPUT}
-                        placeholder="City"
-                        required
-                      />
-                    )}
+                <div className="grid gap-x-12 gap-y-10 sm:grid-cols-2">
+                  <Field icon={User} label="Họ và Tên">
+                    <input
+                      value={form.fullName}
+                      onChange={(e) => setForm({...form, fullName: e.target.value})}
+                      className={INPUT}
+                      placeholder="Nhập tên của bạn"
+                    />
                   </Field>
 
-                  <Field label="Postcode">
+                  <Field icon={Mail} label="Địa chỉ Email">
+                    <input value={form.email} disabled className={INPUT_DISABLED} />
+                  </Field>
+
+                  <Field icon={Phone} label="Số điện thoại">
                     <input
-                      value={form.shippingAddress.postcode}
-                      onChange={(e) => updateAddr("postcode", e.target.value)}
+                      value={form.phone}
+                      onChange={(e) => setForm({...form, phone: e.target.value})}
                       className={INPUT}
-                      placeholder="Postcode"
+                      placeholder="+971..."
                     />
+                  </Field>
+
+                  <Field icon={ShieldCheck} label="Phân quyền">
+                    <div className="pt-3">
+                      <span className="font-mono text-[10px] font-bold text-white px-2 py-1" style={{ background: M }}>
+                        {form.role?.toUpperCase()}
+                      </span>
+                    </div>
                   </Field>
                 </div>
 
-                <Field label="Country">
-                  <input
-                    value={form.shippingAddress.country}
-                    disabled
-                    className={INPUT_DISABLED}
-                    placeholder="Country"
-                  />
-                </Field>
-              </div>
-            </div>
+                {/* Shipping Section */}
+                <div className="pt-10">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-400 block mb-8">02 — Giao hàng</span>
+                  <div className="space-y-10">
+                    <Field icon={MapPin} label="Địa chỉ dòng 1">
+                      <input
+                        value={form.shippingAddress.line1}
+                        onChange={(e) => setForm({...form, shippingAddress: {...form.shippingAddress, line1: e.target.value}})}
+                        className={INPUT}
+                        placeholder="Số nhà, tên đường..."
+                      />
+                    </Field>
 
-            {/* ── Save ───────────────────────────────────────────── */}
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={saving}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-extrabold text-white shadow-sm transition-all duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-              style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #e8472a 100%)` }}
-            >
-              {saving ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Saving…
-                </>
-              ) : "Save Changes"}
-            </motion.button>
-          </form>
-        )}
-      </div>
+                    <div className="grid gap-x-12 gap-y-10 sm:grid-cols-2">
+                      <Field label="Thành phố">
+                        {isUAE ? (
+                          <select
+                            className={INPUT}
+                            value={form.shippingAddress.city}
+                            onChange={(e) => setForm({...form, shippingAddress: {...form.shippingAddress, city: e.target.value}})}
+                          >
+                            <option value="">Chọn thành phố</option>
+                            {UAE_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                        ) : (
+                          <input
+                            value={form.shippingAddress.city}
+                            onChange={(e) => setForm({...form, shippingAddress: {...form.shippingAddress, city: e.target.value}})}
+                            className={INPUT}
+                          />
+                        )}
+                      </Field>
+
+                      <Field label="Mã bưu điện">
+                        <input
+                          value={form.shippingAddress.postcode}
+                          onChange={(e) => setForm({...form, shippingAddress: {...form.shippingAddress, postcode: e.target.value}})}
+                          className={INPUT}
+                        />
+                      </Field>
+                    </div>
+
+                    <Field label="Quốc gia">
+                      <input value={form.shippingAddress.country} disabled className={INPUT_DISABLED} />
+                    </Field>
+                  </div>
+                </div>
+
+                {/* Nút lưu kiểu Magnet */}
+                <div className="pt-6">
+                  <motion.button
+                    whileTap={{ scale: 0.97 }}
+                    disabled={saving}
+                    className="flex items-center justify-center gap-4 bg-slate-900 px-12 py-5 text-xs font-extrabold text-white tracking-[0.2em] uppercase transition-all hover:bg-black hover:scale-[1.02] disabled:opacity-50"
+                  >
+                    {saving ? "Đang xử lý..." : "Cập nhật hồ sơ"}
+                    <ArrowRight size={16} style={{ color: C }} />
+                  </motion.button>
+                </div>
+
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* Footer Decoration */}
+      <section className="bg-slate-950 py-20 px-10 text-center">
+        <p className="font-mono text-[10px] tracking-[0.5em] text-white/20 uppercase">
+          Gallery Standard Archive System
+        </p>
+      </section>
     </div>
   );
 }
