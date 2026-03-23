@@ -2,10 +2,10 @@
   "name": "goldenartframes",
   "version": "1.0.0",
   "description": "MVP: Print editor flow (portrait) - upload -> crop/zoom -> price -> add to cart.",
-  "main": "server/index.js",
+  "main": "server/src/index.js",
   "scripts": {
     "build": "npm install --prefix server && npm install --prefix client --legacy-peer-deps && npm run build --prefix client",
-    "start": "node server/index.js"
+    "start": "node server/src/index.js"
   },
   "keywords": [],
   "author": "",
