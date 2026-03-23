@@ -1,22 +1,20 @@
 // client/src/pages/BlogPostPage.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Modern Blog Post page — matches site theme.
-// ALL existing logic is preserved exactly. Only the UI is redesigned.
-// ─────────────────────────────────────────────────────────────────────────────
-
+// Modern Blog Post page — matches site theme (minimal, clean like goldenartframe.com)
+// ALL existing logic preserved. No ShinyText, no neon/brutalism. Fixed build & UI issues.
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Calendar, User, ArrowLeft, BookOpen, Clock } from "lucide-react";
-import Page from "../components/Page.jsx";
-import api from "../lib/api.js";
+import api from "../lib/api.js"; // Giữ nguyên api của bạn
 
-const ACCENT = "#FF633F";
+const ACCENT = "#FF633F"; // Màu accent gốc (orange-red)
 
 function formatDate(d) {
   try {
-    return new Date(d).toLocaleDateString("en-GB", {
-      day: "numeric", month: "long", year: "numeric",
+    return new Date(d).toLocaleDateString("vi-VN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
   } catch {
     return "";
@@ -28,7 +26,7 @@ function readingTime(html = "") {
   return Math.max(1, Math.round(words / 200));
 }
 
-// ─── Skeleton ────────────────────────────────────────────────────────────────
+// Skeleton loading
 function Skeleton() {
   return (
     <div className="animate-pulse space-y-4 pt-8">
@@ -40,10 +38,8 @@ function Skeleton() {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 export default function BlogPostPage() {
   const { slug } = useParams();
-
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [blog, setBlog] = useState(null);
@@ -55,32 +51,32 @@ export default function BlogPostPage() {
       try {
         setLoading(true);
         setErr("");
-
         const res = await api.get(`/blogs/${slug}`);
         const data = res.data;
-
-        if (!data?.ok) throw new Error(data?.message || "Blog not found");
+        if (!data?.ok) throw new Error(data?.message || "Không tìm thấy bài viết");
         if (!alive) return;
         setBlog(data.blog);
       } catch (e) {
         if (!alive) return;
-        setErr(e?.message || "Something went wrong");
+        setErr(e?.message || "Đã có lỗi xảy ra. Vui lòng thử lại.");
       } finally {
         if (alive) setLoading(false);
       }
     }
 
     load();
-    return () => { alive = false; };
+
+    return () => {
+      alive = false;
+    };
   }, [slug]);
 
   return (
     <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
-
-      {/* ── Hero / cover area ─────────────────────────────────────── */}
+      {/* Hero / cover area - minimal dark overlay như goldenartframe */}
       {!loading && blog ? (
         <div className="relative overflow-hidden bg-slate-950">
-          {/* Cover image */}
+          {/* Cover image với overlay */}
           {blog.coverImage?.url ? (
             <div className="absolute inset-0">
               <img
@@ -88,7 +84,7 @@ export default function BlogPostPage() {
                 alt={blog.title}
                 className="h-full w-full object-cover opacity-30"
               />
-              <div className="absolute inset-0 bg-linear-to-b from-slate-950/60 via-slate-950/70 to-slate-950" />
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/70 to-slate-950" />
             </div>
           ) : (
             <div
@@ -103,7 +99,7 @@ export default function BlogPostPage() {
               to="/blog"
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-bold text-white/60 transition hover:bg-white/10 hover:text-white"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to Blog
+              <ArrowLeft className="h-3.5 w-3.5" /> Quay về Blog
             </Link>
 
             {/* Tags */}
@@ -121,6 +117,7 @@ export default function BlogPostPage() {
               </div>
             )}
 
+            {/* Title */}
             <motion.h1
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -138,7 +135,7 @@ export default function BlogPostPage() {
             <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white/50">
               <span className="inline-flex items-center gap-1.5">
                 <User className="h-3.5 w-3.5" />
-                {blog.author?.fullName || "Team"}
+                {blog.author?.fullName || "Ban biên tập"}
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5" />
@@ -146,7 +143,7 @@ export default function BlogPostPage() {
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="h-3.5 w-3.5" />
-                {readingTime(blog.content)} min read
+                {readingTime(blog.content)} phút đọc
               </span>
             </div>
           </div>
@@ -162,9 +159,8 @@ export default function BlogPostPage() {
         )
       )}
 
-      {/* ── Content area ─────────────────────────────────────────── */}
+      {/* Content area */}
       <div className="mx-auto max-w-3xl px-4 pb-20 pt-10">
-
         {/* Error */}
         {err && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700">
@@ -172,10 +168,10 @@ export default function BlogPostPage() {
           </div>
         )}
 
-        {/* Loading skeleton */}
+        {/* Loading */}
         {loading && <Skeleton />}
 
-        {/* Article content */}
+        {/* Article */}
         {!loading && blog && (
           <motion.article
             initial={{ opacity: 0, y: 12 }}
@@ -184,14 +180,13 @@ export default function BlogPostPage() {
             className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm"
           >
             <div className="p-6 sm:p-10">
-              {/* Prose body */}
               <div
                 className="prose prose-slate prose-headings:font-extrabold prose-a:text-[#FF633F] prose-a:no-underline hover:prose-a:underline max-w-none"
-                dangerouslySetInnerHTML={{ __html: blog.content }}
+                dangerouslySetInnerHTML={{ __html: blog.content || "<p>Nội dung đang cập nhật...</p>" }}
               />
             </div>
 
-            {/* Footer */}
+            {/* Tags footer */}
             {Array.isArray(blog.tags) && blog.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 border-t border-slate-100 px-6 py-4 sm:px-10">
                 {blog.tags.map((t) => (
@@ -215,7 +210,7 @@ export default function BlogPostPage() {
               to="/blog"
               className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
-              <BookOpen className="h-4 w-4" /> More Articles
+              <BookOpen className="h-4 w-4" /> Xem thêm bài viết
             </Link>
           </div>
         )}
