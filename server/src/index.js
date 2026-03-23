@@ -58,53 +58,51 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/admin/blogs", adminBlogRoutes);
 app.use("/api/analytics", analyticsRouter);
 
-// --- LOGIC SEO CHO 500.000 SẢN PHẨM (CHỈ CHẠY TRÊN PRODUCTION) ---
+// --- LOGIC SEO CHO 500.000 SẢN PHẨM ---
 if (process.env.NODE_ENV === "production") {
   const clientDistPath = path.join(__dirname, "../client/dist");
   app.use(express.static(clientDistPath));
 
-  // Middleware nhồi Meta động cho Bot
   app.get(["/editor/:id", "/blog/:slug"], async (req, res) => {
     const indexPath = path.join(clientDistPath, "index.html");
     const slugOrId = req.params.id || req.params.slug;
 
     try {
-      let html = fs.readFileSync(indexPath, "utf8");
-      let metaData = { title: "Lavender Prime", image: "", desc: "Nghệ thuật cao cấp" };
+      if (!fs.existsSync(indexPath)) return res.status(404).send("Build not found");
 
-      // Truy vấn nhanh từ MongoDB tùy theo loại route
-      if (req.path.startsWith("/editor/")) {
+      let html = fs.readFileSync(indexPath, "utf8");
+      let metaData = { title: "Lavender Prime", image: "", desc: "Bản in nghệ thuật" };
+
+      // KIỂM TRA ID HỢP LỆ TRƯỚC KHI TRUY VẤN
+      if (req.path.startsWith("/editor/") && mongoose.Types.ObjectId.isValid(slugOrId)) {
         const product = await mongoose.connection.collection("products").findOne(
           { _id: new mongoose.Types.ObjectId(slugOrId) },
           { projection: { name: 1, imageUrl: 1, description: 1 } }
         );
         if (product) {
-          metaData = { title: product.name, image: product.imageUrl, desc: product.description };
+          metaData = { 
+            title: product.name + " | Lavender Prime", 
+            image: product.imageUrl, 
+            desc: product.description 
+          };
         }
       }
 
-      // Nhồi vào các biến chờ đã đặt ở index.html
       html = html
         .replace(/__TITLE__/g, metaData.title)
         .replace(/__OG_TITLE__/g, metaData.title)
         .replace(/__OG_IMAGE__/g, metaData.image)
-        .replace(/__DESCRIPTION__/g, metaData.desc?.substring(0, 160));
+        .replace(/__DESCRIPTION__/g, metaData.desc?.substring(0, 160))
+        .replace(/__OG_DESCRIPTION__/g, metaData.desc?.substring(0, 160));
 
       res.send(html);
     } catch (error) {
-      res.sendFile(indexPath); // Fallback nếu có lỗi
+      console.error("SEO Error:", error);
+      res.sendFile(indexPath);
     }
   });
 
-  // Default route cho các trang SPA khác
   app.get(/^(?!\/api).*/, (req, res) => {
     res.sendFile(path.join(clientDistPath, "index.html"));
   });
 }
-
-const PORT = process.env.PORT || 5000;
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  });
-});
