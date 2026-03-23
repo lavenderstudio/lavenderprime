@@ -4,7 +4,7 @@
   "description": "MVP: Print editor flow (portrait) - upload -> crop/zoom -> price -> add to cart.",
   "main": "server/index.js",
   "scripts": {
-    "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
+    "build": "npm install --prefix server && npm install --prefix client --legacy-peer-deps && npm run build --prefix client",
     "start": "node server/index.js"
   },
   "keywords": [],
