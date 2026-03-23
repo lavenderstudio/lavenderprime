@@ -1,329 +1,261 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable react-hooks/static-components */
-// client/src/pages/EditorWeddingPrint.jsx
-
 import { useEffect, useMemo, useState } from "react";
 import api from "../lib/api.js";
 import { Link, useNavigate } from "react-router-dom";
-import Page from "../components/Page.jsx";
+import { motion, AnimatePresence } from "framer-motion";
 import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
-import WeddingPrintPreview from "../components/WeddingPrintPreview.jsx";
-import PersonalisationForm from "../components/PersonalisationForm.jsx";
+import { CANVAS_OPTIONS } from "../lib/optionsUi.js";
 
-import { ACCENT, ACCENT_BG, ACCENT_HOVER, Container } from "../components/home/ui.jsx";
+// Hệ màu tím nghệ thuật Heritage
+const PURPLE_ACCENT = "rgb(224, 64, 251)";
 
-function parseCmSize(sizeStr) {
-  if (!sizeStr) return null;
-  const cleaned = sizeStr.toLowerCase().replace("cm", "").replace("×", "x").trim();
-  const [w, h] = cleaned.split("x").map((n) => Number(n));
-  if (!Number.isFinite(w) || !Number.isFinite(h)) return null;
-  return { w, h };
-}
+const RELATED_PRODUCTS = [
+  { 
+    name: "In & Đóng Khung", 
+    desc: "Ảnh của bạn, khung thủ công, sẵn treo tường.", 
+    img: "/feature/11.avif",
+    href: "/editor/print-frame",
+    accent: PURPLE_ACCENT
+  },
+  { 
+    name: "Fine Art Print", 
+    desc: "Giấy mỹ thuật chất lượng bảo tàng.", 
+    img: "/feature/12.avif", 
+    href: "/editor/fine-art-print",
+    accent: "#ffffff"
+  },
+  { 
+    name: "Khung Collage", 
+    desc: "Nhiều ảnh trong một khung đẹp.", 
+    img: "/feature/3.avif", 
+    href: "/editor/collage-frame",
+    accent: PURPLE_ACCENT
+  }
+];
 
-function SectionLabel({ children }) {
-  return <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">{children}</p>;
-}
-
-function SizePills({ variants, value, onChange }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {variants.map((v) => {
-        const active = v.sku === value;
-        return (
-          <button key={v.sku} type="button" onClick={() => onChange(v.sku)}
-            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95
-              ${active ? `${ACCENT_BG} text-white shadow-md shadow-[#FF633F]/25` : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
-            {v.size}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function MaterialTiles({ options, value, onChange }) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {options.map((opt) => {
-        const active = opt.name === value;
-        return (
-          <button key={opt.name} type="button" onClick={() => onChange(opt.name)}
-            className={`flex flex-col items-center justify-center rounded-xl p-3 text-center transition-all duration-200 active:scale-95
-              ${active ? "ring-2 ring-[#FF633F] bg-[#FF633F]/8 border border-[#FF633F]/30" : "border border-slate-200 bg-white hover:bg-slate-50"}`}>
-            <span className={`text-sm font-bold ${active ? "text-[#FF633F]" : "text-slate-700"}`}>{opt.name}</span>
-            {opt.price > 0 && <span className="mt-0.5 text-[10px] font-semibold text-slate-400">+{opt.price}</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function UploadPlaceholder({ onUpload }) {
-  return (
-    <button type="button" onClick={onUpload} aria-label="Upload photo"
-      className="group relative flex w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center transition-all duration-200 hover:border-[#FF633F]/50 hover:bg-[#FF633F]/5 active:scale-[0.99]">
-      <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-200 group-hover:scale-105">
-        <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#FF633F]/30 animate-spin [animation-duration:8s]" />
-        <svg className="h-8 w-8 text-[#FF633F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-      </div>
-      <div>
-        <p className="text-base font-extrabold text-slate-900">Upload Your Wedding Photo</p>
-        <p className="mt-1 text-sm text-slate-500">Portrait Ratio → Crop → Preview</p>
-      </div>
-      <span className="rounded-full bg-[#FF633F] px-5 py-2 text-sm font-bold text-white shadow-md shadow-[#FF633F]/30 transition-transform group-hover:scale-105">Choose Photo</span>
-    </button>
-  );
-}
-
-export default function EditorWeddingPrint() {
+export default function EditorCanvas() {
   const navigate = useNavigate();
-  const [product, setProduct]   = useState(null);
+  const [product, setProduct] = useState(null);
   const [variantSku, setVariantSku] = useState("");
-  const [material, setMaterial] = useState("Matte");
-  const [quantity]              = useState(1);
+  const [frame, setFrame] = useState("Stretched"); 
   const [originalUrl, setOriginalUrl] = useState("");
-  const [quote, setQuote]       = useState(null);
-  const [error, setError]       = useState("");
+  const [quote, setQuote] = useState(null);
   const [isUploadWizardOpen, setIsUploadWizardOpen] = useState(false);
   const [selectedRatio, setSelectedRatio] = useState(null);
-  const [personalization, setPersonalization] = useState({});
-  const lockedRatioId = "2:3";
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        setError("");
-        const res = await api.get("/products/wedding-print");
-        setProduct(res.data);
-        const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
-        if (firstPortrait) setVariantSku(firstPortrait.sku);
-        const fields = res.data?.personalizationConfig?.fields || [];
-        if (fields.length) {
-          const initial = {};
-          fields.forEach((f) => { initial[f.key] = ""; });
-          setPersonalization(initial);
-        }
-      } catch (err) { setError(err?.response?.data?.message || err.message); }
-    };
-    load();
+    api.get("/products/canvas").then(res => {
+      setProduct(res.data);
+      const firstPortrait = res.data.variants?.find(v => v.orientation === "portrait");
+      if (firstPortrait) setVariantSku(firstPortrait.sku);
+    });
   }, []);
 
-  const portraitVariants = useMemo(() => (product?.variants || []).filter((v) => v.orientation === "portrait"), [product]);
-  const selectedVariant  = portraitVariants.find((v) => v.sku === variantSku);
-  const parsedPrint      = parseCmSize(selectedVariant?.size);
-  const materialOptions  = useMemo(() => product?.options?.materials || [], [product]);
-  const personalizationEnabled = !!product?.personalizationConfig?.enabled;
-  const personalizationFields  = useMemo(() => {
-    const fields = product?.personalizationConfig?.fields || [];
-    return [...fields].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-  }, [product]);
-
   useEffect(() => {
-    const getQuote = async () => {
-      if (!variantSku) return;
-      try {
-        setError("");
-        const res = await api.post("/pricing/quote", { productSlug: "wedding-print", variantSku, options: { material }, quantity });
-        setQuote(res.data);
-      } catch (err) { setQuote(null); setError(err?.response?.data?.message || err.message); }
-    };
-    getQuote();
-  }, [variantSku, material, quantity]);
-
-  function validatePersonalization() {
-    if (!personalizationEnabled) return { ok: true };
-    for (const f of personalizationFields) {
-      const val = String(personalization?.[f.key] ?? "").trim();
-      if (f.required && !val) return { ok: false, message: `Please fill: ${f.label}` };
-      if (val) {
-        const minL = Number(f.minLength ?? 0); const maxL = Number(f.maxLength ?? 9999);
-        if (minL && val.length < minL) return { ok: false, message: `${f.label} must be at least ${minL} characters.` };
-        if (maxL && val.length > maxL) return { ok: false, message: `${f.label} must be under ${maxL} characters.` };
-      }
-      if (val && f.pattern) {
-        try { const re = new RegExp(f.pattern); if (!re.test(val)) return { ok: false, message: `${f.label} format is invalid.` }; }
-        catch { /* skip bad regex */ }
-      }
-    }
-    return { ok: true };
-  }
-
-  const canOrder = !!(originalUrl && quote && selectedRatio);
+    if (!variantSku) return;
+    api.post("/pricing/quote", {
+      productSlug: "canvas", variantSku, options: { frame }, quantity: 1,
+    }).then(res => setQuote(res.data));
+  }, [variantSku, frame]);
 
   const handleAddToCart = async () => {
-    try {
-      setError("");
-      if (!originalUrl || !quote || !selectedVariant || !selectedRatio)
-        return setError("Missing image, ratio selection, or price.");
-      const pv = validatePersonalization();
-      if (!pv.ok) return setError(pv.message);
-      const sessionId = getSessionId();
-      await api.post("/cart/items", {
-        sessionId,
-        item: {
-          productSlug: "wedding-print", variantSku,
-          config: { orientation: "portrait", size: selectedVariant.size, material, quantity, transform: { ratio: selectedRatio.id, ratioW: selectedRatio.w, ratioH: selectedRatio.h } },
-          personalization: personalizationEnabled ? personalization : undefined,
-          assets: { originalUrl, previewUrl: "" },
-          price: { unit: quote.unit, total: quote.total, currency: quote.currency },
-        },
-      });
-      navigate("/cart");
-    } catch (err) { setError(err?.response?.data?.message || err.message); }
+    const payload = {
+      sessionId: getSessionId(),
+      productSlug: "canvas", variantSku,
+      options: { frame, originalUrl, ratio: selectedRatio },
+      quantity: 1
+    };
+    await api.post("/cart", payload);
+    navigate("/cart");
   };
 
+  const portraitVariants = useMemo(() => (product?.variants || []).filter(v => v.orientation === "portrait"), [product]);
+  const canOrder = !!(originalUrl && quote);
+
   return (
-    <Page title="Editor — Wedding Print">
-      <Container className="px-0">
-        <div className="px-4 pt-4">
-          <Link to="/products" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-            Products
-          </Link>
+    <div className="w-full min-h-screen bg-[#0A0A0A] text-white font-sans overflow-x-hidden">
+      
+      {/* 1. VÙNG TRƯNG BÀY & CẤU HÌNH */}
+      <div className="flex flex-col lg:flex-row h-[90vh] lg:h-screen overflow-hidden border-b border-white/5">
+        
+        {/* Gallery 3D Canvas */}
+        <div className="relative flex-1 bg-[#0F0F0F] flex flex-col items-center justify-center p-8 lg:p-20 overflow-hidden">
+          <div className="absolute inset-0 opacity-20 pointer-events-none" 
+               style={{ background: `radial-gradient(circle at 50% 50%, ${PURPLE_ACCENT} 0%, transparent 70%)` }} />
+          
+          <AnimatePresence mode="wait">
+            {!originalUrl ? (
+              <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="z-10 text-center">
+                <button onClick={() => setIsUploadWizardOpen(true)} className="group flex flex-col items-center gap-6">
+                  <div className="w-20 h-20 rounded-full border border-white/10 flex items-center justify-center group-hover:border-[#E040FB] transition-all duration-500">
+                    <span className="text-2xl font-light text-white/30 group-hover:text-[#E040FB]">+</span>
+                  </div>
+                  <p className="font-mono text-[10px] tracking-[0.4em] uppercase text-white/40 group-hover:text-white transition-colors">Khởi tạo tác phẩm</p>
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div key="artwork" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="relative z-10">
+                <div className="canvas-container-3d">
+                  <div className="canvas-3d-box shadow-[50px_80px_100px_-20px_rgba(0,0,0,0.7)]">
+                    <div className="canvas-face-front">
+                      <img src={originalUrl} alt="Canvas Front" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent pointer-events-none" />
+                    </div>
+                    <div className="canvas-face-right" style={{ backgroundImage: `url(${originalUrl})` }} />
+                    <div className="canvas-face-bottom" style={{ backgroundImage: `url(${originalUrl})` }} />
+                  </div>
+                </div>
+                <div className="mt-24 text-center">
+                  <h2 className="text-[11px] font-black uppercase tracking-[0.5em] text-[#E040FB]">Canvas Gallery Wrap</h2>
+                  <p className="text-[10px] font-medium text-white/30 mt-3 italic tracking-widest">Hand-stretched on 1.5" sustainable wood frames</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {error && (
-          <div className="mx-4 mt-3 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <svg className="h-4 w-4 shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-            {error}
+        {/* Sidebar Điều khiển */}
+        <div className="w-full lg:w-[440px] bg-[#0A0A0A] border-l border-white/5 flex flex-col z-20">
+          <div className="p-10">
+            <Link to="/products" className="text-[10px] font-bold tracking-[0.3em] text-white/40 uppercase hover:text-[#E040FB] transition-colors">← Collections</Link>
+            <h1 className="text-5xl font-black tracking-tighter uppercase mt-8 leading-[0.85]">
+              Heritage <br/><span className="italic" style={{ color: "transparent", WebkitTextStroke: `1px ${PURPLE_ACCENT}` }}>Canvas</span>
+            </h1>
           </div>
-        )}
 
-        <div className="px-4 pt-4 pb-2">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Wedding Print</h1>
-          <p className="mt-0.5 text-sm text-slate-500">Personalised Wedding Photo Prints — Premium Quality &amp; Delivered.</p>
-        </div>
-
-        {!product ? (
-          <div className="mx-4 mt-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm animate-pulse">
-            <div className="h-4 w-32 rounded bg-slate-200 mb-3" /><div className="h-48 w-full rounded-2xl bg-slate-100" />
-          </div>
-        ) : (
-          <div className="mt-2 flex flex-col gap-0 lg:grid lg:grid-cols-12 lg:gap-6 lg:px-4 lg:pb-8">
-            <div className="lg:col-span-7">
-              <div className="sticky top-20 overflow-hidden rounded-none lg:rounded-3xl border-0 border-b border-slate-200 lg:border bg-white shadow-sm">
-                <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#FF633F] shadow-sm shadow-[#FF633F]/50" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Live Preview</span>
-                  </div>
-                  {originalUrl && (
-                    <button onClick={() => setIsUploadWizardOpen(true)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all active:scale-95">↺ Change Photo</button>
-                  )}
-                </div>
-                <div className="px-5 pb-5">
-                  {!originalUrl ? (
-                    <div className="rounded-2xl bg-slate-50 p-4"><UploadPlaceholder onUpload={() => setIsUploadWizardOpen(true)} /></div>
-                  ) : (
-                    <WeddingPrintPreview
-                      imageUrl={originalUrl}
-                      groomName={personalization.groomName} brideName={personalization.brideName}
-                      locationText={personalization.location} weddingDateText={personalization.weddingDate}
-                      message={personalization.message}
-                    />
-                  )}
-                </div>
-                {originalUrl && (
-                  <div className="flex items-center gap-3 border-t border-slate-100 px-5 py-3 flex-wrap">
-                    {selectedRatio && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Ratio: {selectedRatio.id}</span>}
-                    {parsedPrint && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Print: {parsedPrint.w}×{parsedPrint.h}cm</span>}
-                    <span className="rounded-full bg-[#FF633F]/10 px-3 py-1 text-xs font-bold text-[#FF633F]">{material}</span>
-                  </div>
-                )}
+          <div className="p-10 space-y-12 overflow-y-auto flex-1 custom-scrollbar">
+            <section>
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-[10px] bg-[#E040FB] text-white w-5 h-5 flex items-center justify-center rounded-full font-bold">1</span>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Kích thước bảo tàng</h3>
               </div>
-            </div>
-
-            <div className="lg:col-span-5">
-              <div className="flex flex-col gap-0">
-                <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 lg:rounded-t-3xl lg:border lg:border-b-0">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-slate-900">Customise</h2>
-                    <p className="text-xs text-slate-500">Size, Material &amp; Personalisation</p>
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-2xl font-black ${quote ? "text-slate-900" : "text-slate-300"}`}>{quote ? `${quote.total}` : "—"}</div>
-                    {quote && <div className="text-xs font-semibold text-slate-400">{quote.currency} · Per Piece</div>}
-                  </div>
-                </div>
-
-                <div className="divide-y divide-slate-100 border border-t-0 border-slate-200 bg-white lg:rounded-b-3xl overflow-hidden">
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Print Size</SectionLabel>
-                      {parsedPrint && <span className="text-xs font-semibold text-slate-400">{parsedPrint.w}×{parsedPrint.h}cm</span>}
-                    </div>
-                    <SizePills variants={portraitVariants} value={variantSku} onChange={setVariantSku} />
-                  </div>
-
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Paper Material</SectionLabel>
-                      <span className={`text-xs font-bold ${ACCENT}`}>{material}</span>
-                    </div>
-                    <MaterialTiles options={materialOptions} value={material} onChange={setMaterial} />
-                  </div>
-
-                  {personalizationEnabled && (
-                    <div className="px-5 py-4">
-                      <SectionLabel>{product?.personalizationConfig?.title || "Personalisation"}</SectionLabel>
-                      <PersonalisationForm
-                        enabled={personalizationEnabled}
-                        title={product?.personalizationConfig?.title}
-                        fields={product?.personalizationConfig?.fields || []}
-                        values={personalization}
-                        onChange={(key, value) => setPersonalization((prev) => ({ ...prev, [key]: value }))}
-                      />
-                    </div>
-                  )}
-
-                  <div className="bg-slate-50 px-5 py-4">
-                    <SectionLabel>Order Summary</SectionLabel>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                      {[["Size", selectedVariant?.size || "—"], ["Material", material], ["Total", quote ? `${quote.total} ${quote.currency}` : "—"]].map(([label, val]) => (
-                        <div key={label} className="flex items-baseline justify-between col-span-2 sm:col-span-1">
-                          <span className="font-semibold text-slate-400">{label}</span>
-                          <span className="font-bold text-slate-700">{val}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur-sm px-5 py-4 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:pb-0 lg:pt-4">
-                  {!originalUrl && (
-                    <p className="mb-3 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-700">
-                      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                      Upload A Portrait Photo Above To Continue
-                    </p>
-                  )}
-                  <button disabled={!canOrder} onClick={handleAddToCart}
-                    className={`w-full rounded-2xl py-3.5 text-sm font-extrabold tracking-wide shadow-sm transition-all duration-300 active:scale-[0.98]
-                      ${canOrder ? `${ACCENT_BG} ${ACCENT_HOVER} text-white shadow-lg shadow-[#FF633F]/30 hover:scale-[1.01]` : "cursor-not-allowed bg-slate-100 text-slate-400"}`}>
-                    {canOrder ? `Add To Cart · ${quote?.total ?? ""} ${quote?.currency ?? ""}` : "Add To Cart"}
+              <div className="grid grid-cols-2 gap-2">
+                {portraitVariants.map(v => (
+                  <button key={v.sku} onClick={() => setVariantSku(v.sku)} 
+                    className={`py-4 px-4 text-[11px] font-bold border transition-all ${v.sku === variantSku ? 'bg-[#E040FB] text-white border-[#E040FB] shadow-[0_0_20px_rgba(224,64,251,0.3)]' : 'bg-white/5 text-white/40 border-white/5 hover:border-white/20'}`}>
+                    {v.size}
                   </button>
-                  <p className="mt-2 text-center text-[10px] font-semibold text-slate-400">🔒 Secure Checkout &nbsp;·&nbsp; Premium Packaging &nbsp;·&nbsp; Doorstep Delivery</p>
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-[10px] bg-[#E040FB] text-white w-5 h-5 flex items-center justify-center rounded-full font-bold">2</span>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">Hình thức hoàn thiện</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {CANVAS_OPTIONS?.map(opt => (
+                  <button key={opt.id} onClick={() => setFrame(opt.id)} 
+                    className={`flex flex-col gap-3 p-3 border transition-all ${frame === opt.id ? 'border-[#E040FB] bg-[#E040FB]/5' : 'border-white/5 hover:bg-white/5'}`}>
+                    <img src={opt.img} className="w-full aspect-square object-cover grayscale opacity-50" alt="" />
+                    <span className="text-[10px] font-black uppercase text-center tracking-widest">{opt.id}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <div className="p-10 border-t border-white/5 bg-[#0D0D0D]">
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <span className="text-[10px] font-black uppercase text-white/30 tracking-widest">Total Investment</span>
+                <div className="text-4xl font-black text-[#E040FB] tracking-tighter mt-1">
+                    {quote ? `${quote.total.toLocaleString()} ${quote.currency}` : "---"}
                 </div>
               </div>
             </div>
+            <button disabled={!canOrder} onClick={handleAddToCart} 
+              className={`w-full py-6 text-[11px] font-black uppercase tracking-[0.5em] transition-all duration-500 ${canOrder ? 'bg-white text-black hover:bg-[#E040FB] hover:text-white shadow-2xl' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}>
+              {canOrder ? "Add to Archive →" : "Upload artwork"}
+            </button>
           </div>
-        )}
+        </div>
+      </div>
 
-        <UploadWizardModal
-          isOpen={isUploadWizardOpen}
-          onClose={() => setIsUploadWizardOpen(false)}
-          lockedRatioId={lockedRatioId}
-          onComplete={({ ratio, imageUrl }) => {
-            if (ratio && Number(ratio.h) <= Number(ratio.w)) {
-              setError("Please choose a portrait ratio for Wedding Print."); return;
-            }
-            setSelectedRatio(ratio); setOriginalUrl(imageUrl);
-          }}
-        />
-      </Container>
-    </Page>
+      {/* 2. ART INSTALLATION DECOR (MODULE MỚI) */}
+      <section className="w-full py-40 px-10 border-t border-white/5 bg-[#0F0F0F] relative overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-end gap-10 relative z-10">
+          <div className="max-w-2xl">
+            <h2 className="text-7xl md:text-9xl font-bold tracking-tighter leading-none mb-10 opacity-10 select-none">THE<br />GALLERY</h2>
+            <p className="text-xl md:text-3xl text-white/80 leading-relaxed italic font-serif">
+              "Mỗi bức ảnh không chỉ là một tờ giấy in, đó là một mảnh linh hồn của buổi lễ, được lưu giữ trong sự tĩnh lặng của nghệ thuật."
+            </p>
+          </div>
+          <div className="flex flex-col items-end border-r-2 border-[#E040FB] pr-8 mb-4">
+             <span className="text-6xl font-black text-[#E040FB] leading-none">99%</span>
+             <span className="text-[10px] font-mono tracking-[0.3em] text-white/40 uppercase mt-2">Color Accuracy</span>
+          </div>
+        </div>
+        {/* Decorative blur for the module */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#E040FB]/5 blur-[120px] rounded-full -mr-48 -mt-48" />
+      </section>
+
+      {/* 3. SECTION RELATED (DI SẢN VĨNH CỬU) */}
+      <section className="w-full bg-[#050505] py-32 px-10 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
+        <div className="max-w-screen-2xl mx-auto relative z-10">
+          <div className="mb-20">
+             <p className="text-[#E040FB] font-mono text-[11px] uppercase tracking-[0.6em] mb-4 italic">The Heritage Collection</p>
+             <h2 className="text-white text-6xl md:text-8xl font-black tracking-tighter uppercase leading-tight">Dịch vụ <br/> <span style={{ color: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.2)" }}>Tương hỗ</span></h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-12">
+            {RELATED_PRODUCTS.map((item, idx) => (
+              <Link key={idx} to={item.href} className="group relative aspect-[3/4] overflow-hidden bg-zinc-900 shadow-2xl">
+                <img src={item.img} alt={item.name} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                <div className="absolute top-0 left-0 right-0 h-1 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700" style={{ background: item.accent }} />
+                <div className="absolute inset-0 p-12 flex flex-col justify-end">
+                  <span className="font-mono text-[10px] text-[#E040FB] mb-3 tracking-widest">{String(idx + 1).padStart(2, '0')}</span>
+                  <h3 className="text-white text-3xl font-black uppercase tracking-tighter mb-3">{item.name}</h3>
+                  <p className="text-white/50 text-[11px] mb-8 leading-relaxed uppercase tracking-widest">{item.desc}</p>
+                  <div className="flex items-center gap-4 text-white text-[10px] font-black tracking-[0.3em] uppercase transition-all group-hover:translate-x-3">
+                     View Exhibit <span className="text-xl">→</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. CSS DÀNH RIÊNG */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .canvas-container-3d { perspective: 2500px; padding: 20px; }
+        .canvas-3d-box { 
+          position: relative; width: 380px; height: 570px;
+          transform-style: preserve-3d; 
+          transform: rotateY(-25deg) rotateX(15deg) rotateZ(-2deg);
+          transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .canvas-3d-box:hover { transform: rotateY(-15deg) rotateX(10deg) rotateZ(0deg); }
+        .canvas-face-front { position: relative; width: 100%; height: 100%; z-index: 2; background: #222; overflow: hidden; }
+        .canvas-face-right {
+          position: absolute; top: 0; right: 0; bottom: 0; width: 45px;
+          background-size: cover; background-position: right center;
+          transform: rotateY(90deg); transform-origin: right;
+          filter: brightness(0.6) contrast(1.2); z-index: 1;
+        }
+        .canvas-face-bottom {
+          position: absolute; bottom: 0; left: 0; right: 0; height: 45px;
+          background-size: cover; background-position: center bottom;
+          transform: rotateX(-90deg); transform-origin: bottom;
+          filter: brightness(0.4) contrast(1.2); z-index: 1;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 2px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: ${PURPLE_ACCENT}; }
+      `}} />
+
+      <UploadWizardModal
+        isOpen={isUploadWizardOpen}
+        onClose={() => setIsUploadWizardOpen(false)}
+        onComplete={({ ratio, imageUrl }) => { 
+          setSelectedRatio(ratio); 
+          setOriginalUrl(imageUrl); 
+          setIsUploadWizardOpen(false);
+        }}
+      />
+    </div>
   );
 }

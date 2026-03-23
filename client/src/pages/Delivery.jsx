@@ -1,305 +1,230 @@
-// client/src/pages/Delivery.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Modern Delivery Page — matches site theme.
-// ALL existing content and structure is preserved. Only the UI is redesigned.
+// TRANG QUY TRÌNH & VẬN CHUYỂN — Phong cách "Museum Archive & Editorial"
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
-  Box,
-  ClipboardList,
-  MapPin,
-  PackageCheck,
-  ShieldCheck,
-  Truck,
   Ruler,
   Image as ImageIcon,
   Clock,
   CreditCard,
   BadgeCheck,
+  ShieldCheck,
+  Truck,
+  MapPin,
+  Box,
 } from "lucide-react";
 import { FadeUp, Stagger, item } from "../components/motion/MotionWrappers.jsx";
 
-const ACCENT = "#FF633F";
+const CYAN = "#00ffff";
+const MAGENTA = "#ff00ff";
+const TEXT_DARK = "#1a1a1a";
 
-// ─── Step card (numbered) ─────────────────────────────────────────────────────
+// ─── Step Card (Thiết kế dạng Thẻ Lưu Trữ) ───────────────────────────────────
 function StepCard({ icon: Icon, title, text, number }) {
   return (
     <motion.div
       variants={item}
-      className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm
-                 transition-shadow duration-300 hover:shadow-md"
+      className="group relative border-b border-r border-slate-100 p-12 transition-all duration-700 hover:bg-slate-50"
     >
-      {/* Step badge */}
-      <div
-        className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-xl text-xs font-extrabold text-white"
-        style={{ background: "#0f172a" }}
-      >
-        {number}
+      <div className="mb-12 flex items-center justify-between">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 transition-all duration-500 group-hover:border-cyan-400 group-hover:bg-cyan-50">
+          <Icon className="h-5 w-5" style={{ color: TEXT_DARK }} />
+        </div>
+        <span className="font-mono text-[10px] font-black tracking-[0.3em] text-slate-300 group-hover:text-cyan-400">
+          PHASE_0{number}
+        </span>
       </div>
-
-      <div
-        className="grid h-11 w-11 place-items-center rounded-xl"
-        style={{ background: `${ACCENT}18` }}
-      >
-        <Icon className="h-5 w-5" style={{ color: ACCENT }} />
-      </div>
-      <p className="mt-4 text-base font-extrabold text-slate-900">{title}</p>
-      <p className="mt-2 text-sm leading-relaxed text-slate-500">{text}</p>
+      <h3 className="text-2xl font-black uppercase tracking-tighter transition-all duration-500 group-hover:translate-x-2" style={{ color: TEXT_DARK }}>
+        {title}
+      </h3>
+      <p className="mt-6 text-sm leading-relaxed tracking-tight text-slate-500 max-w-[240px]">
+        {text}
+      </p>
+      {/* Accent Line */}
+      <div className="absolute bottom-0 left-0 h-[3px] w-0 bg-cyan-400 transition-all duration-700 group-hover:w-full" />
     </motion.div>
   );
 }
 
-// ─── Info card ─────────────────────────────────────────────────────────────────
-function InfoCard({ icon: Icon, title, text }) {
-  return (
-    <motion.div
-      variants={item}
-      className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm
-                 transition-shadow duration-300 hover:shadow-md"
-    >
-      <div
-        className="grid h-11 w-11 place-items-center rounded-xl"
-        style={{ background: `${ACCENT}18` }}
-      >
-        <Icon className="h-5 w-5" style={{ color: ACCENT }} />
-      </div>
-      <p className="mt-4 text-base font-extrabold text-slate-900">{title}</p>
-      <p className="mt-2 text-sm leading-relaxed text-slate-500">{text}</p>
-    </motion.div>
-  );
-}
-
-// ─── FAQ card ─────────────────────────────────────────────────────────────────
-function FAQ({ q, a }) {
-  return (
-    <motion.div
-      variants={item}
-      className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
-    >
-      <p className="text-sm font-extrabold text-slate-900">{q}</p>
-      <p className="mt-2 text-sm leading-relaxed text-slate-500">{a}</p>
-    </motion.div>
-  );
-}
-
-// ─── Section header ───────────────────────────────────────────────────────────
-function SectionHeader({ tag, title, sub }) {
+// ─── Section Header (Đồng bộ trang chủ) ─────────────────────────────────────
+function SectionHeader({ tag, title, sub, strokeTitle }) {
   return (
     <FadeUp>
-      <div className="max-w-2xl">
-        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>{tag}</p>
-        <h2 className="mt-2 text-3xl font-extrabold text-slate-900">{title}</h2>
-        {sub && <p className="mt-2 text-sm leading-relaxed text-slate-500 sm:text-base">{sub}</p>}
+      <div className="mb-24">
+        <div className="flex items-center gap-6 mb-8">
+          <div className="h-px w-12 bg-magenta-500" style={{ backgroundColor: MAGENTA }} />
+          <p className="font-mono text-[10px] font-black uppercase tracking-[0.5em]" style={{ color: MAGENTA }}>{tag}</p>
+        </div>
+        <h2 className="text-6xl font-black uppercase leading-none tracking-tighter md:text-8xl lg:text-9xl">
+          {title} <br />
+          <span 
+            className="italic"
+            style={{ 
+              WebkitTextStroke: `1.5px ${TEXT_DARK}`, 
+              color: 'transparent' 
+            }}
+          >
+            {strokeTitle}
+          </span>
+        </h2>
+        {sub && <p className="mt-10 max-w-xl text-lg font-light leading-relaxed text-slate-400">{sub}</p>}
       </div>
     </FadeUp>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE
-// ─────────────────────────────────────────────────────────────────────────────
 export default function Delivery() {
   const orderSteps = [
-    { icon: ImageIcon, title: "Upload Your Photo / Artwork", text: "Choose your image from phone or desktop. We recommend high resolution for the sharpest print." },
-    { icon: Ruler, title: "Pick Size, Frame & Finish", text: "Select dimensions, frame colour, mount (optional) and paper type. Preview updates live." },
-    { icon: CreditCard, title: "Checkout Securely", text: "Add delivery details, pay securely, and you'll receive an order confirmation instantly." },
-    { icon: ClipboardList, title: "We Produce Your Order", text: "We print, frame, quality-check, then package your order carefully for safe travel." },
-  ];
-
-  const packaging = [
-    { icon: ShieldCheck, title: "Corner & Edge Protection", text: "Frames are protected with corner guards and edge padding to prevent knocks and scuffs." },
-    { icon: Box, title: "Multi-Layer Wrap", text: "We wrap the item using protective layers to reduce movement inside the box during transit." },
-    { icon: PackageCheck, title: "Rigid Box + Sealing", text: "Packed in a strong outer box and sealed securely to keep the product stable and protected." },
-  ];
-
-  const delivery = [
-    { icon: Truck, title: "Doorstep Delivery", text: "Your order is delivered to your address. Please ensure someone is available to receive it." },
-    { icon: MapPin, title: "Tracking Updates", text: "Once shipped, you can track your order using your order reference on the Track Order page." },
-    { icon: Clock, title: "Estimated Timelines", text: "Most orders dispatch in 1–3 working days, depending on size, framing and customisation." },
-    { icon: BadgeCheck, title: "Quality Checks Before Dispatch", text: "We inspect print sharpness, alignment, and frame finishing before anything leaves our workspace." },
-  ];
-
-  const faqs = [
-    { q: "How Long Does Delivery Take?", a: "Production usually takes 1–3 working days. Delivery depends on your location and courier service. You'll get tracking once shipped." },
-    { q: "What If My Frame Arrives Damaged?", a: "Message us with photos of the packaging and the product within 24–48 hours of delivery. We'll review and sort a replacement or solution quickly." },
-    { q: "Can I Change My Address After Ordering?", a: "If your order hasn't shipped yet, contact us ASAP. Once shipped, changes may depend on courier policies." },
-    { q: "Do You Deliver To Apartments / Flats?", a: "Yes. Add clear delivery instructions (building name, floor, access code). Couriers deliver to the doorstep where possible." },
+    { icon: ImageIcon, title: "Tải Lên Tác Phẩm", text: "Hệ thống AI tự động kiểm tra mật độ điểm ảnh để đảm bảo độ sắc nét bảo tàng." },
+    { icon: Ruler, title: "Tùy Chỉnh Kích Thước", text: "Lựa chọn tỉ lệ vàng và chất liệu Canvas hoặc Giấy mỹ thuật Acid-free." },
+    { icon: CreditCard, title: "Thanh Toán An Toàn", text: "Mã hóa 256-bit bảo mật tuyệt đối thông tin giao dịch của khách hàng." },
+    { icon: BadgeCheck, title: "Kiểm Định & Đóng Gói", text: "Mỗi bản in được nghệ nhân ký tên và đóng dấu niêm phong lưu trữ." },
   ];
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
+    <div className="min-h-screen bg-white font-sans antialiased selection:bg-cyan-100">
+      
+      {/* ── Hero Section (Phong cách Poster triển lãm) ───────────────── */}
+      <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#FBFBFB] px-6">
+        {/* Decorative Grid Background */}
+        <div className="absolute inset-0 z-0 opacity-[0.03]" 
+             style={{ backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`, size: '50px 50px', backgroundSize: '60px 60px' }} />
+        
+        <div className="relative z-10 mx-auto max-w-7xl w-full">
+          <div className="grid lg:grid-cols-12 gap-12">
+            <div className="lg:col-span-8">
+              <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="mb-8 flex items-center gap-4">
+                 <span className="h-[2px] w-8 bg-black" />
+                 <span className="font-mono text-[11px] font-bold uppercase tracking-[0.4em]">Logistics Protocol v.25</span>
+              </motion.div>
 
-      {/* ── Hero ──────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950 px-4 py-16 text-center">
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 rounded-full opacity-20 blur-3xl"
-          style={{ background: ACCENT }}
-        />
-        <div className="relative mx-auto max-w-3xl">
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-xs font-bold uppercase tracking-widest"
-            style={{ color: ACCENT }}
-          >
-            Delivery & Packaging
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.22, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-3 text-4xl font-extrabold leading-tight text-white sm:text-5xl"
-          >
-            Safely Delivering Your<br />
-            <span style={{ color: ACCENT }}>Prints & Frames</span>
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-white/50 sm:text-base"
-          >
-            From upload → printing → framing → packaging → courier delivery, every step is designed
-            to protect your order and keep quality premium.
-          </motion.p>
+              <motion.h1 
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="text-7xl font-black uppercase leading-[0.85] tracking-[-0.05em] sm:text-9xl md:text-[10rem] lg:text-[12rem]"
+              >
+                Vận chuyển <br />
+                <span style={{ WebkitTextStroke: `2px ${MAGENTA}`, color: 'transparent' }}>Nghệ thuật</span>
+              </motion.h1>
+            </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.52 }}
-            className="mt-7 flex flex-wrap justify-center gap-3"
-          >
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-extrabold text-white shadow-sm transition-all duration-300 hover:brightness-110 hover:scale-[1.03]"
-              style={{ background: ACCENT }}
-            >
-              Start Designing <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/contact"
-              className="group inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-bold text-white/80 transition hover:bg-white/10 hover:text-white"
-            >
-              Contact Us <ArrowRight className="h-4 w-4" />
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── How to order ──────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-4 py-16">
-        <SectionHeader
-          tag="How To Order"
-          title="Place An Order In Minutes"
-          sub="Simple Flow: Upload → Customise → Checkout → We Produce and Ship."
-        />
-
-        <Stagger className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {orderSteps.map((s, idx) => (
-            <StepCard key={s.title} number={idx + 1} icon={s.icon} title={s.title} text={s.text} />
-          ))}
-        </Stagger>
-
-        <FadeUp>
-          <div
-            className="mt-6 rounded-2xl border border-slate-100 p-5 text-sm text-slate-700"
-            style={{ background: `${ACCENT}08` }}
-          >
-            <span className="font-extrabold text-slate-900">Pro Tip: </span>
-            For the sharpest results, use high-resolution photos and avoid screenshots where possible.
+            <div className="lg:col-span-4 flex flex-col justify-end pb-12">
+               <motion.p 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                className="text-sm font-medium leading-relaxed text-slate-500 border-l-2 border-slate-900 pl-6 italic"
+               >
+                 Chúng tôi không chỉ gửi một gói hàng. Chúng tôi chuyển giao một di sản tinh thần với sự cẩn trọng tuyệt đối của một quản thủ bảo tàng.
+               </motion.p>
+               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="mt-10">
+                  <Link to="/products" className="group inline-flex items-center gap-8 bg-black p-6 text-[10px] font-black uppercase tracking-[0.5em] text-white transition-all hover:bg-cyan-400 hover:text-black">
+                    Bắt đầu dịch vụ <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-4" />
+                  </Link>
+               </motion.div>
+            </div>
           </div>
-        </FadeUp>
-      </section>
-
-      {/* ── Packaging ────────────────────────────────────────────────── */}
-      <section className="border-y border-slate-100 bg-white py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <SectionHeader
-            tag="Packaging"
-            title="How We Package Your Frame"
-            sub="Frames And Prints Are Fragile — We Package With Impact Protection And Rigid Boxing."
-          />
-
-          <Stagger className="mt-8 grid gap-4 md:grid-cols-3">
-            {packaging.map((p) => <InfoCard key={p.title} icon={p.icon} title={p.title} text={p.text} />)}
-          </Stagger>
-
-          <FadeUp>
-            <div className="mt-6 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-sm font-extrabold text-slate-900">Before We Seal The Box</p>
-                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-500">
-                  <li>Print quality check (sharpness, color, alignment)</li>
-                  <li>Frame finishing check (corners, mounts, cleanliness)</li>
-                  <li>Secure fit check (no movement inside packaging)</li>
-                </ul>
-              </div>
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-sm font-extrabold text-slate-900">When You Receive The Parcel</p>
-                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-slate-500">
-                  <li>Inspect the outer box before opening</li>
-                  <li>Keep packaging until you're happy with the product</li>
-                  <li>If anything looks wrong, take photos and contact support</li>
-                </ul>
-              </div>
-            </div>
-          </FadeUp>
         </div>
       </section>
 
-      {/* ── Delivery ─────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-6xl px-4 py-16">
-        <SectionHeader
-          tag="Delivery"
-          title="From Our Workshop To Your Doorstep"
-          sub="Once Produced, We Dispatch Using Reliable Couriers With Tracking Where Available."
-        />
-
-        <Stagger className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {delivery.map((d) => <InfoCard key={d.title} icon={d.icon} title={d.title} text={d.text} />)}
-        </Stagger>
+      {/* ── Quy trình (Bố cục Grid liền mạch) ─────────────────────────── */}
+      <section className="border-t border-slate-100">
+        <div className="mx-auto max-w-7xl px-6 py-32">
+          <SectionHeader 
+            tag="Workflow" 
+            title="Quy trình" 
+            strokeTitle="Chuẩn mực"
+            sub="Từ màn hình đến không gian sống của bạn là một hành trình của sự chính xác."
+          />
+          <Stagger className="grid grid-cols-1 border-t border-l border-slate-100 md:grid-cols-2 lg:grid-cols-4">
+            {orderSteps.map((s, idx) => (
+              <StepCard key={s.title} number={idx + 1} icon={s.icon} title={s.title} text={s.text} />
+            ))}
+          </Stagger>
+        </div>
       </section>
 
-      {/* ── FAQ ───────────────────────────────────────────────────────── */}
-      <section className="border-t border-slate-100 bg-white py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <SectionHeader
-            tag="FAQs"
-            title="Delivery Questions"
-            sub="Common Questions Customers Ask Before Ordering."
-          />
-
-          <Stagger className="mt-8 grid gap-4 md:grid-cols-2">
-            {faqs.map((f) => <FAQ key={f.q} q={f.q} a={f.a} />)}
-          </Stagger>
-
-          {/* CTA */}
-          <FadeUp>
-            <div
-              className="mt-10 overflow-hidden rounded-3xl p-8"
-              style={{ background: `linear-gradient(135deg, ${ACCENT}18 0%, transparent 80%)` }}
-            >
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-sm font-extrabold" style={{ color: ACCENT }}>Ready To Order?</p>
-                  <p className="mt-1 text-xl font-extrabold text-slate-900">Start Your Golden Art Frames Order Today</p>
-                  <p className="mt-1 text-sm text-slate-500">Upload Your Photo, Choose Frame And Size, And We'll Handle The Rest.</p>
-                </div>
-                <Link
-                  to="/products"
-                  className="inline-flex shrink-0 items-center gap-2 rounded-2xl px-6 py-3 text-sm font-extrabold text-white shadow-sm transition-all duration-300 hover:brightness-110 hover:scale-[1.03]"
-                  style={{ background: ACCENT }}
-                >
-                  Start An Order <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
+      {/* ── Packaging (High Contrast - Inverted) ────────────────────── */}
+      <section className="bg-black py-40 text-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-24 lg:grid-cols-2">
+            <div>
+               <p className="font-mono text-[10px] font-black uppercase tracking-[0.5em] text-cyan-400">Packaging Standards</p>
+               <h2 className="mt-8 text-6xl font-black uppercase tracking-tighter md:text-8xl">
+                 Bảo vệ <br />
+                 <span className="italic opacity-30">Vĩnh cửu.</span>
+               </h2>
+               <div className="mt-12 space-y-8">
+                 {[
+                   { label: "Vật liệu", val: "Thùng Carton 5 lớp Double-Wall" },
+                   { label: "Chống sốc", val: "Foam đúc định hình theo kích thước khung" },
+                   { label: "Bề mặt", val: "Màng Glassine chống ẩm và axit" }
+                 ].map(item => (
+                   <div key={item.label} className="flex items-center justify-between border-b border-white/10 pb-4">
+                     <span className="font-mono text-[10px] uppercase tracking-widest text-slate-500">{item.label}</span>
+                     <span className="text-sm font-bold uppercase">{item.val}</span>
+                   </div>
+                 ))}
+               </div>
             </div>
-          </FadeUp>
+
+            <div className="relative aspect-square overflow-hidden bg-slate-900">
+               {/* Thay bằng ảnh minh họa đóng gói hoặc Canvas đồ họa */}
+               <div className="absolute inset-0 flex items-center justify-center">
+                  <Box className="h-32 w-32 text-white/10" strokeWidth={0.5} />
+                  <div className="absolute h-full w-px bg-white/5 left-1/2" />
+                  <div className="absolute w-full h-px bg-white/5 top-1/2" />
+               </div>
+               <div className="absolute bottom-10 left-10">
+                 <p className="text-[10px] font-mono tracking-[0.2em] text-cyan-400 uppercase">Archive Security Seal</p>
+                 <p className="mt-2 text-xs text-slate-400 italic">Đảm bảo nguyên vẹn 100% từ xưởng chế tác.</p>
+               </div>
+            </div>
+          </div>
         </div>
+      </section>
+
+      {/* ── Logistics Network (Minimalist) ───────────────────────────── */}
+      <section className="mx-auto max-w-7xl px-6 py-32">
+        <div className="grid gap-12 lg:grid-cols-3">
+          <div className="lg:col-span-1">
+            <h3 className="text-4xl font-black uppercase tracking-tighter leading-none">Mạng lưới <br/> Tin cậy</h3>
+          </div>
+          <div className="lg:col-span-2 grid gap-12 sm:grid-cols-2">
+             {[
+               { icon: Truck, t: "Hỏa tốc nội thành", d: "Giao hàng trong vòng 24h đối với các tác phẩm kích thước tiêu chuẩn." },
+               { icon: MapPin, t: "Truy vết thời gian thực", d: "Hệ thống định vị chính xác vị trí tác phẩm trong suốt quá trình di chuyển." },
+               { icon: Clock, t: "Cam kết thời gian", d: "Bồi hoàn 100% chi phí vận chuyển nếu trễ hẹn so với dự kiến." },
+               { icon: BadgeCheck, t: "Đồng kiểm (Open-box)", d: "Mở hộp và kiểm tra tình trạng tranh cùng nhân viên giao hàng." }
+             ].map((item) => (
+               <div key={item.t} className="group">
+                 <item.icon className="h-6 w-6 mb-6 transition-transform group-hover:scale-110 group-hover:text-magenta-500" style={{ color: MAGENTA }} />
+                 <h4 className="text-xs font-black uppercase tracking-widest">{item.t}</h4>
+                 <p className="mt-4 text-sm leading-relaxed text-slate-500">{item.d}</p>
+               </div>
+             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Final Call to Action (Big Typography) ───────────────────── */}
+      <section className="px-6 pb-40">
+        <Link to="/products" className="group relative block w-full overflow-hidden border border-black py-32 text-center transition-all hover:bg-black">
+          <div className="relative z-10">
+            <h2 className="text-5xl font-black uppercase tracking-tighter text-black transition-colors group-hover:text-white md:text-8xl">
+              Bắt đầu <span style={{ WebkitTextStroke: '1px currentColor', color: 'transparent' }}>Bộ sưu tập</span>
+            </h2>
+            <div className="mt-12 flex justify-center">
+              <span className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.5em] text-black group-hover:text-cyan-400">
+                Khám phá ngay <ArrowRight className="h-4 w-4" />
+              </span>
+            </div>
+          </div>
+          {/* Overlay effect */}
+          <div className="absolute inset-0 -translate-x-full bg-black transition-transform duration-700 group-hover:translate-x-0" />
+        </Link>
       </section>
     </div>
   );

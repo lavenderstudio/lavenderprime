@@ -1,321 +1,242 @@
+// client/src/pages/ContactPage.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Modern Contact Page — matches site theme.
-// ALL existing logic is preserved exactly. Only the UI is redesigned.
+// CONTACT PAGE — "THE CURATOR'S CORRESPONDENCE"
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Facebook, Instagram, Mail, MapPin, Phone, ArrowRight, MessageCircle } from "lucide-react";
+import { 
+  Facebook, 
+  Instagram, 
+  Mail, 
+  MapPin, 
+  Phone, 
+  ArrowRight, 
+  Globe, 
+  PenTool,
+  SendHorizontal
+} from "lucide-react";
 
-const ACCENT = "#FF633F";
+const CYAN = "#00ffff";
+const MAGENTA = "#ff00ff";
 const WHATSAPP_NUMBER = "971522640871";
 
-// ─── Shared input classes ─────────────────────────────────────────────────────
+// ─── Museum Input Style (The Ink on Paper) ──────────────────────────────────
 const INPUT =
-  "h-11 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#FF633F]/60 focus:bg-white focus:ring-2 focus:ring-[#FF633F]/10 placeholder:text-slate-400";
+  "w-full border-b-[1px] border-slate-200 bg-transparent py-4 text-sm font-medium text-slate-900 " +
+  "outline-none transition-all duration-700 focus:border-[#ff00ff] focus:pl-4 " +
+  "placeholder:text-slate-200 placeholder:font-light italic group-hover:border-slate-400";
 
-// ─── Contact info row ─────────────────────────────────────────────────────────
-function InfoRow({ icon: Icon, title, children }) {
+// ─── Shared Info Component ────────────────────────────────────────────────────
+function InfoRow({ icon: Icon, title, children, delay = 0 }) {
   return (
-    <div className="flex items-start gap-4">
-      <div
-        className="grid h-11 w-11 shrink-0 place-items-center rounded-xl"
-        style={{ background: `${ACCENT}18` }}
-      >
-        <Icon className="h-5 w-5" style={{ color: ACCENT }} />
+    <motion.div 
+      initial={{ opacity: 0, x: -20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.8 }}
+      className="group flex items-start gap-8"
+    >
+      <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border border-slate-100 bg-white shadow-sm transition-all duration-500 group-hover:border-[#00ffff] group-hover:rotate-[15deg]">
+        <div className="absolute inset-0 bg-[#00ffff]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <Icon className="h-5 w-5 text-slate-400 transition-colors group-hover:text-slate-900" />
       </div>
-      <div>
-        <h3 className="text-sm font-extrabold text-slate-900">{title}</h3>
-        <div className="mt-1 text-sm leading-relaxed text-slate-500">{children}</div>
+      <div className="space-y-2">
+        <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#ff00ff]">{title}</h3>
+        <div className="text-[13px] font-light leading-relaxed text-slate-500 md:text-sm">{children}</div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-// ─── Label wrapper ────────────────────────────────────────────────────────────
-function Field({ label, required, children }) {
+// ─── Field Animation Wrapper ─────────────────────────────────────────────────
+function Field({ label, required, children, delay = 0 }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-slate-500">
-        {label}
-        {required && <span className="ml-1 text-rose-500">*</span>}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay }}
+      className="group flex flex-col gap-2"
+    >
+      <label className="text-[9px] font-black uppercase tracking-[0.5em] text-slate-300 group-focus-within:text-[#ff00ff] transition-colors">
+        {label} {required && <span className="text-[#ff00ff]">*</span>}
       </label>
       {children}
-    </div>
+    </motion.div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE
-// ─────────────────────────────────────────────────────────────────────────────
 export default function ContactPage() {
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    country: "",
-    city: "",
-    reason: "Service Enquiry",
-    product: "",
-    remarks: "",
+    name: "", email: "", phone: "", country: "", city: "",
+    reason: "Service Enquiry", product: "", remarks: "",
   });
 
   const reasons = useMemo(
-    () => ["Service Enquiry", "Product Enquiry", "Sales Enquiry", "Support Request", "Other"],
+    () => ["Service Enquiry", "Product Enquiry", "Custom Framing", "Partnership", "Support"],
     []
   );
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.phone) {
-      alert("Please fill in Name, Email and Phone.");
-      return;
-    }
-
-    const message = `
-*New Website Enquiry — Golden Art Frames*
-
-*Name:* ${form.name}
-*Email:* ${form.email}
-*Phone:* ${form.phone}
-*Location:* ${form.country || "-"}${form.city ? ` - ${form.city}` : ""}
-
-*Reason:* ${form.reason || "-"}
-*Product / Service:* ${form.product || "-"}
-
-*Remarks:*
-${form.remarks || "-"}
-    `.trim();
-
-    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
+    const message = `*Enquiry từ Golden Art*\n\n*Họ tên:* ${form.name}\n*Lý do:* ${form.reason}\n*Lời nhắn:* ${form.remarks}`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
-
-      {/* ── Hero ──────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950 px-4 py-14 text-center">
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 h-56 w-56 -translate-x-1/2 rounded-full opacity-25 blur-3xl"
-          style={{ background: ACCENT }}
-        />
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: ACCENT }}
-        >
-          Golden Art Frames
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-3 text-4xl font-extrabold text-white"
-        >
-          Let's Talk
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.38 }}
-          className="mt-2 text-sm text-white/50"
-        >
-          Ask about custom sizes, bulk orders, delivery timelines or product recommendations
-        </motion.p>
+    <div className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-[#00ffff]/20">
+      
+      {/* ── Artistic Header (The Canvas) ────────────────────────────────── */}
+      <section className="relative overflow-hidden bg-[#fafafa] py-40 px-6 lg:py-56">
+        {/* Decorative Grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+        
+        <div className="relative mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <span className="font-mono text-[11px] font-black uppercase tracking-[1em] text-[#ff00ff]">EST. 2026</span>
+            <h1 className="mt-10 text-[12vw] font-black leading-[0.8] tracking-[-0.08em] md:text-[8rem] lg:text-[10rem]">
+              LIÊN HỆ<span className="text-[#00ffff]">.</span>
+            </h1>
+            <div className="mt-16 flex flex-col items-start gap-8 md:flex-row md:items-end md:gap-24">
+               <p className="max-w-md text-sm font-light leading-relaxed text-slate-400">
+                Hãy để lại dấu ấn của bạn. Mỗi yêu cầu tư vấn là bước đầu tiên để hiện thực hóa một không gian sống đầy cảm hứng nghệ thuật.
+               </p>
+               <motion.div 
+                 animate={{ rotate: [0, 10, 0] }} 
+                 transition={{ repeat: Infinity, duration: 5 }}
+                 className="h-px w-32 bg-slate-200" 
+               />
+            </div>
+          </motion.div>
+        </div>
       </section>
 
-      {/* ── Content ───────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-6xl px-4 py-12">
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* ── Body (The Correspondence) ──────────────────────────────────── */}
+      <main className="mx-auto max-w-7xl px-6 py-32 lg:py-48">
+        <div className="grid grid-cols-1 gap-32 lg:grid-cols-12 lg:items-start">
 
-          {/* ── Left: info card ─────────────────────────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col gap-6 overflow-hidden rounded-3xl border border-slate-100 bg-white p-8 shadow-sm"
-          >
-            {/* Accent header band */}
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-                Contact
-              </p>
-              <h2 className="mt-1 text-2xl font-extrabold text-slate-900">Say Hello</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                We're happy to guide you on print finishes, frame styles, and delivery.
-              </p>
-            </div>
+          {/* ── Left: Museum Dossier ──────────────────────────────────── */}
+          <div className="lg:col-span-4 space-y-24">
+            <section>
+              <h2 className="mb-16 font-mono text-[10px] font-black uppercase tracking-[0.5em] text-slate-300">Archive Info</h2>
+              <div className="space-y-16">
+                <InfoRow icon={MapPin} title="The Studio" delay={0.1}>
+                  1103-Al Ghanem Business Building <br /> 
+                  <span className="font-bold text-slate-900 uppercase tracking-tighter">Al-Majaz-3, Sharjah, UAE</span>
+                </InfoRow>
+                <InfoRow icon={Mail} title="Correspondence" delay={0.2}>
+                  <a href="mailto:info@goldenartframe.com" className="block hover:text-[#ff00ff] transition-colors">info@goldenartframe.com</a>
+                  <span className="text-[10px] text-slate-400 italic">Response within 24 curators' hours</span>
+                </InfoRow>
+                <InfoRow icon={Phone} title="Direct Line" delay={0.3}>
+                  <a href="tel:+971522640871" className="text-lg font-bold tracking-tighter text-slate-900 hover:text-[#00ffff]">+971 522 640 871</a>
+                </InfoRow>
+              </div>
+            </section>
 
-            {/* Info rows */}
-            <div className="space-y-6">
-              <InfoRow icon={MapPin} title="Address">
-                1103-Al Ghanem Business Building Al-Majaz-3, Sharjah,
-                <br /> United Arab Emirates
-              </InfoRow>
-
-              <InfoRow icon={Mail} title="Email">
-                <a className="transition hover:underline" href="mailto:print@albumhq.ae" style={{ color: ACCENT }}>
-                  print@albumhq.ae
-                </a>
-                <br />
-                <a className="transition hover:underline" href="mailto:info@goldenartframe.com" style={{ color: ACCENT }}>
-                  info@goldenartframe.com
-                </a>
-              </InfoRow>
-
-              <InfoRow icon={Phone} title="Phone">
-                <a className="transition hover:underline" href="tel:+971522640871" style={{ color: ACCENT }}>
-                  +971 522640871
-                </a>
-                <br />
-                <a className="transition hover:underline" href="tel:+97168053054" style={{ color: ACCENT }}>
-                  +971 6 8053054
-                </a>
-              </InfoRow>
-            </div>
-
-            {/* Divider */}
-            <div className="h-px bg-slate-100" />
-
-            {/* Social */}
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500">Follow us</p>
-              <div className="mt-3 flex gap-3">
+            <section className="border-t border-slate-100 pt-16">
+              <h2 className="mb-10 font-mono text-[10px] font-black uppercase tracking-[0.5em] text-slate-300">Social Presence</h2>
+              <div className="flex gap-4">
                 {[
-                  { href: "https://www.facebook.com/albumhq/",      Icon: Facebook,       label: "Facebook" },
-                  { href: "https://www.instagram.com/albumhq.ae/",  Icon: Instagram,      label: "Instagram" },
-                  { href: `https://wa.me/${WHATSAPP_NUMBER}`,        Icon: MessageCircle,  label: "WhatsApp" },
-                ].map(({ href, Icon, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={label}
-                    className="group flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 shadow-sm transition-all duration-200 hover:scale-105 hover:border-[#FF633F]/30 hover:bg-[#FF633F]/5"
+                  { icon: Instagram, label: "IG" },
+                  { icon: Facebook, label: "FB" },
+                  { icon: Globe, label: "WEB" }
+                ].map((s, i) => (
+                  <motion.a
+                    key={i}
+                    whileHover={{ y: -5 }}
+                    className="flex h-14 w-14 items-center justify-center border border-slate-100 bg-white transition-all hover:bg-black hover:text-white"
+                    href="#"
                   >
-                    <Icon className="h-5 w-5 text-slate-400 transition group-hover:text-[#FF633F]" />
-                  </a>
+                    <s.icon className="h-4 w-4" />
+                  </motion.a>
                 ))}
               </div>
+            </section>
+          </div>
+
+          {/* ── Right: The Aesthetic Form ──────────────────────────────── */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="relative border-[1px] border-slate-200 bg-white p-10 shadow-[40px_40px_0px_#f8f8f8] md:p-20 lg:col-span-8"
+          >
+            <div className="absolute right-10 top-10 opacity-5">
+              <PenTool className="h-32 w-32 rotate-12" />
             </div>
 
-            {/* Quick WhatsApp CTA */}
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}`}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-auto flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-extrabold text-white shadow-sm transition-all duration-300 hover:brightness-110"
-              style={{ background: "#25D366" }}
-            >
-              <MessageCircle className="h-4 w-4" />
-              Chat on WhatsApp
-            </a>
-          </motion.div>
+            <header className="mb-20">
+              <h2 className="text-4xl font-black tracking-tighter uppercase md:text-5xl">Start a <br /><span className="italic font-light">Dialogue</span></h2>
+              <p className="mt-4 font-mono text-[10px] uppercase tracking-widest text-slate-400">WhatsApp Integrated Enquiry System</p>
+            </header>
 
-          {/* ── Right: enquiry form ──────────────────────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden rounded-3xl border border-slate-100 bg-white p-8 shadow-sm"
-          >
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-              Enquiry
-            </p>
-            <h2 className="mt-1 text-2xl font-extrabold text-slate-900">Request A Call Back</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Fill the form — we'll open WhatsApp with a ready message.
-            </p>
-
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-              <Field label="Name" required>
-                <input name="name" value={form.name} onChange={handleChange}
-                  className={INPUT} placeholder="Your name" />
-              </Field>
-
-              <Field label="Email" required>
-                <input name="email" type="email" value={form.email} onChange={handleChange}
-                  className={INPUT} placeholder="you@email.com" />
-              </Field>
-
-              <Field label="Phone" required>
-                <input name="phone" type="tel" value={form.phone} onChange={handleChange}
-                  className={INPUT} placeholder="+971..." />
-              </Field>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field label="Country">
-                  <input name="country" value={form.country} onChange={handleChange}
-                    className={INPUT} placeholder="Country" />
+            <form onSubmit={handleSubmit} className="space-y-12">
+              <div className="grid gap-12 md:grid-cols-2">
+                <Field label="Collector Name" required delay={0.1}>
+                  <input className={INPUT} placeholder="How should we address you?" onChange={(e) => setForm({...form, name: e.target.value})} />
                 </Field>
-                <Field label="City">
-                  <input name="city" value={form.city} onChange={handleChange}
-                    className={INPUT} placeholder="City" />
+                <Field label="Email Address" required delay={0.2}>
+                  <input className={INPUT} type="email" placeholder="curator@gallery.com" />
                 </Field>
               </div>
 
-              <Field label="Reason">
-                <select name="reason" value={form.reason} onChange={handleChange} className={INPUT}>
-                  {reasons.map((r) => <option key={r} value={r}>{r}</option>)}
-                </select>
-              </Field>
+              <div className="grid gap-12 md:grid-cols-3">
+                <Field label="Phone / WhatsApp" required delay={0.3}>
+                  <input className={INPUT} placeholder="+971 -- --- ----" />
+                </Field>
+                <div className="md:col-span-2">
+                  <Field label="Interested In" delay={0.4}>
+                    <input className={INPUT} placeholder="e.g. Canvas Stretched, Wedding Frames..." />
+                  </Field>
+                </div>
+              </div>
 
-              <Field label="Product / Service">
-                <input name="product" value={form.product} onChange={handleChange}
-                  className={INPUT} placeholder="e.g. Print & Frame" />
-              </Field>
-
-              <Field label="Remarks">
-                <textarea
-                  name="remarks"
-                  value={form.remarks}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#FF633F]/60 focus:bg-white focus:ring-2 focus:ring-[#FF633F]/10"
-                  placeholder="Tell us what you need..."
+              <Field label="Your Message / Vision" delay={0.5}>
+                <textarea 
+                  rows={4} 
+                  className={`${INPUT} resize-none`} 
+                  placeholder="Tell us about your space or your creative idea..."
+                  onChange={(e) => setForm({...form, remarks: e.target.value})}
                 />
               </Field>
 
-              {/* CTAs */}
-              <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+              <div className="flex flex-col gap-10 pt-10 md:flex-row md:items-center justify-between">
                 <motion.button
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-extrabold text-white shadow-sm transition-all duration-300 hover:brightness-110"
-                  style={{ background: ACCENT }}
+                  className="flex items-center justify-center gap-6 bg-black px-12 py-6 text-[11px] font-black uppercase tracking-[0.4em] text-white transition-all hover:bg-[#ff00ff] hover:shadow-[0_20px_40px_rgba(255,0,255,0.2)]"
                 >
-                  Send via WhatsApp <ArrowRight className="h-4 w-4" />
+                  Send to Curator <SendHorizontal className="h-4 w-4" />
                 </motion.button>
 
-                <Link
-                  to="/delivery"
-                  className="group inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-700 transition hover:bg-slate-50"
-                >
-                  <span className="relative after:absolute after:left-0 after:-bottom-0.5 after:h-[1.5px] after:w-full after:origin-left after:scale-x-0 after:bg-[#FF633F] after:transition-transform after:duration-300 group-hover:after:scale-x-100">
-                    How delivery works
-                  </span>
-                  <ArrowRight className="h-4 w-4" />
+                <Link to="/products" className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 hover:text-black transition-colors">
+                  Explore Gallery <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
                 </Link>
               </div>
-
-              <p className="text-xs text-slate-400">
-                WhatsApp opens with your message — you can edit before sending.
-              </p>
             </form>
           </motion.div>
-
         </div>
-      </div>
+      </main>
+
+      {/* ── Footer Decor (The Final Stamp) ────────────────────────────── */}
+      <footer className="bg-black py-32 text-center text-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="text-4xl font-light italic tracking-tighter md:text-6xl">
+            L'art pour l'art.
+          </h2>
+          <p className="mt-8 font-mono text-[10px] font-black uppercase tracking-[1em] text-slate-500">
+            Golden Art Framing Studio — Dubai
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

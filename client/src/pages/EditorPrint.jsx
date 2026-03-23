@@ -1,267 +1,170 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable react-hooks/static-components */
-// client/src/pages/EditorPrint.jsx
-
 import { useEffect, useMemo, useState } from "react";
 import api from "../lib/api.js";
 import { Link, useNavigate } from "react-router-dom";
-import Page from "../components/Page.jsx";
+import { motion, AnimatePresence } from "framer-motion";
 import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
 import PrintPreview from "../components/PrintPreview.jsx";
 
-import { ACCENT, ACCENT_BG, ACCENT_HOVER, Container } from "../components/home/ui.jsx";
+const C = "#00e5ff"; // Cyan
+const M = "#e040fb"; // Magenta
 
-function parseCmSize(sizeStr) {
-  if (!sizeStr) return null;
-  const cleaned = sizeStr.toLowerCase().replace("cm", "").replace("×", "x").trim();
-  const [w, h] = cleaned.split("x").map((n) => Number(n));
-  if (!Number.isFinite(w) || !Number.isFinite(h)) return null;
-  return { w, h };
-}
+const RELATED = [
+  { name: "In & Đóng Khung", desc: "Khung thủ công cao cấp, sẵn treo tường.", price: "từ 189k", img: "/feature/11.avif", href: "/editor/print-frame", tag: "Phổ biến", accent: C },
+  { name: "Fine Art Premium", desc: "Giấy mỹ thuật 100% cotton cao cấp.", price: "từ 249k", img: "/feature/12.avif", href: "/editor/fine-art-print", tag: "Nghệ thuật", accent: M },
+  { name: "In Canvas Gallery", desc: "Vải canvas bọc khung gỗ tràm.", price: "từ 149k", img: "/feature/8.avif", href: "/editor/canvas", tag: "Gallery", accent: C },
+];
 
-function SectionLabel({ children }) {
-  return <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">{children}</p>;
-}
-
-function SizePills({ variants, value, onChange }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {variants.map((v) => {
-        const active = v.sku === value;
-        return (
-          <button key={v.sku} type="button" onClick={() => onChange(v.sku)}
-            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95
-              ${active ? `${ACCENT_BG} text-white shadow-md shadow-[#FF633F]/25` : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
-            {v.size}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function MaterialTiles({ options, value, onChange }) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {options.map((opt) => {
-        const active = opt.name === value;
-        return (
-          <button key={opt.name} type="button" onClick={() => onChange(opt.name)}
-            className={`flex flex-col items-center justify-center rounded-xl p-3 text-center transition-all duration-200 active:scale-95
-              ${active ? "ring-2 ring-[#FF633F] bg-[#FF633F]/8 border border-[#FF633F]/30" : "border border-slate-200 bg-white hover:bg-slate-50"}`}>
-            <span className={`text-sm font-bold ${active ? "text-[#FF633F]" : "text-slate-700"}`}>{opt.name}</span>
-            {opt.price > 0 && <span className="mt-0.5 text-[10px] font-semibold text-slate-400">+{opt.price}</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function UploadPlaceholder({ onUpload }) {
-  return (
-    <button type="button" onClick={onUpload} aria-label="Upload photo"
-      className="group relative flex w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center transition-all duration-200 hover:border-[#FF633F]/50 hover:bg-[#FF633F]/5 active:scale-[0.99]">
-      <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-200 group-hover:scale-105">
-        <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#FF633F]/30 animate-spin [animation-duration:8s]" />
-        <svg className="h-8 w-8 text-[#FF633F]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-      </div>
-      <div>
-        <p className="text-base font-extrabold text-slate-900">Upload Your Photo</p>
-        <p className="mt-1 text-sm text-slate-500">Choose Ratio → Crop → Preview</p>
-      </div>
-      <span className="rounded-full bg-[#FF633F] px-5 py-2 text-sm font-bold text-white shadow-md shadow-[#FF633F]/30 transition-transform group-hover:scale-105">Choose Photo</span>
-    </button>
-  );
-}
-
-export default function EditorPrint() {
+export default function EditorFineArtPrint() {
   const navigate = useNavigate();
-  const [product, setProduct]   = useState(null);
+  const [product, setProduct] = useState(null);
   const [variantSku, setVariantSku] = useState("");
-  const [material, setMaterial] = useState("Matte");
-  const [quantity]              = useState(1);
+  const [material, setMaterial] = useState("Glossy");
   const [originalUrl, setOriginalUrl] = useState("");
-  const [quote, setQuote]       = useState(null);
-  const [error, setError]       = useState("");
+  const [quote, setQuote] = useState(null);
   const [isUploadWizardOpen, setIsUploadWizardOpen] = useState(false);
   const [selectedRatio, setSelectedRatio] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await api.get("/products/print");
-        setProduct(res.data);
-        const firstMaterial = res.data.options?.materials?.[0];
-        if (firstMaterial) setMaterial(firstMaterial.name);
-      } catch (err) { setError(err?.response?.data?.message || err.message); }
-    };
-    load();
+    api.get("/products/fine-art-print").then(res => {
+      setProduct(res.data);
+      const v5070 = res.data.variants.find(v => v.size.includes("50x70"));
+      if (v5070) setVariantSku(v5070.sku);
+    });
   }, []);
 
-  const materialOptions  = useMemo(() => product?.options?.materials || [], [product]);
-  const portraitVariants = useMemo(() => (product?.variants || []).filter((v) => v.orientation === "portrait"), [product]);
-
   useEffect(() => {
-    const getQuote = async () => {
-      if (!variantSku) return;
-      try {
-        const res = await api.post("/pricing/quote", { productSlug: "print", variantSku, options: { material }, quantity });
-        setQuote(res.data);
-      } catch (err) { setQuote(null); setError(err?.response?.data?.message || err.message); }
-    };
-    getQuote();
-  }, [variantSku, material, quantity]);
+    if (!variantSku) return;
+    api.post("/pricing/quote", { productSlug: "fine-art-print", variantSku, options: { material }, quantity: 1 })
+      .then(res => setQuote(res.data));
+  }, [variantSku, material]);
 
-  const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
-  const parsedPrint     = parseCmSize(selectedVariant?.size);
-  const canOrder        = !!(originalUrl && quote && selectedRatio);
-
-  const handleAddToCart = async () => {
-    try {
-      setError("");
-      if (!originalUrl || !quote || !selectedVariant || !selectedRatio)
-        return setError("Missing image, ratio selection, or price.");
-      const sessionId = getSessionId();
-      await api.post("/cart/items", {
-        sessionId,
-        item: {
-          productSlug: "print", variantSku,
-          config: { orientation: "portrait", size: selectedVariant.size, material, quantity, transform: { ratio: selectedRatio.id, ratioW: selectedRatio.w, ratioH: selectedRatio.h } },
-          assets: { originalUrl, previewUrl: "" },
-          price: { unit: quote.unit, total: quote.total, currency: quote.currency },
-        },
-      });
-      navigate("/cart");
-    } catch (err) { setError(err?.response?.data?.message || err.message); }
-  };
+  const portraitVariants = useMemo(() => (product?.variants || []).filter(v => v.orientation === "portrait"), [product]);
+  const selectedVariant = portraitVariants.find(v => v.sku === variantSku);
 
   return (
-    <Page title="Editor — Print">
-      <Container className="px-0">
-        <div className="px-4 pt-4">
-          <Link to="/products" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-            Products
-          </Link>
+    <div className="w-full min-h-screen bg-white font-sans">
+      {/* 1. TOP SECTION: STUDIO WORKSPACE (Fixed Height) */}
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] min-h-[700px] overflow-hidden border-b border-slate-100">
+        
+        {/* LEFT: MUSEUM DISPLAY */}
+        <div className="relative flex-1 bg-[#f4f1eb] flex flex-col items-center justify-center p-12 overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 3h1v1H1V3zm2-2h1v1H3V1z' fill='%23000' fill-opacity='0.4'/%3E%3C/svg%3E")` }} />
+          
+          <AnimatePresence mode="wait">
+            {!originalUrl ? (
+              <motion.button onClick={() => setIsUploadWizardOpen(true)} className="group flex flex-col items-center gap-6 z-10">
+                <div className="w-16 h-16 rounded-full border border-slate-300 flex items-center justify-center text-slate-400 group-hover:border-cyan-400 group-hover:text-cyan-400 transition-all">+</div>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Tải ảnh lên (50x70)</span>
+              </motion.button>
+            ) : (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative flex flex-col items-center z-10">
+                {/* ẢNH TRÀN VIỀN (FULL-BLEED) VỚI ĐỔ BÓNG THỰC TẾ */}
+                <div className="relative shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)] bg-white p-[1px] clean-preview-container">
+                    <PrintPreview imageUrl={originalUrl} />
+                </div>
+                {/* MUSEUM LABEL */}
+                <div className="mt-12 text-center bg-white/40 backdrop-blur-sm p-4 px-8 border border-black/5 rounded-sm">
+                  <p className="font-mono text-[9px] tracking-[0.3em] text-slate-400 uppercase mb-1">Golden Art Frames</p>
+                  <h3 className="text-sm font-black text-slate-800 tracking-tight">{selectedVariant?.size} — {material}</h3>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          <div className="absolute bottom-0 left-0 right-0 h-6 bg-[#ddd8cc] border-t border-[#bfbab0]" />
         </div>
 
-        {error && (
-          <div className="mx-4 mt-3 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <svg className="h-4 w-4 shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-            {error}
+        {/* RIGHT: CONTROL PANEL */}
+        <div className="w-full lg:w-[420px] bg-white flex flex-col border-l border-slate-100 overflow-y-auto">
+          <div className="p-10 border-b border-slate-50">
+            <Link to="/products" className="text-[9px] font-black tracking-widest text-slate-400 uppercase">← Quay lại</Link>
+            <h1 className="text-3xl font-black tracking-tighter uppercase mt-6 leading-none text-slate-900">In Ảnh<br/><span style={{ color: "transparent", WebkitTextStroke: `1px ${C}` }}>Cao Cấp</span></h1>
           </div>
-        )}
 
-        <div className="px-4 pt-4 pb-2">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Print</h1>
-          <p className="mt-0.5 text-sm text-slate-500">Upload A Photo, Choose Your Material, And Get It Delivered.</p>
+          <div className="p-10 space-y-10 flex-1">
+             <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Kích thước</p>
+                <div className="flex flex-wrap gap-2">
+                  {portraitVariants.map(v => (
+                    <button key={v.sku} onClick={() => setVariantSku(v.sku)} className={`px-4 py-2 text-[11px] font-bold border rounded-full transition-all ${v.sku === variantSku ? 'bg-black text-white border-black shadow-lg' : 'bg-white text-slate-500 border-slate-200'}`}>{v.size}</button>
+                  ))}
+                </div>
+             </div>
+
+             <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Chất liệu giấy</p>
+                <div className="grid grid-cols-1 gap-2">
+                  {["Glossy", "Matte", "Satin"].map(m => (
+                    <button key={m} onClick={() => setMaterial(m)} className={`flex items-center justify-between p-4 border rounded-xl transition-all ${material === m ? 'border-cyan-400 bg-cyan-50/10' : 'border-slate-100'}`}>
+                      <span className="text-[11px] font-black uppercase text-slate-800">{m} Finish</span>
+                      <span className="text-cyan-500 text-lg">{material === m ? '●' : '○'}</span>
+                    </button>
+                  ))}
+                </div>
+             </div>
+          </div>
+
+          <div className="p-10 bg-white border-t border-slate-50 sticky bottom-0">
+             <div className="flex justify-between items-end mb-6">
+                <span className="text-[10px] font-black uppercase text-slate-400">Thanh toán</span>
+                <span className="text-3xl font-black text-slate-900 tracking-tighter">{quote?.total.toLocaleString()} {quote?.currency}</span>
+             </div>
+             <button disabled={!originalUrl} className={`w-full py-5 text-[11px] font-black uppercase tracking-[0.3em] rounded-xl transition-all ${originalUrl ? 'bg-black text-white shadow-2xl shadow-cyan-500/20' : 'bg-slate-100 text-slate-300'}`}>Thêm vào giỏ hàng →</button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. BOTTOM SECTION: RELATED SERVICES (TRÀN VIỀN) */}
+      <section className="w-full bg-white">
+        <div className="py-20 px-10 lg:px-20 border-b border-slate-100">
+           <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-px bg-cyan-500" />
+              <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-cyan-500">Dịch vụ bổ sung</span>
+           </div>
+           <h2 className="text-4xl font-black tracking-tighter uppercase text-slate-900">Có thể bạn quan tâm</h2>
         </div>
 
-        {!product ? (
-          <div className="mx-4 mt-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm animate-pulse">
-            <div className="h-4 w-32 rounded bg-slate-200 mb-3" />
-            <div className="h-48 w-full rounded-2xl bg-slate-100" />
-          </div>
-        ) : (
-          <div className="mt-2 flex flex-col gap-0 lg:grid lg:grid-cols-12 lg:gap-6 lg:px-4 lg:pb-8">
-            <div className="lg:col-span-7">
-              <div className="sticky top-20 overflow-hidden rounded-none lg:rounded-3xl border-0 border-b border-slate-200 lg:border bg-white shadow-sm">
-                <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#FF633F] shadow-sm shadow-[#FF633F]/50" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Live Preview</span>
-                  </div>
-                  {originalUrl && (
-                    <button onClick={() => setIsUploadWizardOpen(true)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all active:scale-95">↺ Change Photo</button>
-                  )}
+        <div className="grid grid-cols-1 md:grid-cols-3 w-full">
+           {RELATED.map((item, idx) => (
+             <Link key={idx} to={item.href} className="group relative aspect-[16/10] md:aspect-auto md:h-[500px] overflow-hidden border-r border-slate-100 last:border-r-0">
+                <img src={item.img} alt={item.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110" />
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors" />
+                <div className="absolute inset-0 p-12 flex flex-col justify-end text-white z-10">
+                   <span className="inline-block self-start px-3 py-1 bg-white text-black text-[9px] font-black uppercase tracking-widest mb-4">{item.tag}</span>
+                   <h3 className="text-2xl font-black uppercase tracking-tighter mb-2">{item.name}</h3>
+                   <p className="text-xs text-white/70 mb-6 opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0">{item.desc}</p>
+                   <span className="font-black text-sm border-b border-white/50 pb-1 w-fit">{item.price}</span>
                 </div>
-                <div className="px-5 pb-5">
-                  {!originalUrl
-                    ? <div className="rounded-2xl bg-slate-50 p-4"><UploadPlaceholder onUpload={() => setIsUploadWizardOpen(true)} /></div>
-                    : <PrintPreview imageUrl={originalUrl} />}
-                </div>
-                {originalUrl && (
-                  <div className="flex items-center gap-3 border-t border-slate-100 px-5 py-3 flex-wrap">
-                    {selectedRatio && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Ratio: {selectedRatio.id}</span>}
-                    {parsedPrint && <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">Print: {parsedPrint.w}×{parsedPrint.h}cm</span>}
-                    <span className="rounded-full bg-[#FF633F]/10 px-3 py-1 text-xs font-bold text-[#FF633F]">{material}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+             </Link>
+           ))}
+        </div>
+      </section>
 
-            <div className="lg:col-span-5">
-              <div className="flex flex-col gap-0">
-                <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 lg:rounded-t-3xl lg:border lg:border-b-0">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-slate-900">Customise</h2>
-                    <p className="text-xs text-slate-500">Pick Size &amp; Material</p>
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-2xl font-black ${quote ? "text-slate-900" : "text-slate-300"}`}>{quote ? `${quote.total}` : "—"}</div>
-                    {quote && <div className="text-xs font-semibold text-slate-400">{quote.currency} · Per Piece</div>}
-                  </div>
-                </div>
+      {/* CSS FIX LỖI TEXT PREVIEW */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .clean-preview-container span, 
+        .clean-preview-container p,
+        .clean-preview-container div:not(:has(img)) {
+          color: transparent !important;
+          font-size: 0 !important;
+          pointer-events: none !important;
+          user-select: none !important;
+          background: none !important;
+        }
+        .clean-preview-container img {
+          display: block !important;
+          max-width: 100% !important;
+          height: auto !important;
+        }
+      `}} />
 
-                <div className="divide-y divide-slate-100 border border-t-0 border-slate-200 bg-white lg:rounded-b-3xl overflow-hidden">
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Print Size</SectionLabel>
-                      {parsedPrint && <span className="text-xs font-semibold text-slate-400">{parsedPrint.w}×{parsedPrint.h}cm</span>}
-                    </div>
-                    <SizePills variants={portraitVariants} value={variantSku} onChange={setVariantSku} />
-                  </div>
-
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Paper Material</SectionLabel>
-                      <span className={`text-xs font-bold ${ACCENT}`}>{material}</span>
-                    </div>
-                    <MaterialTiles options={materialOptions} value={material} onChange={setMaterial} />
-                  </div>
-
-                  <div className="bg-slate-50 px-5 py-4">
-                    <SectionLabel>Order Summary</SectionLabel>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                      {[["Size", selectedVariant?.size || "—"], ["Material", material], ["Total", quote ? `${quote.total} ${quote.currency}` : "—"]].map(([label, val]) => (
-                        <div key={label} className="flex items-baseline justify-between col-span-2 sm:col-span-1">
-                          <span className="font-semibold text-slate-400">{label}</span>
-                          <span className="font-bold text-slate-700">{val}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur-sm px-5 py-4 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:pb-0 lg:pt-4">
-                  {!originalUrl && (
-                    <p className="mb-3 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-700">
-                      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                      Upload A Photo Above To Continue
-                    </p>
-                  )}
-                  <button disabled={!canOrder} onClick={handleAddToCart}
-                    className={`w-full rounded-2xl py-3.5 text-sm font-extrabold tracking-wide shadow-sm transition-all duration-300 active:scale-[0.98]
-                      ${canOrder ? `${ACCENT_BG} ${ACCENT_HOVER} text-white shadow-lg shadow-[#FF633F]/30 hover:scale-[1.01]` : "cursor-not-allowed bg-slate-100 text-slate-400"}`}>
-                    {canOrder ? `Add To Cart · ${quote?.total ?? ""} ${quote?.currency ?? ""}` : "Add To Cart"}
-                  </button>
-                  <p className="mt-2 text-center text-[10px] font-semibold text-slate-400">🔒 Secure Checkout &nbsp;·&nbsp; Premium Packaging &nbsp;·&nbsp; Doorstep Delivery</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <UploadWizardModal
-          isOpen={isUploadWizardOpen}
-          onClose={() => setIsUploadWizardOpen(false)}
-          onComplete={({ ratio, imageUrl }) => { setSelectedRatio(ratio); setOriginalUrl(imageUrl); }}
-        />
-      </Container>
-    </Page>
+      <UploadWizardModal
+        isOpen={isUploadWizardOpen}
+        onClose={() => setIsUploadWizardOpen(false)}
+        onComplete={({ ratio, imageUrl }) => { setSelectedRatio(ratio); setOriginalUrl(imageUrl); }}
+      />
+    </div>
   );
 }

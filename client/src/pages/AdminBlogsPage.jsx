@@ -1,26 +1,25 @@
-// client/src/pages/AdminBlogsPage.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Modern Admin Blogs page — matches site theme.
-// ALL existing logic is preserved exactly. Only the UI is redesigned.
+// Digital Gallery Admin Blogs — Museum Archive Edition
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { PenLine, Trash2, Plus, FileText } from "lucide-react";
-import Page from "../components/Page.jsx";
+import { PenLine, Trash2, Plus, FileText, ArrowUpRight, Search, Hash, Globe, Lock } from "lucide-react";
 import api from "../lib/api.js";
 
-const ACCENT = "#FF633F";
+// Sử dụng cùng hệ màu Accent của trang chủ
+const ACCENT = "#FF633F"; 
 
 function formatDate(d) {
   try {
-    return new Date(d).toLocaleDateString("en-GB", {
-      day: "numeric", month: "short", year: "numeric",
-    });
-  } catch {
-    return "";
-  }
+    const date = new Date(d);
+    return {
+      day: date.getDate().toString().padStart(2, '0'),
+      month: date.toLocaleString('en-US', { month: 'short' }).toUpperCase(),
+      year: date.getFullYear()
+    };
+  } catch { return { day: "00", month: "ERR", year: "0000" }; }
 }
 
 export default function AdminBlogsPage() {
@@ -31,13 +30,9 @@ export default function AdminBlogsPage() {
   async function load() {
     try {
       setLoading(true);
-      setErr("");
-
       const res = await api.get("/admin/blogs?limit=50");
-      const data = res.data;
-
-      if (!data?.ok) throw new Error(data?.message || "Failed to load");
-      setItems(data.items || []);
+      if (!res.data?.ok) throw new Error(res.data?.message || "Failed to load");
+      setItems(res.data.items || []);
     } catch (e) {
       setErr(e?.message || "Something went wrong");
     } finally {
@@ -48,159 +43,176 @@ export default function AdminBlogsPage() {
   useEffect(() => { load(); }, []);
 
   const onDelete = async (id) => {
-    const ok = confirm("Delete this blog? This cannot be undone.");
-    if (!ok) return;
-
+    if (!confirm("XÁC NHẬN XÓA VĨNH VIỄN? THAO TÁC NÀY KHÔNG THỂ HOÀN TÁC.")) return;
     try {
       await api.delete(`/admin/blogs/${id}`);
       await load();
-    } catch (e) {
-      alert(e?.message || "Delete failed");
-    }
+    } catch (e) { alert(e?.message || "Delete failed"); }
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
-
-      {/* ── Dark hero ──────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-slate-950 px-4 py-10">
-        <div
-          className="pointer-events-none absolute right-1/4 top-0 h-40 w-40 rounded-full opacity-20 blur-3xl"
-          style={{ background: ACCENT }}
-        />
-        <div className="relative mx-auto max-w-5xl flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-              Admin Panel
-            </p>
-            <h1 className="mt-1 text-3xl font-extrabold text-white">Manage Blogs</h1>
-            <p className="mt-1 text-sm text-white/40">Create, edit, and publish blog posts.</p>
-          </div>
-
-          <Link
-            to="/admin/blogs/new"
-            className="inline-flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-extrabold text-white shadow transition hover:brightness-110"
-            style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #e8472a 100%)` }}
-          >
-            <Plus className="h-4 w-4" /> New Blog
-          </Link>
+    <div className="min-h-screen bg-[#FDFDFD] text-[#1A1A1A] antialiased selection:bg-black selection:text-white pb-20">
+      
+      {/* ── Top Navigation Bar (Brutalist Style) ────────────────── */}
+      <nav className="sticky top-0 z-50 flex items-center justify-between border-b-2 border-black bg-white/80 px-6 py-4 backdrop-blur-md md:px-12">
+        <div className="flex items-center gap-4">
+          <div className="h-4 w-4 bg-black" />
+          <span className="font-mono text-[11px] font-black uppercase tracking-[0.3em]">
+            Studio / Archive / Blogs
+          </span>
         </div>
-      </div>
-
-      {/* ── Body ────────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-5xl px-4 py-10">
-
-        {/* Error */}
-        <AnimatePresence>
-          {err && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"
-            >
-              {err}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Table card */}
-        <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-          {/* Header row */}
-          <div className="grid grid-cols-12 border-b border-slate-100 bg-slate-50 px-5 py-3">
-            {[["col-span-5", "Title"], ["col-span-2", "Status"], ["col-span-3", "Date"], ["col-span-2 text-right", "Actions"]].map(([cls, label]) => (
-              <div key={label} className={`${cls} text-[10px] font-extrabold uppercase tracking-widest text-slate-400`}>
-                {label}
-              </div>
-            ))}
-          </div>
-
-          {/* Skeleton rows */}
-          {loading && Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="grid animate-pulse grid-cols-12 items-center gap-2 border-b border-slate-100 px-5 py-4 last:border-0">
-              <div className="col-span-5 space-y-1.5">
-                <div className="h-3 w-3/4 rounded-full bg-slate-100" />
-                <div className="h-2.5 w-1/2 rounded-full bg-slate-100" />
-              </div>
-              <div className="col-span-2"><div className="h-5 w-16 rounded-full bg-slate-100" /></div>
-              <div className="col-span-3"><div className="h-3 w-20 rounded-full bg-slate-100" /></div>
-              <div className="col-span-2 flex justify-end gap-2">
-                <div className="h-8 w-12 rounded-xl bg-slate-100" />
-                <div className="h-8 w-12 rounded-xl bg-slate-100" />
-              </div>
-            </div>
-          ))}
-
-          {/* Empty */}
-          {!loading && items.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <FileText className="h-10 w-10 text-slate-300" />
-              <p className="mt-3 text-sm font-bold text-slate-500">No blogs yet</p>
-              <Link
-                to="/admin/blogs/new"
-                className="mt-4 inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-extrabold text-white"
-                style={{ background: ACCENT }}
-              >
-                <Plus className="h-3.5 w-3.5" /> Create First Post
-              </Link>
-            </div>
-          )}
-
-          {/* Rows */}
-          {!loading && items.map((b, idx) => (
-            <motion.div
-              key={b._id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: idx * 0.04 }}
-              className={`grid grid-cols-12 items-center gap-2 border-b border-slate-100 px-5 py-3.5 last:border-0 transition-colors ${
-                idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"
-              }`}
-            >
-              {/* Title */}
-              <div className="col-span-5 min-w-0">
-                <div className="truncate text-sm font-extrabold text-slate-900">{b.title}</div>
-                <div className="truncate text-xs text-slate-400">/{b.slug}</div>
-              </div>
-
-              {/* Status */}
-              <div className="col-span-2">
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide ${
-                    b.status === "published"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-amber-100 text-amber-700"
-                  }`}
-                >
-                  {b.status}
-                </span>
-              </div>
-
-              {/* Date */}
-              <div className="col-span-3 text-xs text-slate-500">
-                {formatDate(b.publishedAt || b.createdAt)}
-              </div>
-
-              {/* Actions */}
-              <div className="col-span-2 flex justify-end gap-2">
-                <Link
-                  to={`/admin/blogs/${b._id}/edit`}
-                  className="flex h-8 items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
-                >
-                  <PenLine className="h-3.5 w-3.5" /> Edit
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => onDelete(b._id)}
-                  className="flex h-8 items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 text-xs font-bold text-rose-700 transition hover:bg-rose-100"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </motion.div>
-          ))}
+        <div className="hidden font-mono text-[10px] font-bold text-slate-400 md:block">
+          SYS_STATUS: <span className="text-emerald-500">OPERATIONAL</span>
         </div>
-      </div>
+      </nav>
+
+      {/* ── Studio Header ─────────────────────────────────────────── */}
+      <header className="px-6 pt-16 pb-12 md:px-12 lg:pt-24 lg:pb-20">
+        <div className="mx-auto max-w-[1600px]">
+          <div className="flex flex-col justify-between gap-12 lg:flex-row lg:items-end">
+            <div className="relative">
+              <span className="absolute -top-6 left-0 font-mono text-[10px] font-black uppercase tracking-[0.5em] text-[#FF633F]">
+                Index: 001—999
+              </span>
+              <h1 className="text-[12vw] font-black leading-[0.8] uppercase tracking-tighter md:text-[8rem] lg:text-[10rem]">
+                Editorial<span className="text-[#FF633F]">.</span>
+              </h1>
+              <p className="mt-4 max-w-md font-mono text-[12px] leading-relaxed text-slate-500 uppercase tracking-wider">
+                Quản lý kho lưu trữ nội dung và các bài viết nghệ thuật. 
+                Sử dụng công cụ biên tập để thay đổi diện mạo trang web.
+              </p>
+            </div>
+            
+            <Link
+              to="/admin/blogs/new"
+              className="group relative flex h-32 w-32 items-center justify-center overflow-hidden border-2 border-black transition-all hover:bg-black"
+            >
+              <div className="relative z-10 flex flex-col items-center gap-2 group-hover:text-white">
+                <Plus size={24} strokeWidth={3} />
+                <span className="font-mono text-[9px] font-black uppercase tracking-widest">Add Entry</span>
+              </div>
+              <motion.div className="absolute inset-0 bg-[#FF633F] translate-y-full transition-transform group-hover:translate-y-0" />
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Main Content ──────────────────────────────────────────── */}
+      <main className="mx-auto max-w-[1600px] px-6 md:px-12">
+        
+        {/* Filter Toolbar */}
+        <div className="mb-1 bg-black p-4 text-white flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex gap-6 font-mono text-[10px] font-black uppercase tracking-[0.2em]">
+            <button className="text-[#FF633F] border-b-2 border-[#FF633F] pb-1">All Posts ({items.length})</button>
+            <button className="opacity-50 hover:opacity-100 transition-opacity">Published</button>
+            <button className="opacity-50 hover:opacity-100 transition-opacity">Drafts</button>
+          </div>
+          <div className="relative flex w-full max-w-sm items-center border-b border-white/30 pb-1 md:w-auto">
+             <Search size={14} className="mr-3 text-slate-400" />
+             <input 
+                type="text" 
+                placeholder="SEARCH ARCHIVE..." 
+                className="w-full bg-transparent font-mono text-[10px] outline-none placeholder:text-slate-600" 
+             />
+          </div>
+        </div>
+
+        {/* Content Table */}
+        <div className="border-x-2 border-black">
+          {loading ? (
+            <div className="divide-y-2 divide-black border-b-2 border-black">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-32 w-full animate-pulse bg-slate-50" />
+              ))}
+            </div>
+          ) : (
+            <div className="divide-y-2 divide-black border-b-2 border-black">
+              {items.map((blog, idx) => {
+                const date = formatDate(blog.publishedAt || blog.createdAt);
+                return (
+                  <motion.div
+                    key={blog._id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="group relative grid grid-cols-12 items-stretch gap-0 bg-white hover:bg-slate-50 transition-colors"
+                  >
+                    {/* Index Number */}
+                    <div className="col-span-1 hidden items-center justify-center border-r-2 border-black font-mono text-[12px] font-black text-slate-200 group-hover:text-black md:flex">
+                      {(idx + 1).toString().padStart(2, '0')}
+                    </div>
+
+                    {/* Date Block */}
+                    <div className="col-span-2 hidden flex-col items-center justify-center border-r-2 border-black bg-slate-50 font-mono md:flex group-hover:bg-[#FF633F] group-hover:text-white transition-colors">
+                      <span className="text-2xl font-black leading-none">{date.day}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{date.month}</span>
+                    </div>
+
+                    {/* Info Body */}
+                    <div className="col-span-12 p-8 md:col-span-7">
+                      <div className="flex items-center gap-3 mb-2">
+                        {blog.status === 'published' ? <Globe size={12} className="text-emerald-500" /> : <Lock size={12} className="text-amber-500" />}
+                        <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">
+                          {blog.status || 'draft'} / {blog.category || 'General'}
+                        </span>
+                      </div>
+                      <Link to={`/admin/blogs/${blog._id}/edit`} className="block">
+                        <h3 className="text-3xl font-black uppercase leading-[0.9] tracking-tighter group-hover:underline decoration-4 decoration-[#FF633F] md:text-5xl">
+                          {blog.title}
+                        </h3>
+                      </Link>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <span className="bg-black px-2 py-0.5 font-mono text-[8px] font-bold text-white uppercase tracking-widest italic">
+                          slug: {blog.slug}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Actions Column */}
+                    <div className="col-span-12 flex items-stretch border-t-2 border-black md:col-span-2 md:border-t-0 md:border-l-2 md:flex-col lg:flex-row lg:divide-x-2 lg:divide-black">
+                      <Link
+                        to={`/admin/blogs/${blog._id}/edit`}
+                        className="flex flex-1 items-center justify-center p-6 hover:bg-black hover:text-white transition-all"
+                        title="Edit Post"
+                      >
+                        <PenLine size={20} />
+                      </Link>
+                      <button
+                        onClick={() => onDelete(blog._id)}
+                        className="flex flex-1 items-center justify-center p-6 hover:bg-rose-500 hover:text-white transition-all"
+                        title="Delete Permanently"
+                      >
+                        <Trash2 size={20} />
+                      </button>
+                      <Link
+                        to={`/blog/${blog.slug}`}
+                        target="_blank"
+                        className="flex flex-1 items-center justify-center p-6 hover:bg-[#FF633F] hover:text-white transition-all"
+                        title="View Live"
+                      >
+                        <ArrowUpRight size={20} />
+                      </Link>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* ── Footer Metadata ────────────────────────────────────────── */}
+        {!loading && (
+          <div className="mt-8 flex flex-col justify-between gap-4 border-t border-slate-200 pt-8 font-mono text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 md:flex-row">
+            <div className="flex gap-8">
+              <span>Integrity_Check: <span className="text-black">100% Valid</span></span>
+              <span>Items_Count: <span className="text-black">{items.length}</span></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Hash size={12} strokeWidth={3} />
+              <span>Session_ID: {Math.random().toString(36).substring(7).toUpperCase()}</span>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

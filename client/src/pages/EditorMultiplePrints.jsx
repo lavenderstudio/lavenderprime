@@ -1,115 +1,76 @@
 /* eslint-disable react-hooks/static-components */
-// client/src/pages/EditorMultiplePrints.jsx
-
 import { useEffect, useMemo, useState } from "react";
 import api from "../lib/api.js";
 import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Page from "../components/Page.jsx";
 import { getSessionId } from "../lib/session.js";
 import MultiUploadWizardModal from "../components/MultiUploadWizardModal.jsx";
 import PrintPreview from "../components/PrintPreview.jsx";
-
-import { ACCENT, ACCENT_BG, ACCENT_HOVER, Container } from "../components/home/ui.jsx";
+import ShinyText from "../components/reactbits/ShinyText.jsx";
 
 const PRODUCT_SLUG = "multiple-prints";
+const C = "#00e5ff"; // Cyan Accent
+const M = "#e040fb"; // Magenta Accent
 
+// ─── HELPERS ────────────────────────────────────────────────────────────────
 function parseCmSize(sizeStr) {
   if (!sizeStr) return null;
   const cleaned = sizeStr.toLowerCase().replace("cm", "").replace("×", "x").trim();
   const [w, h] = cleaned.split("x").map((n) => Number(n));
-  if (!Number.isFinite(w) || !Number.isFinite(h)) return null;
   return { w, h };
 }
 
-function SectionLabel({ children }) {
-  return <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">{children}</p>;
-}
-
-function SizePills({ variants, value, onChange }) {
+function SectionLabel({ children, color = M }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {variants.map((v) => {
-        const active = v.sku === value;
-        return (
-          <button key={v.sku} type="button" onClick={() => onChange(v.sku)}
-            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95
-              ${active ? `${ACCENT_BG} text-white shadow-md shadow-[#FF633F]/25` : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}>
-            {v.size}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function MaterialTiles({ options, value, onChange }) {
-  return (
-    <div className="grid grid-cols-2 gap-2">
-      {options.map((opt) => {
-        const active = opt.name === value;
-        return (
-          <button key={opt.name} type="button" onClick={() => onChange(opt.name)}
-            className={`flex flex-col items-center justify-center rounded-xl p-3 text-center transition-all duration-200 active:scale-95
-              ${active ? "ring-2 ring-[#FF633F] bg-[#FF633F]/8 border border-[#FF633F]/30" : "border border-slate-200 bg-white hover:bg-slate-50"}`}>
-            <span className={`text-sm font-bold ${active ? "text-[#FF633F]" : "text-slate-700"}`}>{opt.name}</span>
-            {opt.price > 0 && <span className="mt-0.5 text-[10px] font-semibold text-slate-400">+{opt.price}</span>}
-          </button>
-        );
-      })}
+    <div className="flex items-center gap-3 mb-4">
+      <div className="h-px w-6" style={{ background: color }} />
+      <span className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color }}>
+        {children}
+      </span>
     </div>
   );
 }
 
 export default function EditorMultiplePrints() {
   const navigate = useNavigate();
-  const [product, setProduct]   = useState(null);
+  const [product, setProduct] = useState(null);
   const [variantSku, setVariantSku] = useState("");
   const [material, setMaterial] = useState("Matte");
-  const [assets, setAssets]     = useState([]);
-  const quantity                = Math.max(1, assets.length);
-  const [quote, setQuote]       = useState(null);
-  const [error, setError]       = useState("");
+  const [assets, setAssets] = useState([]);
+  const [quote, setQuote] = useState(null);
+  const [error, setError] = useState("");
   const [isMultiWizardOpen, setIsMultiWizardOpen] = useState(false);
 
+  // Load Product
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await api.get(`/products/${PRODUCT_SLUG}`);
-        setProduct(res.data);
-        const firstPortrait = res.data.variants?.find((v) => v.orientation === "portrait");
-        if (firstPortrait) setVariantSku(firstPortrait.sku);
-        const firstMaterial = res.data.options?.materials?.[0];
-        if (firstMaterial) setMaterial(firstMaterial.name);
-      } catch (err) { setError(err?.response?.data?.message || err.message); }
-    };
-    load();
+    api.get(`/products/${PRODUCT_SLUG}`).then((res) => {
+      setProduct(res.data);
+      const firstPortrait = res.data.variants?.find((v) => v.orientation === "portrait") || res.data.variants?.[0];
+      if (firstPortrait) setVariantSku(firstPortrait.sku);
+      if (res.data.options?.materials?.[0]) setMaterial(res.data.options.materials[0].name);
+    }).catch(err => setError(err.message));
   }, []);
 
-  const materialOptions  = useMemo(() => product?.options?.materials || [], [product]);
+  const materialOptions = useMemo(() => product?.options?.materials || [], [product]);
   const portraitVariants = useMemo(() => (product?.variants || []).filter((v) => v.orientation === "portrait"), [product]);
-  const selectedVariant  = portraitVariants.find((v) => v.sku === variantSku);
-  const parsedPrint      = parseCmSize(selectedVariant?.size);
+  const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
+  const parsedPrint = parseCmSize(selectedVariant?.size);
 
+  // Pricing
   useEffect(() => {
-    const getQuote = async () => {
-      if (!variantSku) return;
-      try {
-        const res = await api.post("/pricing/quote", { productSlug: PRODUCT_SLUG, variantSku, options: { material }, quantity });
-        setQuote(res.data);
-      } catch (err) { setQuote(null); setError(err?.response?.data?.message || err.message); }
-    };
-    getQuote();
-  }, [variantSku, material, quantity]);
+    if (variantSku) {
+      api.post("/pricing/quote", { productSlug: PRODUCT_SLUG, variantSku, options: { material }, quantity: Math.max(1, assets.length) })
+        .then(res => setQuote(res.data))
+        .catch(() => setQuote(null));
+    }
+  }, [variantSku, material, assets.length]);
 
   const handleBulkComplete = (newFiles) => setAssets((prev) => [...prev, ...newFiles]);
-  const removeAsset        = (idx) => setAssets((prev) => prev.filter((_, i) => i !== idx));
-  const canOrder           = assets.length > 0 && !!quote;
+  const removeAsset = (idx) => setAssets((prev) => prev.filter((_, i) => i !== idx));
 
   const handleAddToCart = async () => {
     try {
-      setError("");
-      if (!selectedVariant || !quote) return setError("Missing info.");
-      if (assets.length === 0) return setError("Please upload at least one photo.");
       const sessionId = getSessionId();
       await api.post("/cart/items", {
         sessionId,
@@ -122,161 +83,182 @@ export default function EditorMultiplePrints() {
         },
       });
       navigate("/cart");
-    } catch (err) { setError(err?.response?.data?.message || err.message); }
+    } catch (err) { setError(err.message); }
   };
 
   return (
-    <Page title="Editor — Multiple Prints">
-      <Container className="px-0">
-        <div className="px-4 pt-4">
-          <Link to="/products" className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
-            Products
-          </Link>
-        </div>
+    <Page title="Museum Curator — Multiple Prints">
+      {/* ✅ Triệt tiêu dòng chữ Preview only bằng Global Style Injection */}
+      <style>{`
+        div[class*="PrintPreview"] p, 
+        div[class*="PrintPreview"] span,
+        .preview-label-fix p { 
+          display: none !important; 
+        }
+      `}</style>
 
-        {error && (
-          <div className="mx-4 mt-3 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <svg className="h-4 w-4 shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-            {error}
+      <div className="min-h-screen bg-white w-full overflow-x-hidden">
+        
+        {/* HEADER: Tràn viền với Padding tiêu chuẩn */}
+        <section className="px-6 sm:px-12 lg:px-20 pt-24 pb-12">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+              <SectionLabel color={M}>Fine Art Collection</SectionLabel>
+              <h1 className="font-extrabold tracking-tighter text-slate-900 leading-[0.9] mb-2" style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
+                Multiple<br />
+                <span style={{ color: "transparent", WebkitTextStroke: `2px ${C}` }}>Prints</span>
+              </h1>
+              <p className="mt-4 text-slate-400 font-mono text-xs tracking-widest uppercase">Triển lãm cá nhân của bạn bắt đầu tại đây.</p>
+            </div>
+            <Link to="/products" className="group shrink-0 text-xs font-bold text-slate-400 hover:text-slate-900 flex items-center gap-2 mb-4 tracking-widest uppercase">
+              ← Quay lại bộ sưu tập
+            </Link>
           </div>
-        )}
+        </section>
 
-        <div className="px-4 pt-4 pb-2">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Multiple Prints</h1>
-          <p className="mt-0.5 text-sm text-slate-500">Upload Multiple Photos, All Printed In The Same Size.</p>
-        </div>
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
-        {!product ? (
-          <div className="mx-4 mt-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm animate-pulse">
-            <div className="h-4 w-32 rounded bg-slate-200 mb-3" /><div className="h-48 w-full rounded-2xl bg-slate-100" />
-          </div>
-        ) : (
-          <div className="mt-2 flex flex-col gap-0 lg:grid lg:grid-cols-12 lg:gap-6 lg:px-4 lg:pb-8">
-
-            {/* LEFT: Photo Grid */}
-            <div className="lg:col-span-7">
-              <div className="overflow-hidden rounded-none lg:rounded-3xl border-0 border-b border-slate-200 lg:border bg-white shadow-sm">
-                <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#FF633F] shadow-sm shadow-[#FF633F]/50" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Your Photos</span>
-                    {assets.length > 0 && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">{assets.length} Selected</span>}
-                  </div>
-                  <button type="button" onClick={() => setIsMultiWizardOpen(true)}
-                    className="flex items-center gap-1.5 rounded-xl border border-[#FF633F]/30 bg-[#FF633F]/8 px-3 py-1.5 text-xs font-bold text-[#FF633F] hover:bg-[#FF633F]/15 transition-all active:scale-95">
-                    + Add Photos
-                  </button>
+        {/* MAIN CURATOR GRID */}
+        <div className="grid lg:grid-cols-12 w-full min-h-[80vh]">
+          
+          {/* LEFT: THE GALLERY WALL (Ảnh của khách) */}
+          <div className="lg:col-span-7 bg-[#F8F8F8] border-r border-slate-100 p-8 lg:p-20 relative">
+             <div className="absolute top-10 left-10 font-mono text-[10vw] font-black text-slate-200/50 select-none leading-none z-0">EXHIBIT</div>
+             
+             <div className="relative z-10 w-full max-w-4xl mx-auto">
+                <div className="flex items-center justify-between mb-12">
+                   <h3 className="font-mono text-[10px] tracking-[0.4em] uppercase text-slate-400">01 — Tác phẩm ({assets.length})</h3>
+                   <button onClick={() => setIsMultiWizardOpen(true)} className="px-6 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest hover:bg-cyan-500 transition-colors">
+                     + Thêm ảnh vào triển lãm
+                   </button>
                 </div>
 
-                <div className="px-5 pb-5">
+                <AnimatePresence mode="popLayout">
                   {assets.length === 0 ? (
-                    <button onClick={() => setIsMultiWizardOpen(true)}
-                      className="group flex w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center transition-all duration-200 hover:border-[#FF633F]/50 hover:bg-[#FF633F]/5 active:scale-[0.99]">
-                      <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg group-hover:scale-105 transition-transform">
-                        <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#FF633F]/30 animate-spin [animation-duration:8s]" />
-                        <svg className="h-8 w-8 text-[#FF633F]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-base font-extrabold text-slate-900">Upload Your Photos</p>
-                        <p className="mt-1 text-sm text-slate-500">Select Multiple Images To Start</p>
-                      </div>
-                      <span className="rounded-full bg-[#FF633F] px-5 py-2 text-sm font-bold text-white shadow-md shadow-[#FF633F]/30 group-hover:scale-105 transition-transform">Choose Photos</span>
-                    </button>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setIsMultiWizardOpen(true)}
+                      className="aspect-[16/9] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer group hover:border-cyan-400 transition-all bg-white shadow-sm"
+                    >
+                      <span className="text-4xl font-light text-slate-200 group-hover:text-cyan-400 mb-4">+</span>
+                      <p className="font-mono text-[10px] tracking-widest text-slate-400 uppercase">Tải lên các khoảnh khắc của bạn</p>
+                    </motion.div>
                   ) : (
-                    <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                       {assets.map((slot, idx) => (
-                        <div key={idx} className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm group hover:shadow-md transition">
-                          <div className="mb-2 flex items-center justify-between">
-                            <span className="text-sm font-extrabold text-slate-900">Image #{idx + 1}</span>
-                            <button onClick={() => removeAsset(idx)} className="text-xs font-bold text-red-400 hover:text-red-600 hover:underline">Remove</button>
+                        <motion.div key={idx} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }} className="relative group">
+                          <div className="relative shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] bg-white p-1 transition-transform duration-500 group-hover:scale-[1.02]">
+                            <div className="preview-label-fix">
+                              <PrintPreview imageUrl={slot.originalUrl} />
+                            </div>
+                            <button onClick={() => removeAsset(idx)} className="absolute -top-3 -right-3 w-8 h-8 bg-white shadow-lg rounded-full flex items-center justify-center text-xs text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-50">✕</button>
                           </div>
-                          <PrintPreview imageUrl={slot.originalUrl} />
-                        </div>
+                          <div className="mt-4 flex justify-between items-center px-1">
+                             <span className="font-mono text-[9px] text-slate-400 uppercase tracking-tighter">Frame 0{idx+1}</span>
+                             <div className="h-px flex-1 mx-4 bg-slate-100" />
+                             <span className="font-bold text-[10px] uppercase tracking-widest">{selectedVariant?.size}</span>
+                          </div>
+                        </motion.div>
                       ))}
                     </div>
                   )}
+                </AnimatePresence>
+             </div>
+          </div>
+
+          {/* RIGHT: CURATOR CONTROLS */}
+          <div className="lg:col-span-5 p-10 lg:p-20 flex flex-col justify-center bg-white">
+            <div className="max-w-md mx-auto w-full space-y-16">
+              
+              {/* Size Selection */}
+              <div>
+                <SectionLabel>02. Quy cách trưng bày</SectionLabel>
+                <div className="grid grid-cols-2 gap-3">
+                  {portraitVariants.map(v => (
+                    <button key={v.sku} onClick={() => setVariantSku(v.sku)}
+                      className={`py-4 px-2 border text-[11px] font-black tracking-widest transition-all ${variantSku === v.sku ? 'border-black bg-black text-white shadow-xl shadow-black/10' : 'border-slate-100 text-slate-400 hover:border-slate-900'}`}
+                    >
+                      {v.size}
+                    </button>
+                  ))}
                 </div>
               </div>
-            </div>
 
-            {/* RIGHT: Options */}
-            <div className="lg:col-span-5">
-              <div className="flex flex-col gap-0">
-                <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 lg:rounded-t-3xl lg:border lg:border-b-0">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-slate-900">Customise</h2>
-                    <p className="text-xs text-slate-500">Pick Size &amp; Material</p>
-                  </div>
+              {/* Material Selection */}
+              <div>
+                <SectionLabel>03. Chất liệu bề mặt</SectionLabel>
+                <div className="space-y-3">
+                  {materialOptions.map(opt => (
+                    <button key={opt.name} onClick={() => setMaterial(opt.name)}
+                      className={`w-full flex justify-between items-center p-5 border transition-all ${material === opt.name ? 'border-cyan-400 bg-cyan-50/20' : 'border-slate-50 opacity-60 hover:opacity-100'}`}
+                    >
+                      <span className="text-[11px] font-bold uppercase tracking-widest">{opt.name}</span>
+                      {material === opt.name && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Order Summary Card */}
+              <div className="pt-10 border-t border-slate-100 mt-20">
+                <div className="flex items-baseline justify-between mb-8">
+                  <span className="font-mono text-[10px] text-slate-400 tracking-widest uppercase">Định mức đầu tư</span>
                   <div className="text-right">
-                    <div className={`text-2xl font-black ${quote ? "text-slate-900" : "text-slate-300"}`}>{quote ? `${quote.total}` : "—"}</div>
-                    {quote && <div className="text-xs font-semibold text-slate-400">{quote.currency} · {assets.length || 1} Print{assets.length !== 1 ? "s" : ""}</div>}
+                    <span className="text-4xl font-black text-slate-900 tracking-tighter block">
+                      {quote ? `${quote.total.toLocaleString()} ${quote.currency}` : '---'}
+                    </span>
+                    <span className="text-[10px] font-bold text-cyan-500 uppercase tracking-widest italic">Bao gồm VAT & Đóng gói cao cấp</span>
                   </div>
                 </div>
 
-                <div className="divide-y divide-slate-100 border border-t-0 border-slate-200 bg-white lg:rounded-b-3xl overflow-hidden">
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Print Size</SectionLabel>
-                      {parsedPrint && <span className="text-xs font-semibold text-slate-400">{parsedPrint.w}×{parsedPrint.h}cm</span>}
-                    </div>
-                    <SizePills variants={portraitVariants} value={variantSku} onChange={setVariantSku} />
-                  </div>
-
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Paper Material</SectionLabel>
-                      <span className={`text-xs font-bold ${ACCENT}`}>{material}</span>
-                    </div>
-                    <MaterialTiles options={materialOptions} value={material} onChange={setMaterial} />
-                  </div>
-
-                  <div className="bg-slate-50 px-5 py-4">
-                    <SectionLabel>Order Summary</SectionLabel>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                      {[
-                        ["Size", selectedVariant?.size || "—"],
-                        ["Material", material],
-                        ["Photos", assets.length || "0"],
-                        ["Total", quote ? `${quote.total} ${quote.currency}` : "—"],
-                      ].map(([label, val]) => (
-                        <div key={label} className="flex items-baseline justify-between col-span-2 sm:col-span-1">
-                          <span className="font-semibold text-slate-400">{label}</span>
-                          <span className="font-bold text-slate-700">{val}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {assets.length === 0 && <p className="mt-2 text-[10px] font-semibold text-amber-600">⚠ Add Photos To See Final Price</p>}
-                  </div>
-                </div>
-
-                <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur-sm px-5 py-4 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:pb-0 lg:pt-4">
-                  {assets.length === 0 && (
-                    <p className="mb-3 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-700">
-                      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                      Upload At Least One Photo To Continue
-                    </p>
-                  )}
-                  <button disabled={!canOrder} onClick={handleAddToCart}
-                    className={`w-full rounded-2xl py-3.5 text-sm font-extrabold tracking-wide shadow-sm transition-all duration-300 active:scale-[0.98]
-                      ${canOrder ? `${ACCENT_BG} ${ACCENT_HOVER} text-white shadow-lg shadow-[#FF633F]/30 hover:scale-[1.01]` : "cursor-not-allowed bg-slate-100 text-slate-400"}`}>
-                    {canOrder ? `Add To Cart · ${quote?.total ?? ""} ${quote?.currency ?? ""}` : "Add To Cart"}
-                  </button>
-                  <p className="mt-2 text-center text-[10px] font-semibold text-slate-400">🔒 Secure Checkout &nbsp;·&nbsp; Premium Packaging &nbsp;·&nbsp; Doorstep Delivery</p>
+                <button disabled={!quote || assets.length === 0} onClick={handleAddToCart}
+                  className="w-full py-6 text-[12px] font-black uppercase tracking-[0.4em] transition-all disabled:opacity-20 disabled:grayscale relative overflow-hidden group"
+                  style={{ background: 'black', color: 'white' }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-magenta-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <span className="relative z-10">
+                    <ShinyText text="Đưa vào giỏ hàng →" speed={3} />
+                  </span>
+                </button>
+                
+                <div className="mt-6 grid grid-cols-3 gap-4">
+                   {['Bảo mật 100%', 'Vận chuyển Toàn quốc', 'Chất lượng Bảo tàng'].map(text => (
+                     <div key={text} className="text-center">
+                        <p className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter leading-tight">{text}</p>
+                     </div>
+                   ))}
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
+
+        {/* ✅ CHẾ TÁC THỦ CÔNG SECTION (Giai đoạn chuyển tiếp) */}
+        <section className="py-32 px-10 bg-slate-950 text-white relative w-full overflow-hidden">
+           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-20">
+              <div className="flex-1">
+                 <SectionLabel color={C}>Craftsmanship</SectionLabel>
+                 <h2 className="text-5xl font-extrabold tracking-tight mb-8 leading-tight">Mỗi bản in là một<br/><span style={{ color: "transparent", WebkitTextStroke: `1px ${C}` }}>Di sản.</span></h2>
+                 <p className="text-slate-400 font-light leading-relaxed text-lg">Chúng tôi không chỉ in ảnh, chúng tôi chế tác những tác phẩm lưu giữ thời gian. Với công nghệ in 12 màu UltraChrome và giấy Giclée chính hiệu, bức tường của bạn sẽ trở thành một không gian nghệ thuật đích thực.</p>
+              </div>
+              <div className="w-px h-40 bg-slate-800 hidden md:block" />
+              <div className="flex-1 grid grid-cols-2 gap-8">
+                 <div>
+                    <h4 className="text-cyan-400 font-black text-3xl mb-2">200+</h4>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500">Năm độ bền màu</p>
+                 </div>
+                 <div>
+                    <h4 className="text-magenta-400 font-black text-3xl mb-2">1200</h4>
+                    <p className="text-[10px] uppercase tracking-widest text-slate-500">DPI Độ phân giải</p>
+                 </div>
+              </div>
+           </div>
+        </section>
 
         <MultiUploadWizardModal
           isOpen={isMultiWizardOpen}
           onClose={() => setIsMultiWizardOpen(false)}
           onComplete={handleBulkComplete}
         />
-      </Container>
+      </div>
     </Page>
   );
 }

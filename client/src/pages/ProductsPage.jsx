@@ -1,24 +1,25 @@
 // client/src/pages/ProductsPage.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Modern Products page — matches HomePage theme.
+// Bảo tàng · Tràn viền · Cyan × Magenta · Việt ngữ · Phá cách
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import api from "../lib/api.js";
 
-const ACCENT = "#FF633F";
+const C = "#00e5ff";
+const M = "#e040fb";
 
-// ─── Shared reveal ────────────────────────────────────────────────────────────
 function Reveal({ children, delay = 0, className = "" }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const inView = useInView(ref, { once: true, margin: "-50px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 28 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.65, delay, ease: [0.16, 1, 0.3, 1] }}
       className={className}
     >
       {children}
@@ -26,209 +27,318 @@ function Reveal({ children, delay = 0, className = "" }) {
   );
 }
 
-// ─── Product catalogue ────────────────────────────────────────────────────────
 const PRODUCTS = [
   {
     id: "print-frame",
-    name: "Print & Frame",
-    tagline: "Your Photo, Framed And Ready To Hang.",
-    price: "From 89 AED",
-    tag: "Most Popular",
-    tagBg: ACCENT,
-    category: "Framed",
+    name: "In & Đóng Khung",
+    tagline: "Ảnh của bạn, khung thủ công, sẵn treo tường.",
+    price: "Từ 89 AED",
+    tag: "Phổ biến nhất",
+    num: "01",
+    category: "Có Khung",
     img: "/products/print&frame.avif",
     href: "/editor/print-frame",
-    features: ["Premium Timber Frame", "Archival Inks", "Ready To Hang"],
+    accent: C,
+    features: ["Khung gỗ cao cấp", "Mực lưu trữ", "Sẵn sàng treo"],
   },
   {
     id: "print",
-    name: "Print",
-    tagline: "High-Fidelity Print On Premium Paper.",
-    price: "From 29 AED",
-    tag: "Best Value",
-    tagBg: "#1E293B",
-    category: "Print",
+    name: "Bản In",
+    tagline: "In độ phân giải cao trên giấy cao cấp.",
+    price: "Từ 29 AED",
+    tag: "Tiết kiệm nhất",
+    num: "02",
+    category: "Bản In",
     img: "/products/print.avif",
     href: "/editor/print",
-    features: ["Ultra HD Print", "Multiple Sizes", "Fast Turnaround"],
+    accent: M,
+    features: ["Ultra HD", "Nhiều kích thước", "Xử lý nhanh"],
   },
   {
     id: "multiple-prints",
-    name: "Multiple Prints",
-    tagline: "Order Several Sizes In A Single Checkout.",
-    price: "From 49 AED",
-    tag: "Bundle",
-    tagBg: "#7C3AED",
-    category: "Print",
+    name: "In Nhiều Ảnh",
+    tagline: "Đặt nhiều kích thước trong một lần thanh toán.",
+    price: "Từ 49 AED",
+    tag: "Combo",
+    num: "03",
+    category: "Bản In",
     img: "/products/multipleprint.avif",
     href: "/editor/multiple-prints",
-    features: ["Bulk Discount", "Mix & Match Sizes", "One Order"],
+    accent: C,
+    features: ["Giảm giá số lượng", "Kích thước tùy chọn", "Một đơn hàng"],
   },
   {
     id: "fine-art-print",
-    name: "Fine Art Print",
-    tagline: "Museum-Grade Giclée On Archival Cotton Paper.",
-    price: "From 79 AED",
+    name: "In Nghệ Thuật",
+    tagline: "Giclée chất lượng bảo tàng trên giấy cotton lưu trữ.",
+    price: "Từ 79 AED",
     tag: "Premium",
-    tagBg: "#0F766E",
-    category: "Print",
+    num: "04",
+    category: "Bản In",
     img: "/products/fineartprint.avif",
     href: "/editor/fine-art-print",
-    features: ["Giclée Printing", "Cotton Rag Paper", "Gallery Quality"],
+    accent: M,
+    features: ["In Giclée", "Giấy cotton", "Chất lượng gallery"],
   },
   {
     id: "canvas",
-    name: "Canvas Print",
-    tagline: "Gallery-Wrapped Canvas With Solid Timber Frame.",
-    price: "From 149 AED",
-    tag: "Best Seller",
-    tagBg: "#059669",
+    name: "In Canvas",
+    tagline: "Canvas bọc gallery với khung gỗ chắc chắn.",
+    price: "Từ 149 AED",
+    tag: "Bán chạy",
+    num: "05",
     category: "Canvas",
     img: "/products/canvas.avif",
     href: "/editor/canvas",
-    features: ["Solid Wood Frame", "Fade-Resistant Inks", "Wire-Mounted"],
+    accent: C,
+    features: ["Khung gỗ đặc", "Mực bền màu", "Treo dây"],
   },
   {
     id: "mini-frames",
-    name: "Mini Frames",
-    tagline: "Compact, Elegant Frames For Small Spaces.",
-    price: "From 59 AED",
-    tag: "Compact",
-    tagBg: "#B45309",
-    category: "Framed",
+    name: "Khung Mini",
+    tagline: "Khung thanh lịch, nhỏ gọn cho không gian hẹp.",
+    price: "Từ 59 AED",
+    tag: "Nhỏ gọn",
+    num: "06",
+    category: "Có Khung",
     img: "/products/miniframe.avif",
     href: "/editor/mini-frames",
-    features: ["Desk & Wall Ready", "Lightweight", "Multiple Finishes"],
+    accent: M,
+    features: ["Để bàn & treo tường", "Nhẹ", "Nhiều hoàn thiện"],
   },
   {
     id: "collage-frame",
-    name: "Collage Frame",
-    tagline: "Multiple Photos In One Beautiful Display.",
-    price: "From 179 AED",
-    tag: "Creative",
-    tagBg: "#7C3AED",
-    category: "Framed",
+    name: "Khung Collage",
+    tagline: "Nhiều ảnh trong một khung trưng bày đẹp.",
+    price: "Từ 179 AED",
+    tag: "Sáng tạo",
+    num: "07",
+    category: "Có Khung",
     img: "/products/collageframe.avif",
     href: "/editor/collage-frame",
-    features: ["4-16 Photo Slots", "Custom Layouts", "Gift Ready"],
+    accent: C,
+    features: ["4-16 ô ảnh", "Bố cục tùy chỉnh", "Phù hợp làm quà"],
   },
   {
     id: "wedding-frame",
-    name: "Wedding Frame",
-    tagline: "Elegant Framing For Your Most Cherished Moments.",
-    price: "From 199 AED",
-    tag: "Special",
-    tagBg: "#BE185D",
-    category: "Wedding",
+    name: "Khung Cưới",
+    tagline: "Khung sang trọng cho những khoảnh khắc trân quý nhất.",
+    price: "Từ 199 AED",
+    tag: "Đặc biệt",
+    num: "08",
+    category: "Đám Cưới",
     img: "/products/weddingframe.avif",
     href: "/editor/wedding-frame",
-    features: ["Gold / Silver Finish", "Keepsake Quality", "Gift Wrap Available"],
+    accent: M,
+    features: ["Viền vàng / bạc", "Chất lượng kỷ niệm", "Có gói quà"],
   },
   {
     id: "wedding-print",
-    name: "Wedding Print",
-    tagline: "Large-Format Prints For The Big Day.",
-    price: "From 99 AED",
-    tag: "Special",
-    tagBg: "#BE185D",
-    category: "Wedding",
+    name: "In Ảnh Cưới",
+    tagline: "Bản in khổ lớn cho ngày trọng đại.",
+    price: "Từ 99 AED",
+    tag: "Đặc biệt",
+    num: "09",
+    category: "Đám Cưới",
     img: "/products/weddingprint.avif",
     href: "/editor/wedding-print",
-    features: ["Oversized Prints", "True-colour Inks", "Satin or Gloss"],
+    accent: C,
+    features: ["Khổ lớn", "Màu sắc trung thực", "Bóng mờ / bóng láng"],
   },
 ];
 
-const CATEGORIES = ["All", "Print", "Framed", "Canvas", "Wedding"];
+const CATEGORIES = [
+  { key: "All",      label: "Tất Cả" },
+  { key: "Bản In",   label: "Bản In" },
+  { key: "Có Khung", label: "Có Khung" },
+  { key: "Canvas",   label: "Canvas" },
+  { key: "Đám Cưới", label: "Đám Cưới" },
+];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PRODUCT CARD
-// ─────────────────────────────────────────────────────────────────────────────
 function ProductCard({ product, i }) {
   return (
-    <Reveal delay={i * 0.06}>
-      <motion.div whileTap={{ scale: 0.98 }} className="h-full">
-        <Link
-          to={product.href}
-          className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm
-                     transition-all duration-300 hover:shadow-xl hover:border-[#FF633F]/25 hover:-translate-y-1.5"
-          aria-label={product.name}
-        >
-          {/* Image */}
-          <div className="relative overflow-hidden bg-slate-50">
-            <div className="aspect-3/4 w-full p-5">
-              <img
-                src={product.img}
-                alt={product.name}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
+    <Reveal delay={i * 0.05}>
+      <Link
+        to={product.href}
+        className="group flex flex-col overflow-hidden bg-white transition-all duration-500 hover:bg-slate-50 relative"
+        style={{
+          minHeight: 480,
+          borderBottom: "1px solid #f1f5f9",
+          borderRight:  "1px solid #f1f5f9",
+        }}
+        aria-label={product.name}
+      >
+        {/* Accent line top khi hover */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ background: `linear-gradient(90deg, ${product.accent}, ${product.accent === C ? M : C})` }}
+        />
 
-            {/* Tag pill */}
+        {/* Ảnh */}
+        <div className="relative overflow-hidden bg-slate-50" style={{ aspectRatio: "4/3" }}>
+          <img
+            src={product.img}
+            alt={product.name}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+            loading="lazy"
+            decoding="async"
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-all duration-500 flex items-center justify-center">
             <span
-              className="absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-extrabold text-white shadow"
-              style={{ background: product.tagBg }}
+              className="opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 px-6 py-3 text-xs font-bold uppercase tracking-widest"
+              style={{
+                background: product.accent,
+                color: product.accent === C ? "#0a0a0a" : "#fff",
+                borderRadius: 2,
+              }}
             >
-              {product.tag}
+              Thiết Kế Ngay →
             </span>
+          </div>
+          <span
+            className="absolute top-4 left-4 px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+            style={{
+              background: product.accent,
+              color: product.accent === C ? "#0a0a0a" : "#fff",
+              borderRadius: 2,
+            }}
+          >
+            {product.tag}
+          </span>
+          <span className="absolute bottom-3 right-4 font-mono text-xs text-white/40">
+            {product.num}
+          </span>
+        </div>
 
-            {/* Overlay CTA on hover */}
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0
-                            transition-opacity duration-300 group-hover:opacity-100">
+        {/* Nội dung */}
+        <div className="flex flex-1 flex-col p-6">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <p className="text-base font-extrabold text-slate-900 tracking-tight">{product.name}</p>
+            <span className="shrink-0 text-sm font-extrabold" style={{ color: product.accent }}>
+              {product.price}
+            </span>
+          </div>
+          <p className="text-xs leading-relaxed text-slate-400 flex-1">{product.tagline}</p>
+
+          <div className="mt-5 flex flex-wrap gap-1.5">
+            {product.features.map(f => (
               <span
-                className="rounded-2xl px-5 py-2.5 text-sm font-extrabold text-white shadow-lg"
-                style={{ background: ACCENT }}
+                key={f}
+                className="px-2.5 py-1 text-[10px] font-semibold text-slate-400 border border-slate-100 transition-all duration-200 group-hover:border-transparent"
+                style={{ borderRadius: 2 }}
               >
-                Start Designing →
+                {f}
               </span>
-            </div>
+            ))}
           </div>
 
-          {/* Content */}
-          <div className="flex flex-1 flex-col p-5">
-            <div className="flex items-start justify-between gap-2">
-              <p className="text-base font-extrabold text-slate-900">{product.name}</p>
-              <span className="shrink-0 text-sm font-extrabold" style={{ color: ACCENT }}>
-                {product.price}
-              </span>
-            </div>
-            <p className="mt-1 text-xs leading-relaxed text-slate-500">{product.tagline}</p>
-
-            {/* Feature pills */}
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {product.features.map(f => (
-                <span
-                  key={f}
-                  className="rounded-xl bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600
-                             transition-all duration-300 group-hover:bg-[#FF633F]/10 group-hover:text-[#FF633F]"
-                >
-                  {f}
-                </span>
-              ))}
-            </div>
-
-            {/* CTA bar */}
-            <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-              <span className="text-xs font-semibold text-slate-400">{product.category}</span>
-              <span
-                className="rounded-xl px-3 py-1.5 text-xs font-extrabold text-white
-                           transition-all duration-300 group-hover:scale-105 group-hover:shadow-md"
-                style={{ background: ACCENT }}
-              >
-                Design →
-              </span>
-            </div>
+          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <span className="font-mono text-[10px] text-slate-300 tracking-wider uppercase">{product.category}</span>
+            <span className="text-xs font-bold" style={{ color: product.accent }}>
+              Xem chi tiết →
+            </span>
           </div>
-        </Link>
-      </motion.div>
+        </div>
+      </Link>
     </Reveal>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE
-// ─────────────────────────────────────────────────────────────────────────────
+function Newsletter() {
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+    try { await api.post("/newsletter/subscribe", { email }); } catch {}
+    setSent(true);
+  };
+
+  return (
+    <section className="w-full" style={{ background: "#0a0a0d" }}>
+      <div className="h-[2px] w-full" style={{ background: `linear-gradient(90deg, ${C}, ${M})` }} />
+
+      <div className="grid lg:grid-cols-2">
+        {/* Trái */}
+        <div
+          className="flex flex-col justify-center px-10 sm:px-16 lg:px-20 py-20"
+          style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-px w-8" style={{ background: C }} />
+            <span className="font-mono text-[10px] tracking-[0.25em] uppercase" style={{ color: C }}>
+              Bản Tin
+            </span>
+          </div>
+          <h2
+            className="font-extrabold tracking-tighter text-white leading-tight"
+            style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}
+          >
+            Nhận{" "}
+            <span style={{ color: "transparent", WebkitTextStroke: `2px ${C}` }}>
+              10% Giảm Giá
+            </span>
+            <br />Đơn Đầu Tiên
+          </h2>
+          <p className="mt-5 text-sm text-white/40 max-w-sm leading-relaxed">
+            Đăng ký nhận ưu đãi độc quyền, hướng dẫn chọn khung và cảm hứng trang trí thẳng vào hộp thư của bạn.
+          </p>
+        </div>
+
+        {/* Phải */}
+        <div className="flex flex-col justify-center px-10 sm:px-16 lg:px-20 py-20">
+          {sent ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm font-bold"
+              style={{ color: C }}
+            >
+              🎉 Cảm ơn bạn! Mã 10% đang trên đường đến.
+            </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block font-mono text-[10px] tracking-[0.2em] uppercase text-white/30 mb-3">
+                  Địa chỉ email
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="email@cuaban.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full px-5 py-4 text-sm font-semibold text-white placeholder-white/20 outline-none transition-all duration-200"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    borderRadius: 2,
+                  }}
+                  onFocus={e => e.currentTarget.style.borderColor = C}
+                  onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)"}
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-4 text-sm font-extrabold uppercase tracking-widest transition-all hover:opacity-90"
+                style={{ background: C, borderRadius: 2 }}
+              >
+                Nhận Mã Ngay
+              </button>
+              <p className="text-[10px] text-white/20 text-center">
+                Không spam. Hủy đăng ký bất cứ lúc nào.
+              </p>
+            </form>
+          )}
+        </div>
+      </div>
+
+      <div className="h-[2px] w-full" style={{ background: `linear-gradient(90deg, ${M}, ${C})` }} />
+    </section>
+  );
+}
+
 export default function ProductsPage() {
   const [active, setActive] = useState("All");
 
@@ -237,125 +347,126 @@ export default function ProductsPage() {
     : PRODUCTS.filter(p => p.category === active);
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 antialiased">
+    <div className="min-h-screen bg-white text-slate-900 antialiased">
 
-      {/* ── Hero banner ─────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950 px-4 py-20 text-center">
-        {/* Radial glow */}
+      {/* ── Hero nền tối tràn viền ──────────────────────────────────── */}
+      <section className="relative w-full overflow-hidden" style={{ background: "#0d0d10" }}>
+        <div className="h-[2px] w-full" style={{ background: `linear-gradient(90deg, ${C}, ${M})` }} />
+
+        {/* Chữ lớn nền mờ */}
         <div
-          className="pointer-events-none absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full opacity-30 blur-3xl"
-          style={{ background: ACCENT }}
-        />
-
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: ACCENT }}
+          className="pointer-events-none select-none absolute inset-0 flex items-center justify-end pr-10 overflow-hidden"
+          style={{
+            fontSize: "clamp(4rem, 16vw, 14rem)",
+            fontWeight: 900,
+            letterSpacing: "-0.05em",
+            color: "transparent",
+            WebkitTextStroke: "1px rgba(255,255,255,0.03)",
+            lineHeight: 1,
+          }}
         >
-          Golden Art Frames
-        </motion.p>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-3 text-4xl font-extrabold leading-tight text-white sm:text-5xl"
-        >
-          Choose What You Want<br />
-          <span style={{ color: ACCENT }}>To Create</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.38 }}
-          className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-white/60"
-        >
-          Upload your photo, choose your size &amp; finish — we print, frame and deliver it to your doorstep across the UAE.
-        </motion.p>
-
-        {/* Category filter pills */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-8 flex flex-wrap items-center justify-center gap-2"
-        >
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setActive(cat)}
-              className="rounded-full px-5 py-2 text-sm font-extrabold transition-all duration-300"
-              style={
-                active === cat
-                  ? { background: ACCENT, color: "#fff" }
-                  : { background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.65)" }
-              }
-            >
-              {cat}
-            </button>
-          ))}
-        </motion.div>
-      </section>
-
-      {/* ── Product grid ────────────────────────────────────────────────── */}
-      <section className="bg-[#fafafa] px-4 py-16">
-        <div className="mx-auto max-w-7xl">
-
-          {/* Count label */}
-          <Reveal className="mb-6 flex items-center justify-between">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-              {filtered.length} product{filtered.length !== 1 ? "s" : ""}
-              {active !== "All" ? ` · ${active}` : ""}
-            </p>
-          </Reveal>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22 }}
-              className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-            >
-              {filtered.map((p, i) => (
-                <ProductCard key={p.id} product={p} i={i} />
-              ))}
-            </motion.div>
-          </AnimatePresence>
+          BỘ SƯU TẬP
         </div>
-      </section>
 
-      {/* ── Bottom trust strip ──────────────────────────────────────────── */}
-      <section className="border-t border-slate-100 bg-white px-4 py-14">
-        <div className="mx-auto max-w-5xl">
-          <Reveal className="mb-8 text-center">
-            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>Why Us</p>
-            <h2 className="mt-2 text-2xl font-extrabold text-slate-900">Every Order, Made With Care</h2>
-          </Reveal>
-          <Reveal delay={0.1} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { icon: "🖼️", title: "Premium Quality", body: "Archival inks and solid timber frames." },
-              { icon: "🚚", title: "UAE-Wide Delivery", body: "Delivered to all 7 Emirates." },
-              { icon: "📦", title: "Safe Packaging", body: "Foam-padded, arrives perfect." },
-              { icon: "🔄", title: "Free Remakes", body: "Damaged? We'll remake it free." },
-            ].map(item => (
-              <div
-                key={item.title}
-                className="flex flex-col items-center rounded-3xl border border-slate-100 bg-[#fafafa]
-                           p-6 text-center transition-all duration-300 hover:border-[#FF633F]/30 hover:shadow-sm"
+        <div className="relative px-10 sm:px-16 lg:px-24 py-24">
+          <motion.div
+            initial={{ opacity: 0, x: -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex items-center gap-3 mb-6"
+          >
+            <div className="h-px w-8" style={{ background: M }} />
+            <span className="font-mono text-[10px] tracking-[0.25em] uppercase" style={{ color: M }}>
+              Bộ Sưu Tập 2025
+            </span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="font-extrabold tracking-tighter text-white leading-tight"
+            style={{ fontSize: "clamp(2.5rem, 6vw, 5.5rem)" }}
+          >
+            Chọn Điều Bạn<br />
+            Muốn{" "}
+            <span style={{ color: "transparent", WebkitTextStroke: `2px ${C}` }}>
+              Tạo Ra
+            </span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.38 }}
+            className="mt-6 max-w-lg text-sm leading-relaxed text-white/50"
+          >
+            Tải ảnh lên, chọn kích thước &amp; hoàn thiện — chúng tôi in, đóng khung và giao tận cửa khắp UAE.
+          </motion.p>
+
+          {/* Filter */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-10 flex flex-wrap gap-2"
+          >
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.key}
+                onClick={() => setActive(cat.key)}
+                className="px-5 py-2 text-xs font-bold uppercase tracking-widest transition-all duration-200"
+                style={{
+                  background: active === cat.key ? C : "rgba(255,255,255,0.06)",
+                  color:      active === cat.key ? "#0a0a0a" : "rgba(255,255,255,0.55)",
+                  borderRadius: 2,
+                  border: active === cat.key ? "none" : "1px solid rgba(255,255,255,0.08)",
+                }}
               >
-                <span className="text-3xl">{item.icon}</span>
-                <p className="mt-3 text-sm font-extrabold text-slate-900">{item.title}</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-500">{item.body}</p>
-              </div>
+                {cat.label}
+              </button>
             ))}
-          </Reveal>
+          </motion.div>
         </div>
+
+        <div className="h-px w-full" style={{ background: "rgba(255,255,255,0.06)" }} />
       </section>
+
+      {/* ── Đếm sản phẩm ───────────────────────────────────────────── */}
+      <div
+        className="w-full px-10 sm:px-16 lg:px-24 py-4 flex items-center justify-between bg-white"
+        style={{ borderBottom: "1px solid #f1f5f9" }}
+      >
+        <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-slate-400">
+          {filtered.length} tác phẩm
+          {active !== "All" ? ` · ${CATEGORIES.find(c => c.key === active)?.label}` : " · Tất cả"}
+        </span>
+        <div className="flex items-center gap-2">
+          <div className="h-1 w-1 rounded-full" style={{ background: C }} />
+          <div className="h-1 w-1 rounded-full" style={{ background: M }} />
+        </div>
+      </div>
+
+      {/* ── Product grid tràn viền ──────────────────────────────────── */}
+      <section className="w-full bg-white">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {filtered.map((p, i) => (
+              <ProductCard key={p.id} product={p} i={i} />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </section>
+
+      {/* ── Newsletter tràn viền ────────────────────────────────────── */}
+      <Newsletter />
     </div>
   );
 }

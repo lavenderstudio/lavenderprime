@@ -1,521 +1,295 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable react-hooks/static-components */
-// client/src/pages/EditorPrint&Frame.jsx
-
 import { useEffect, useMemo, useState } from "react";
 import api from "../lib/api.js";
 import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import Page from "../components/Page.jsx";
 import { getSessionId } from "../lib/session.js";
 import UploadWizardModal from "../components/UploadWizardModal.jsx";
 import FramePreview from "../components/FramePreview.jsx";
 import { FRAME_OPTIONS, MAT_OPTIONS } from "../lib/optionsUi.js";
 import { MAT_CM } from "../lib/matSizes.js";
+import ShinyText from "../components/reactbits/ShinyText.jsx";
 
-// ✅ Theme tokens
-import { ACCENT, ACCENT_BG, ACCENT_HOVER, Container } from "../components/home/ui.jsx";
+// ✅ Theme tinh chỉnh cho trải nghiệm Bảo tàng Tương lai
+const GOLD = "#D4AF37";
+const CYAN = "#00e5ff";
+const BORDER_GLASS = "rgba(255, 255, 255, 0.1)";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
 function parseCmSize(sizeStr) {
   if (!sizeStr) return null;
   const cleaned = sizeStr.toLowerCase().replace("cm", "").replace("×", "x").trim();
   const [w, h] = cleaned.split("x").map((n) => Number(n));
-  if (!Number.isFinite(w) || !Number.isFinite(h)) return null;
   return { w, h };
 }
 
-function totalWithMat(printW, printH, matCm) {
-  return { w: printW + matCm * 2, h: printH + matCm * 2 };
-}
-
 // ─── Sub-components ───────────────────────────────────────────────────────────
-
-function SectionLabel({ children }) {
+function MuseumLabel({ children, accent = CYAN }) {
   return (
-    <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
-      {children}
-    </p>
-  );
-}
-
-function SizePills({ variants, value, onChange }) {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {variants.map((v) => {
-        const active = v.sku === value;
-        return (
-          <button
-            key={v.sku}
-            type="button"
-            onClick={() => onChange(v.sku)}
-            className={`rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-200 active:scale-95
-              ${
-                active
-                  ? `${ACCENT_BG} text-white shadow-md shadow-[#FF633F]/25`
-                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-              }`}
-          >
-            {v.size}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function FrameTiles({ options, value, onChange }) {
-  return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-      {options.map((opt) => {
-        const active = opt.id === value;
-        return (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => onChange(opt.id)}
-            className={`group flex flex-col items-center gap-1.5 rounded-xl p-2 transition-all duration-200 active:scale-95
-              ${
-                active
-                  ? "ring-2 ring-[#FF633F] bg-[#FF633F]/8 border border-[#FF633F]/30"
-                  : "border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-              }`}
-          >
-            <div className="h-10 w-10 overflow-hidden rounded-full border border-slate-200 shadow-sm">
-              <img src={opt.img} alt={opt.id} className="h-full w-full object-cover" loading="lazy" />
-            </div>
-            <span className={`text-[9px] font-bold uppercase leading-tight tracking-wide text-center
-              ${active ? "text-[#FF633F]" : "text-slate-500"}`}>
-              {opt.id.replace(" Wood", "").replace(" Metal", "")}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function MatTiles({ options, value, onChange }) {
-  return (
-    <div className="grid grid-cols-4 gap-2">
-      {options.map((opt) => {
-        const active = opt.id === value;
-        const Icon = opt.Icon;
-        return (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => onChange(opt.id)}
-            className={`flex flex-col items-center gap-1.5 rounded-xl p-2 transition-all duration-200 active:scale-95
-              ${
-                active
-                  ? "ring-2 ring-[#FF633F] bg-[#FF633F]/8 border border-[#FF633F]/30"
-                  : "border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-              }`}
-          >
-            <div className="h-10 w-10">
-              <Icon />
-            </div>
-            <span className={`text-[9px] font-bold uppercase tracking-wide
-              ${active ? "text-[#FF633F]" : "text-slate-500"}`}>
-              {opt.id}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Upload Placeholder ───────────────────────────────────────────────────────
-
-function UploadPlaceholder({ onUpload }) {
-  return (
-    <button
-      type="button"
-      onClick={onUpload}
-      aria-label="Upload photo"
-      className="group relative flex w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center transition-all duration-200 hover:border-[#FF633F]/50 hover:bg-[#FF633F]/5 active:scale-[0.99]"
-    >
-      {/* Animated upload ring */}
-      <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg transition-transform duration-200 group-hover:scale-105">
-        <div className="absolute inset-0 rounded-full border-2 border-dashed border-[#FF633F]/30 animate-spin [animation-duration:8s]" />
-        <svg
-          className="h-8 w-8 text-[#FF633F]"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-          <polyline points="17 8 12 3 7 8" />
-          <line x1="12" y1="3" x2="12" y2="15" />
-        </svg>
-      </div>
-
-      <div>
-        <p className="text-base font-extrabold text-slate-900">Upload Your Photo</p>
-        <p className="mt-1 text-sm text-slate-500">Choose Ratio → Crop → Preview In Frame</p>
-      </div>
-
-      <span className="rounded-full bg-[#FF633F] px-5 py-2 text-sm font-bold text-white shadow-md shadow-[#FF633F]/30 transition-transform group-hover:scale-105">
-        Choose Photo
+    <div className="flex items-center gap-2 mb-4">
+      <div className="h-[1px] w-8" style={{ background: accent }} />
+      <span className="font-mono text-[10px] tracking-[0.4em] uppercase text-white/50">
+        {children}
       </span>
-    </button>
+    </div>
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+const RELATED_PRODUCTS = [
+  { name: "Fine Art Print", label: "Museum Grade", img: "/feature/12.avif", href: "/editor/fine-art-print", color: CYAN },
+  { name: "Canvas Pro", label: "Texture Focus", img: "/feature/8.avif", href: "/editor/canvas", color: GOLD },
+  { name: "Mini Frames", label: "Desktop Art", img: "/feature/3.avif", href: "/editor/mini-frames", color: "#e040fb" },
+];
 
-export default function EditorPrintPortrait() {
+export default function EditorPrintPortraitMuseum() {
   const navigate = useNavigate();
-
-  const [product, setProduct]       = useState(null);
+  const [product, setProduct] = useState(null);
   const [variantSku, setVariantSku] = useState("");
-  const [frame, setFrame]           = useState("Black Wood");
-  const [mat, setMat]               = useState("Classic");
-  const [quantity, setQuantity]     = useState(1);
+  const [frame, setFrame] = useState("Black Wood");
+  const [mat, setMat] = useState("Classic");
   const [originalUrl, setOriginalUrl] = useState("");
-  const [quote, setQuote]           = useState(null);
-  const [error, setError]           = useState("");
+  const [quote, setQuote] = useState(null);
   const [isUploadWizardOpen, setIsUploadWizardOpen] = useState(false);
   const [selectedRatio, setSelectedRatio] = useState(null);
 
   // Load product
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await api.get("/products/print-and-frame");
-        setProduct(res.data);
-        const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
-        if (firstPortrait) setVariantSku(firstPortrait.sku);
-      } catch (err) {
-        setError(err?.response?.data?.message || err.message);
-      }
-    };
-    load();
+    api.get("/products/print-and-frame").then((res) => {
+      setProduct(res.data);
+      const firstPortrait = res.data.variants.find((v) => v.orientation === "portrait");
+      if (firstPortrait) setVariantSku(firstPortrait.sku);
+    });
   }, []);
+
+  // Fetch quote
+  useEffect(() => {
+    if (variantSku) {
+      api.post("/pricing/quote", {
+        productSlug: "print-and-frame",
+        variantSku,
+        options: { frame, mat },
+        quantity: 1,
+      }).then(res => setQuote(res.data));
+    }
+  }, [variantSku, frame, mat]);
 
   const portraitVariants = useMemo(
     () => (product?.variants || []).filter((v) => v.orientation === "portrait"),
     [product]
   );
 
-  // Fetch quote
-  useEffect(() => {
-    const getQuote = async () => {
-      if (!variantSku) return;
-      try {
-        const res = await api.post("/pricing/quote", {
-          productSlug: "print-and-frame",
-          variantSku,
-          options: { frame, mat },
-          quantity,
-        });
-        setQuote(res.data);
-      } catch (err) {
-        setQuote(null);
-        setError(err?.response?.data?.message || err.message);
-      }
-    };
-    getQuote();
-  }, [variantSku, frame, mat, quantity]);
-
   const selectedVariant = portraitVariants.find((v) => v.sku === variantSku);
-  const matCm           = MAT_CM[mat] ?? 0;
-  const parsedPrint     = parseCmSize(selectedVariant?.size);
-  const totalSize       = parsedPrint ? totalWithMat(parsedPrint.w, parsedPrint.h, matCm) : null;
+  const parsedPrint = parseCmSize(selectedVariant?.size);
 
   const handleAddToCart = async () => {
-    try {
-      setError("");
-      if (!originalUrl || !quote || !selectedVariant || !selectedRatio) {
-        return setError("Missing image, ratio selection, or price.");
-      }
-      const sessionId = getSessionId();
-      await api.post("/cart/items", {
-        sessionId,
-        item: {
-          productSlug: "print-and-frame",
-          variantSku,
-          config: {
-            orientation: "portrait",
-            size: selectedVariant.size,
-            frame,
-            mat,
-            quantity,
-            transform: {
-              ratio: selectedRatio.id,
-              ratioW: selectedRatio.w,
-              ratioH: selectedRatio.h,
-            },
-          },
-          assets: { originalUrl, previewUrl: "" },
-          price: {
-            unit: quote.unit,
-            total: quote.total,
-            currency: quote.currency,
-          },
-        },
-      });
-      navigate("/cart");
-    } catch (err) {
-      setError(err?.response?.data?.message || err.message);
-    }
+    const sessionId = getSessionId();
+    await api.post("/cart/items", {
+      sessionId,
+      item: {
+        productSlug: "print-and-frame",
+        variantSku,
+        config: { orientation: "portrait", size: selectedVariant.size, frame, mat, transform: { ratio: selectedRatio.id } },
+        assets: { originalUrl, previewUrl: "" },
+        price: { unit: quote.unit, total: quote.total, currency: quote.currency },
+      },
+    });
+    navigate("/cart");
   };
 
-  const canOrder = !!(originalUrl && quote && selectedRatio);
-
   return (
-    <Page title="Editor — Print & Frame">
-      <Container className="px-0">
-        {/* ── Back link ── */}
-        <div className="px-4 pt-4">
-          <Link
-            to="/products"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 5l-7 7 7 7" />
-            </svg>
-            Products
+    <Page title="Bảo tàng Chế tác - Print & Frame">
+      <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden font-sans">
+        
+        {/* ✅ CSS HACK: LOẠI BỎ CHỮ "PREVIEW ONLY" TRONG TOÀN BỘ COMPONENT */}
+        <style>{`
+          div[class*="FramePreview"] p, 
+          div[class*="FramePreview"] span,
+          div[class*="MiniFramePreview"] p { 
+            display: none !important; 
+          }
+          .museum-shadow {
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7), 0 30px 60px -30px rgba(0,0,0,0.8);
+          }
+        `}</style>
+
+        {/* ── HEADER ── */}
+        <header className="relative z-20 pt-20 px-10 lg:px-24 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <MuseumLabel accent={GOLD}>Curated Exhibition</MuseumLabel>
+            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85]">
+              PRINT &<br />
+              <span style={{ color: "transparent", WebkitTextStroke: `1px ${CYAN}` }}>FRAME</span>
+            </h1>
+          </motion.div>
+          <Link to="/products" className="mb-4 text-xs font-bold tracking-[0.2em] uppercase text-white/30 hover:text-white transition-colors">
+            [ Quay lại bộ sưu tập ]
           </Link>
-        </div>
+        </header>
 
-        {/* ── Error banner ── */}
-        {error && (
-          <div className="mx-4 mt-3 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            <svg className="h-4 w-4 shrink-0 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            {error}
-          </div>
-        )}
+        {/* ── MAIN VIEWPORT (Tràn viền) ── */}
+        <main className="grid lg:grid-cols-12 w-full mt-16 border-y border-white/5">
+          
+          {/* TRÁI: KHÔNG GIAN TRIỂN LÃM */}
+          <div className="lg:col-span-7 bg-[#080808] relative min-h-[700px] flex items-center justify-center p-12 lg:p-24 overflow-hidden border-r border-white/5">
+            {/* Background Decor */}
+            <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" 
+                 style={{ background: `radial-gradient(circle at 50% 50%, #1a1a1a 0%, transparent 80%)` }} />
+            <div className="absolute top-10 left-10 text-[180px] font-black text-white/[0.02] select-none uppercase">Studio</div>
 
-        {/* ── Page Title ── */}
-        <div className="px-4 pt-4 pb-2">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
-            Print &amp; Frame
-          </h1>
-          <p className="mt-0.5 text-sm text-slate-500">
-            Upload a photo, choose your style, and get it delivered.
-          </p>
-        </div>
-
-        {/* ── Loading skeleton ── */}
-        {!product ? (
-          <div className="mx-4 mt-2 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm animate-pulse">
-            <div className="h-4 w-32 rounded bg-slate-200 mb-3" />
-            <div className="h-48 w-full rounded-2xl bg-slate-100" />
-          </div>
-        ) : (
-          <div className="mt-2 flex flex-col gap-0 lg:grid lg:grid-cols-12 lg:gap-6 lg:px-4 lg:pb-8">
-
-            {/* ════════════════════════════════════════
-                LEFT: Preview Panel
-            ════════════════════════════════════════ */}
-            <div className="lg:col-span-7">
-              <div className="sticky top-20 overflow-hidden rounded-none lg:rounded-3xl border-0 border-b border-slate-200 lg:border bg-white shadow-sm">
-
-                {/* Header bar */}
-                <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2.5 w-2.5 rounded-full bg-[#FF633F] shadow-sm shadow-[#FF633F]/50" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Live Preview</span>
+            <AnimatePresence mode="wait">
+              {!originalUrl ? (
+                <motion.div 
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="relative z-10 w-full max-w-md group cursor-pointer"
+                  onClick={() => setIsUploadWizardOpen(true)}
+                >
+                  <div className="aspect-[3/4] border border-white/10 bg-white/[0.02] backdrop-blur-3xl flex flex-col items-center justify-center transition-all group-hover:border-cyan-500/50">
+                    <div className="w-16 h-16 border border-white/20 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <span className="text-2xl font-light text-white/40">+</span>
+                    </div>
+                    <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-white/40">Thêm kiệt tác của bạn</span>
                   </div>
-                  {originalUrl && (
-                    <button
-                      onClick={() => setIsUploadWizardOpen(true)}
-                      className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all active:scale-95"
+                </motion.div>
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                  className="relative z-10 museum-shadow transition-transform duration-1000 hover:scale-[1.02]"
+                >
+                  <FramePreview
+                    imageUrl={originalUrl}
+                    frame={frame}
+                    mat={mat}
+                    maxWidthClass="max-w-[85vh]"
+                  />
+                  {/* Ánh sáng đèn Spotlight giả lập bảo tàng */}
+                  <div className="absolute -top-20 inset-x-0 h-40 bg-gradient-to-b from-white/10 to-transparent blur-3xl pointer-events-none" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* PHẢI: BẢNG ĐIỀU KHIỂN CÔNG NGHỆ */}
+          <div className="lg:col-span-5 bg-[#050505] p-10 lg:p-20 flex flex-col">
+            <div className="flex-1 space-y-16">
+              
+              {/* Size Select */}
+              <section>
+                <MuseumLabel>01. Cấu hình kích thước</MuseumLabel>
+                <div className="flex flex-wrap gap-3">
+                  {portraitVariants.map((v) => (
+                    <button key={v.sku} onClick={() => setVariantSku(v.sku)}
+                      className={`px-6 py-4 text-[11px] font-bold tracking-widest uppercase transition-all border
+                        ${variantSku === v.sku ? 'bg-white text-black border-white' : 'border-white/10 text-white/40 hover:border-white/30'}`}
                     >
-                      ↺ Change Photo
+                      {v.size}
                     </button>
-                  )}
+                  ))}
                 </div>
+              </section>
 
-                {/* Preview content */}
-                <div className="px-5 pb-5">
-                  {!originalUrl ? (
-                    <div className="rounded-2xl bg-slate-50 p-4">
-                      <UploadPlaceholder onUpload={() => setIsUploadWizardOpen(true)} />
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <FramePreview
-                        imageUrl={originalUrl}
-                        frame={frame}
-                        mat={mat}
-                        maxWidthClass="max-w-full"
-                        className="rounded-2xl"
-                      />
-                    </div>
-                  )}
+              {/* Frame Select */}
+              <section>
+                <MuseumLabel>02. Vật liệu khung</MuseumLabel>
+                <div className="grid grid-cols-3 gap-4">
+                  {FRAME_OPTIONS.map((opt) => (
+                    <button key={opt.id} onClick={() => setFrame(opt.id)}
+                      className={`group relative p-4 border transition-all ${frame === opt.id ? 'border-cyan-400 bg-cyan-400/5' : 'border-white/5 bg-white/[0.02] opacity-40 hover:opacity-100'}`}
+                    >
+                      <img src={opt.img} className="w-10 h-10 rounded-full mx-auto mb-3 object-cover grayscale group-hover:grayscale-0 transition-all" alt="" />
+                      <div className="text-[9px] font-black uppercase tracking-tighter text-center">{opt.id}</div>
+                      {frame === opt.id && <div className="absolute top-0 right-0 w-2 h-2 bg-cyan-400" />}
+                    </button>
+                  ))}
                 </div>
+              </section>
 
-                {/* Size + ratio badge strip */}
-                {originalUrl && (
-                  <div className="flex items-center gap-3 border-t border-slate-100 px-5 py-3 flex-wrap">
-                    {selectedRatio && (
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                        Ratio: {selectedRatio.id}
-                      </span>
-                    )}
-                    {parsedPrint && (
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                        Print: {parsedPrint.w}×{parsedPrint.h}cm
-                      </span>
-                    )}
-                    {totalSize && (
-                      <span className="rounded-full bg-[#FF633F]/10 px-3 py-1 text-xs font-bold text-[#FF633F]">
-                        Frame: {totalSize.w}×{totalSize.h}cm
-                      </span>
-                    )}
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 capitalize">
-                      {frame}
-                    </span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
-                      Mat: {mat}
-                    </span>
-                  </div>
-                )}
-              </div>
+              {/* Mat Select */}
+              <section>
+                <MuseumLabel>03. Lớp nền nghệ thuật (Mat)</MuseumLabel>
+                <div className="grid grid-cols-4 gap-2">
+                  {MAT_OPTIONS.map((opt) => (
+                    <button key={opt.id} onClick={() => setMat(opt.id)}
+                      className={`py-3 border text-[9px] font-bold uppercase tracking-widest transition-all
+                        ${mat === opt.id ? 'border-white bg-white text-black' : 'border-white/10 text-white/30 hover:text-white'}`}
+                    >
+                      {opt.id}
+                    </button>
+                  ))}
+                </div>
+              </section>
             </div>
 
-            {/* ════════════════════════════════════════
-                RIGHT: Options Panel
-            ════════════════════════════════════════ */}
-            <div className="lg:col-span-5">
-              <div className="flex flex-col gap-0">
-
-                {/* Price + title strip */}
-                <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 lg:rounded-t-3xl lg:border lg:border-b-0">
-                  <div>
-                    <h2 className="text-lg font-extrabold text-slate-900">Customise</h2>
-                    <p className="text-xs text-slate-500">Pick size, frame &amp; mat</p>
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-2xl font-black ${quote ? "text-slate-900" : "text-slate-300"}`}>
-                      {quote ? `${quote.total}` : "—"}
-                    </div>
-                    {quote && (
-                      <div className="text-xs font-semibold text-slate-400">{quote.currency} · per piece</div>
-                    )}
+            {/* Price & Action */}
+            <div className="mt-20 pt-10 border-t border-white/10">
+              <div className="flex items-end justify-between mb-10">
+                <div>
+                  <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-2">Giá chế tác</p>
+                  <div className="text-4xl font-light tracking-tighter">
+                    {quote ? `${quote.total.toLocaleString()} ${quote.currency}` : "---"}
                   </div>
                 </div>
-
-                {/* Options cards */}
-                <div className="divide-y divide-slate-100 border border-t-0 border-slate-200 bg-white lg:rounded-b-3xl overflow-hidden">
-
-                  {/* ─ Size ─ */}
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Print Size</SectionLabel>
-                      {parsedPrint && (
-                        <span className="text-xs font-semibold text-slate-400">
-                          {parsedPrint.w}×{parsedPrint.h}cm
-                        </span>
-                      )}
-                    </div>
-                    <SizePills
-                      variants={portraitVariants}
-                      value={variantSku}
-                      onChange={setVariantSku}
-                    />
-                    {totalSize && (
-                      <p className="mt-2 text-xs text-slate-400">
-                        Total With Mat: <b className="text-slate-600">{totalSize.w}×{totalSize.h}cm</b>
-                      </p>
-                    )}
-                  </div>
-
-                  {/* ─ Frame ─ */}
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Frame Style</SectionLabel>
-                      <span className={`text-xs font-bold ${ACCENT}`}>{frame}</span>
-                    </div>
-                    <FrameTiles options={FRAME_OPTIONS} value={frame} onChange={setFrame} />
-                  </div>
-
-                  {/* ─ Mat ─ */}
-                  <div className="px-5 py-4">
-                    <div className="flex items-baseline justify-between mb-3">
-                      <SectionLabel>Mat Border</SectionLabel>
-                      <button
-                        type="button"
-                        className="text-[10px] font-bold text-slate-400 underline underline-offset-2 hover:text-slate-600 transition-colors"
-                        onClick={() =>
-                          alert(
-                            "A Mat Is The Decorative Card Border Placed Around Your Photo Inside The Frame."
-                          )
-                        }
-                      >
-                        What's This?
-                      </button>
-                    </div>
-                    <MatTiles options={MAT_OPTIONS} value={mat} onChange={setMat} />
-                    <p className="mt-2 text-xs text-slate-400">
-                      Selected: <b className="text-slate-600">{mat}</b>
-                      {matCm > 0 && <> &nbsp;·&nbsp; {matCm}cm Border</>}
-                    </p>
-                  </div>
-
-                  {/* ─ Order Summary ─ */}
-                  <div className="bg-slate-50 px-5 py-4">
-                    <SectionLabel>Order Summary</SectionLabel>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                      {[
-                        ["Size", selectedVariant?.size || "—"],
-                        ["Frame", frame],
-                        ["Mat", `${mat}${matCm > 0 ? ` (${matCm}cm)` : ""}`],
-                        ["Total", quote ? `${quote.total} ${quote.currency}` : "—"],
-                      ].map(([label, val]) => (
-                        <div key={label} className="flex items-baseline justify-between col-span-2 sm:col-span-1">
-                          <span className="font-semibold text-slate-400">{label}</span>
-                          <span className="font-bold text-slate-700">{val}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* ─ CTA ─ */}
-                <div className="sticky bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur-sm px-5 py-4 lg:static lg:bg-transparent lg:border-0 lg:px-0 lg:pb-0 lg:pt-4">
-                  {!originalUrl && (
-                    <p className="mb-3 flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-700">
-                      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                      </svg>
-                      Upload A Photo Above To Continue
-                    </p>
-                  )}
-
-                  <button
-                    disabled={!canOrder}
-                    onClick={handleAddToCart}
-                    className={`w-full rounded-2xl py-3.5 text-sm font-extrabold tracking-wide shadow-sm transition-all duration-300 active:scale-[0.98]
-                      ${
-                        canOrder
-                          ? `${ACCENT_BG} ${ACCENT_HOVER} text-white shadow-lg shadow-[#FF633F]/30 hover:scale-[1.01]`
-                          : "cursor-not-allowed bg-slate-100 text-slate-400"
-                      }`}
-                  >
-                    {canOrder ? `Add To Cart · ${quote?.total ?? ""} ${quote?.currency ?? ""}` : "Add To Cart"}
-                  </button>
-
-                  <p className="mt-2 text-center text-[10px] font-semibold text-slate-400">
-                    🔒 Secure Checkout &nbsp;·&nbsp; Premium Packaging &nbsp;·&nbsp; Doorstep Delivery
-                  </p>
+                <div className="text-right">
+                    <p className="text-[10px] text-white/30 uppercase tracking-[0.2em]">Kích thước in</p>
+                    <p className="font-mono text-cyan-400">{parsedPrint?.w} × {parsedPrint?.h} CM</p>
                 </div>
               </div>
+
+              <button 
+                disabled={!originalUrl || !quote} 
+                onClick={handleAddToCart}
+                className="w-full py-6 relative overflow-hidden group disabled:opacity-20"
+              >
+                <div className="absolute inset-0 bg-white transition-transform duration-500 group-hover:translate-y-[-100%]" />
+                <div className="absolute inset-0 bg-cyan-500 translate-y-[100%] transition-transform duration-500 group-hover:translate-y-0" />
+                <span className="relative z-10 text-black text-[11px] font-black uppercase tracking-[0.4em] transition-colors duration-500 group-hover:text-white">
+                  <ShinyText text="Đưa vào bộ sưu tập →" speed={3} />
+                </span>
+              </button>
             </div>
           </div>
-        )}
+        </main>
+
+        {/* ── CHẾ TÁC THỦ CÔNG SECTION ── */}
+        <section className="py-40 px-10 lg:px-24 bg-[#0a0a0a] border-b border-white/5">
+           <div className="max-w-4xl">
+              <MuseumLabel accent={GOLD}>Artisan Standard</MuseumLabel>
+              <h2 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-10">
+                Lưu giữ <span className="text-cyan-400">linh hồn</span> của bức ảnh trong từng thớ gỗ.
+              </h2>
+              <p className="text-white/40 text-xl font-light leading-relaxed max-w-2xl">
+                Không chỉ đơn thuần là in ấn, chúng tôi tạo ra những vật phẩm trưng bày đẳng cấp bảo tàng. 
+                Sử dụng mực in Pigment 12 màu và khung gỗ sồi nhập khẩu, mỗi tác phẩm là một di sản bền vững 100 năm.
+              </p>
+           </div>
+        </section>
+
+        {/* ── RELATED PRODUCTS (Impressive Labels) ── */}
+        <section className="w-full grid grid-cols-1 md:grid-cols-3">
+          {RELATED_PRODUCTS.map((item, i) => (
+            <Link key={i} to={item.href} className="group relative h-[600px] overflow-hidden border-r border-white/5 last:border-0">
+              <img src={item.img} className="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" alt="" />
+              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/20 transition-all duration-700" />
+              
+              {/* Nhãn gây ấn tượng */}
+              <div className="absolute top-10 left-10 overflow-hidden">
+                <motion.div initial={{ x: -100 }} whileInView={{ x: 0 }} className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full" style={{ background: item.color }} />
+                  <span className="font-mono text-[10px] tracking-[0.3em] uppercase">{item.label}</span>
+                </motion.div>
+              </div>
+
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-10">
+                <h3 className="text-4xl font-black tracking-tighter uppercase mb-2 transform transition-transform group-hover:scale-110 duration-500">{item.name}</h3>
+                <div className="w-0 h-[1px] group-hover:w-20 transition-all duration-700" style={{ background: item.color }} />
+              </div>
+
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                <span className="text-[9px] font-bold tracking-[0.5em] uppercase">[ Khám phá ]</span>
+              </div>
+            </Link>
+          ))}
+        </section>
 
         <UploadWizardModal
           isOpen={isUploadWizardOpen}
@@ -523,9 +297,10 @@ export default function EditorPrintPortrait() {
           onComplete={({ ratio, imageUrl }) => {
             setSelectedRatio(ratio);
             setOriginalUrl(imageUrl);
+            setIsUploadWizardOpen(false);
           }}
         />
-      </Container>
+      </div>
     </Page>
   );
 }
