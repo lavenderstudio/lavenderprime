@@ -4,34 +4,32 @@ import tailwindcss from "@tailwindcss/vite";
 import mongoose from "mongoose";
 
 export default defineConfig(async () => {
-    const fetchProductRoutes = async () => {
+    const fetchFullProductData = async () => {
         const MONGODB_URI = "mongodb://mongo:bsuJNsALhobbvwKMyYUpDAqjBLKmIVmm@mongodb.railway.internal:27017";
-        
         try {
-            console.log("📡 [Lavender Prime] Kết nối MongoDB lấy danh sách Editor SEO...");
+            console.log("📡 [Lavender Prime] Đang kết nối MongoDB nội bộ...");
             await mongoose.connect(MONGODB_URI, { dbName: 'test' }); 
-            
             const Product = mongoose.connection.collection('products');
-            const products = await Product.find({}, { projection: { _id: 1 } }).toArray();
             
+            // Lấy TẤT CẢ dữ liệu để phục vụ việc render HTML tĩnh
+            const products = await Product.find({}).toArray();
             await mongoose.disconnect();
-            
-            // ✅ ĐÃ SỬA: Khớp với cấu trúc /editor/ của bạn
-            // Nếu các trang sản phẩm của bạn có dạng /editor/[ID], hãy dùng dòng này:
-            const routes = products.map(p => `/editor/${p._id.toString()}`);
-            
-            // Bổ sung các trang tĩnh quan trọng khác của bạn
-            const staticRoutes = ['/editor/multiple-prints']; 
-            
-            console.log(`✅ [Lavender Prime] Đã sẵn sàng tạo ${routes.length} trang Editor tĩnh.`);
-            return [...staticRoutes, ...routes];
+
+            // Chuyển đổi dữ liệu sang dạng Route có kèm dữ liệu tranh
+            const dynamicRoutes = products.map(p => ({
+                route: `/editor/${p._id.toString()}`,
+                data: p // Bơm dữ liệu bức tranh vào đây
+            }));
+
+            console.log(`✅ [Lavender Prime] Đã sẵn sàng đúc ${dynamicRoutes.length} file HTML SEO.`);
+            return dynamicRoutes;
         } catch (err) {
-            console.error("❌ [Lavender Prime] Lỗi:", err);
-            return ['/editor/multiple-prints'];
+            console.error("❌ [Lavender Prime] Lỗi kết nối:", err);
+            return [];
         }
     };
 
-    const dynamicRoutes = await fetchProductRoutes();
+    const productRoutes = await fetchFullProductData();
 
     return {
         plugins: [react(), tailwindcss()],
@@ -39,7 +37,22 @@ export default defineConfig(async () => {
             script: 'async',
             formatting: 'minify',
             async includedRoutes(paths) {
-                return [...paths, ...dynamicRoutes];
+                // Chỉ lấy phần 'route' để tạo danh sách file .html
+                const staticPaths = ['/editor/multiple-prints'];
+                const dynamicPaths = productRoutes.map(r => r.route);
+                return [...paths, ...staticPaths, ...dynamicPaths];
+            },
+            // Ma thuật ở đây: Truyền dữ liệu vào từng trang khi render
+            onBeforePageRender(route, indexHtml, appCtx) {
+                const found = productRoutes.find(r => r.route === route);
+                if (found) {
+                    // Bơm dữ liệu vào biến toàn cục để React "nhặt" được ngay
+                    return indexHtml.replace(
+                        '<head>',
+                        `<head><script>window.__INITIAL_DATA__ = ${JSON.stringify(found.data)}</script>`
+                    );
+                }
+                return indexHtml;
             }
         }
     };
