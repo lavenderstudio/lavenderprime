@@ -826,7 +826,7 @@ function BlogSection() {
               className="font-extrabold tracking-tighter text-slate-900"
               style={{ fontSize: "clamp(1.8rem, 3.5vw, 3rem)" }}
             >
-              Mẹo · Hướng Dẫn · Cập Nhật
+              Nhật Ký
             </h2>
           </div>
           {!loading && blogs.length > 0 && (
