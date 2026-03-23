@@ -2,19 +2,18 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
-import { 
-  ArrowLeft, 
-  Clock, 
-  Share2, 
+import {
+  ArrowLeft,
+  Clock,
+  Share2,
   Bookmark,
   ChevronRight,
   Fingerprint // Biểu tượng mang tính "Identity"
 } from "lucide-react";
 import api from "../lib/api.js";
 
-// Import các component từ thư viện reactbits (giả định bạn đã có hoặc tương tự)
-// Nếu chưa có, có thể thay bằng motion.div đơn giản
-import ShinyText from "../components/ShinyText"; 
+// Xóa import ShinyText vì component không tồn tại → tránh lỗi build
+// import ShinyText from "../components/ShinyText";
 
 const CYAN = "#00ffff";
 const MAGENTA = "#ff00ff";
@@ -23,15 +22,18 @@ export default function BlogPostPage() {
   const { slug } = useParams();
   const [loading, setLoading] = useState(true);
   const [blog, setBlog] = useState(null);
-  
+
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
   const yImage = useTransform(scrollYProgress, [0, 1], [0, 200]);
 
   useEffect(() => {
-    // Logic fetch API giữ nguyên như cũ
+    // Logic fetch API giữ nguyên như cũ (bạn có thể thêm fetch blog ở đây nếu chưa có)
+    // Ví dụ: api.get(`/blogs/${slug}`).then(res => { setBlog(res.data); setLoading(false); })
     // ... (fetch logic)
     window.scrollTo(0, 0);
+    // Giả sử setLoading(false) sau khi fetch xong
+    setTimeout(() => setLoading(false), 1000); // tạm thời để test, thay bằng fetch thật
   }, [slug]);
 
   if (loading) return <div className="min-h-screen bg-white" />;
@@ -61,29 +63,28 @@ export default function BlogPostPage() {
       <header className="relative overflow-hidden pt-40 pb-20 md:pt-56 md:pb-32">
         <div className="mx-auto max-w-[1400px] px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            
             {/* Cột trái: Metadata kiểu Technical */}
             <div className="lg:col-span-3 flex flex-col justify-end border-l border-slate-200 pl-6 order-2 lg:order-1">
-               <div className="space-y-8">
-                  <div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Author_ID</p>
-                    <p className="text-sm font-bold uppercase">{blog?.author?.fullName || "Editorial"}</p>
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Reading_Time</p>
-                    <p className="text-sm font-bold uppercase flex items-center gap-2">
-                       <Clock size={14} style={{color: CYAN}} /> 08 Min
-                    </p>
-                  </div>
-                  <div className="pt-8">
-                    <Fingerprint size={40} strokeWidth={1} className="text-slate-200" />
-                  </div>
-               </div>
+              <div className="space-y-8">
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Author_ID</p>
+                  <p className="text-sm font-bold uppercase">{blog?.author?.fullName || "Editorial"}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Reading_Time</p>
+                  <p className="text-sm font-bold uppercase flex items-center gap-2">
+                    <Clock size={14} style={{ color: CYAN }} /> 08 Min
+                  </p>
+                </div>
+                <div className="pt-8">
+                  <Fingerprint size={40} strokeWidth={1} className="text-slate-200" />
+                </div>
+              </div>
             </div>
 
             {/* Cột phải: Tiêu đề cực đại (Brutalism) */}
             <div className="lg:col-span-9 order-1 lg:order-2">
-              <motion.h1 
+              <motion.h1
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 className="text-[12vw] md:text-[8vw] font-black leading-[0.85] tracking-tighter text-[#1a1a1a] uppercase italic"
@@ -94,7 +95,7 @@ export default function BlogPostPage() {
                   </span>
                 ))}
               </motion.h1>
-              
+
               <style jsx>{`
                 .text-stroke-custom {
                   -webkit-text-stroke: 1.5px #1a1a1a;
@@ -115,37 +116,35 @@ export default function BlogPostPage() {
           alt="Cover"
         />
         <div className="absolute bottom-10 left-10 right-10 flex justify-between items-end text-white">
-           <div className="max-w-md italic text-lg font-light opacity-80">
-              "{blog?.excerpt}"
-           </div>
-           <div className="hidden md:block h-32 w-[1px] bg-gradient-to-t from-[#ff00ff] to-transparent" />
+          <div className="max-w-md italic text-lg font-light opacity-80">
+            "{blog?.excerpt}"
+          </div>
+          <div className="hidden md:block h-32 w-[1px] bg-gradient-to-t from-[#ff00ff] to-transparent" />
         </div>
       </section>
 
       {/* 5. Main Content - Bố cục lệch tâm (Off-grid) */}
       <main className="mx-auto max-w-7xl px-6 py-32 grid grid-cols-1 lg:grid-cols-12 gap-12">
-        
         {/* Sidebar công cụ bên trái */}
         <aside className="lg:col-span-1 flex lg:flex-col gap-4 sticky top-32 h-fit">
-           <button className="h-12 w-12 flex items-center justify-center rounded-none border border-slate-200 hover:bg-black hover:text-white transition-colors">
-              <Share2 size={18} />
-           </button>
-           <button className="h-12 w-12 flex items-center justify-center rounded-none border border-slate-200 hover:bg-[#ff00ff] hover:text-white transition-colors">
-              <Bookmark size={18} />
-           </button>
+          <button className="h-12 w-12 flex items-center justify-center rounded-none border border-slate-200 hover:bg-black hover:text-white transition-colors">
+            <Share2 size={18} />
+          </button>
+          <button className="h-12 w-12 flex items-center justify-center rounded-none border border-slate-200 hover:bg-[#ff00ff] hover:text-white transition-colors">
+            <Bookmark size={18} />
+          </button>
         </aside>
 
         {/* Nội dung chính bài viết */}
         <article className="lg:col-span-8 lg:col-start-3">
-          <div 
-            className="prose prose-xl prose-slate max-w-none 
+          <div
+            className="prose prose-xl prose-slate max-w-none
               prose-p:font-light prose-p:leading-[2] prose-p:text-slate-700
               prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tighter
               prose-blockquote:border-l-4 prose-blockquote:border-[#00ffff] prose-blockquote:italic
               prose-img:shadow-[40px_40px_0px_0px_rgba(0,255,255,0.1)] prose-img:border prose-img:border-slate-100"
             dangerouslySetInnerHTML={{ __html: blog?.content }}
           />
-
           {/* Tags mang phong cách nhãn mác vật lý */}
           <div className="mt-20 flex flex-wrap gap-2">
             {blog?.tags?.map(tag => (
@@ -159,18 +158,18 @@ export default function BlogPostPage() {
 
       {/* 6. Footer "Next Article" - Giống Section trang chủ */}
       <section className="bg-black py-40 text-white relative overflow-hidden">
-         <div className="mx-auto max-w-7xl px-6 relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#ff00ff] mb-4">Continue Reading</p>
-            <Link to="#" className="group">
-               <h2 className="text-5xl md:text-8xl font-black uppercase leading-none tracking-tighter transition-all group-hover:italic group-hover:text-[#00ffff]">
-                  Nghệ thuật chạm khắc vàng ta <ChevronRight className="inline h-16 w-16" strokeWidth={3} />
-               </h2>
-            </Link>
-         </div>
-         {/* Decor nền */}
-         <div className="absolute top-1/2 left-0 -translate-y-1/2 text-[30vw] font-black text-white/5 whitespace-nowrap pointer-events-none">
-            NEXT STORY
-         </div>
+        <div className="mx-auto max-w-7xl px-6 relative z-10">
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-[#ff00ff] mb-4">Continue Reading</p>
+          <Link to="#" className="group">
+            <h2 className="text-5xl md:text-8xl font-black uppercase leading-none tracking-tighter transition-all group-hover:italic group-hover:text-[#00ffff]">
+              Nghệ thuật chạm khắc vàng ta <ChevronRight className="inline h-16 w-16" strokeWidth={3} />
+            </h2>
+          </Link>
+        </div>
+        {/* Decor nền */}
+        <div className="absolute top-1/2 left-0 -translate-y-1/2 text-[30vw] font-black text-white/5 whitespace-nowrap pointer-events-none">
+          NEXT STORY
+        </div>
       </section>
     </div>
   );
