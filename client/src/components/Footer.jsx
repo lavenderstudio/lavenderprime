@@ -1,13 +1,9 @@
 // client/src/components/Footer.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Modern dark footer — logo, navigation columns, social links, bottom bar.
-// All existing links and contact info preserved.
-// ─────────────────────────────────────────────────────────────────────────────
 
 import { Link } from "react-router-dom";
 
-const ACCENT = "#FF633F";
-
+const C = "#00e5ff";
+const M = "#e040fb";
 const WHATSAPP = "971522640871";
 
 const socials = [
@@ -42,124 +38,157 @@ const socials = [
   },
 ];
 
-function FooterLink({ to, children }) {
-  return (
-    <li>
-      <Link
-        to={to}
-        className="group inline-flex items-center gap-1.5 text-sm text-white/50 transition-colors duration-200 hover:text-white"
-      >
-        <span
-          className="h-0.5 w-0 rounded-full bg-[#FF633F] transition-all duration-300 group-hover:w-3"
-        />
-        {children}
-      </Link>
-    </li>
-  );
+// ── FooterLink — không có span, tiêu đề và link thẳng hàng ───────────────────
+function FooterLink({ to, children, href }) {
+  const cls = "block text-sm text-white/40 transition-colors duration-200 hover:text-white py-1";
+  if (href) {
+    return <li><a href={href} target="_blank" rel="noreferrer" className={cls}>{children}</a></li>;
+  }
+  return <li><Link to={to} className={cls}>{children}</Link></li>;
 }
 
 export default function Footer() {
   return (
-    <footer className="border-t border-white/5 bg-slate-950 text-white">
-      <div className="mx-auto max-w-6xl px-4">
+    <footer
+      className="w-full text-white"
+      style={{
+        background: "#0d0d10",
+        borderTop:  "1px solid rgba(255,255,255,0.06)",
+        fontFamily: "'Nunito', sans-serif",
+      }}
+    >
+      {/* Đường accent top cyan→magenta */}
+      <div
+        className="h-[2px] w-full"
+        style={{ background: `linear-gradient(90deg, ${C} 0%, ${M} 100%)` }}
+      />
 
-        {/* ── Main grid ───────────────────────────────────────────── */}
-        <div className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+      {/* ── Main grid — vạch kẻ đứng, không có borderBottom ─────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 
-          {/* Brand column */}
-          <div className="lg:col-span-1">
-            {/* Logo */}
-            <Link to="/" className="inline-block">
-              <img
-                src="/logo.png"
-                alt="Golden Art Frames"
-                className="h-12 w-auto object-contain"
-                style={{ filter: "brightness(0) invert(1)" }}
-              />
-            </Link>
+        {/* Cột 1 — Thương hiệu */}
+        <div
+          className="flex flex-col px-8 py-12 lg:px-10"
+          style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <Link to="/" className="inline-block mb-6">
+            <img
+              src="/logo.png"
+              alt="Golden Art Frames"
+              className="h-11 w-auto object-contain"
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+          </Link>
 
-            <p className="mt-5 max-w-xs text-sm leading-7 text-white/40">
-              Premium custom prints, frames, and canvas art crafted with care — designed to elevate
-              your space with timeless elegance.
-            </p>
+          <p className="text-sm leading-7 text-white/35 flex-1">
+            Bản in, khung và canvas nghệ thuật tùy chỉnh cao cấp — được chế tác tỉ mỉ để nâng tầm
+            không gian sống của bạn với vẻ đẹp vượt thời gian.
+          </p>
 
-            {/* Social row */}
-            <div className="mt-6 flex items-center gap-2">
-              {socials.map(({ label, href, icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={label}
-                  className="group flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/50 transition-all duration-200 hover:border-[#FF633F]/40 hover:bg-[#FF633F]/10 hover:text-[#FF633F]"
-                >
-                  {icon}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Shop */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-white/30">Shop</h4>
-            <ul className="mt-5 space-y-3">
-              <FooterLink to="/products">All Products</FooterLink>
-              <FooterLink to="/editor/print-frame">Print &amp; Frame</FooterLink>
-              <FooterLink to="/editor/canvas">Canvas Prints</FooterLink>
-              <FooterLink to="/cart">Cart</FooterLink>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-white/30">Support</h4>
-            <ul className="mt-5 space-y-3">
-              <FooterLink to="/account">My Account</FooterLink>
-              <FooterLink to="/orders">My Orders</FooterLink>
-              <FooterLink to="/delivery">Delivery Info</FooterLink>
-              <FooterLink to="/contact">Contact Us</FooterLink>
-              <FooterLink to="/about">About Us</FooterLink>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-white/30">Contact</h4>
-            <ul className="mt-5 space-y-4 text-sm leading-6 text-white/40">
-              <li>
-                1103-Al Ghanem Business Building,
-                <br />Al-Majaz-3, Sharjah,
-                <br />United Arab Emirates
-              </li>
-              <li>
-                <a
-                  href="mailto:info@goldenartframe.com"
-                  className="transition-colors hover:text-white"
-                >
-                  info@goldenartframe.com
-                </a>
-              </li>
-              <li>
-                <a
-                  href="tel:+971522640871"
-                  className="transition-colors hover:text-white"
-                >
-                  +971 52 264 0871
-                </a>
-              </li>
-            </ul>
+          <div className="mt-8 flex items-center gap-2">
+            {socials.map(({ label, href, icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={label}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/40 transition-all duration-200"
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = C;
+                  e.currentTarget.style.background  = `${C}18`;
+                  e.currentTarget.style.color       = C;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.10)";
+                  e.currentTarget.style.background  = "rgba(255,255,255,0.05)";
+                  e.currentTarget.style.color       = "rgba(255,255,255,0.40)";
+                }}
+              >
+                {icon}
+              </a>
+            ))}
           </div>
         </div>
 
-        {/* ── Bottom bar ───────────────────────────────────────────── */}
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-white/5 py-6 sm:flex-row">
-          <p className="text-xs text-white/25">
+        {/* Cột 2 — Cửa hàng */}
+        <div
+          className="flex flex-col px-8 py-12 lg:px-10"
+          style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <h4 className="text-sm font-bold mb-5" style={{ color: C }}>
+            Cửa hàng
+          </h4>
+          <ul className="space-y-1">
+            <FooterLink to="/products">Tất cả sản phẩm</FooterLink>
+            <FooterLink to="/editor/print-frame">In &amp; đóng khung</FooterLink>
+            <FooterLink to="/editor/canvas">In canvas</FooterLink>
+            <FooterLink to="/editor/fine-art-print">In nghệ thuật</FooterLink>
+            <FooterLink to="/cart">Giỏ hàng</FooterLink>
+          </ul>
+        </div>
+
+        {/* Cột 3 — Hỗ trợ */}
+        <div
+          className="flex flex-col px-8 py-12 lg:px-10"
+          style={{ borderRight: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <h4 className="text-sm font-bold mb-5" style={{ color: C }}>
+            Hỗ trợ
+          </h4>
+          <ul className="space-y-1">
+            <FooterLink to="/account">Tài khoản</FooterLink>
+            <FooterLink to="/orders">Đơn hàng</FooterLink>
+            <FooterLink to="/delivery">Thông tin giao hàng</FooterLink>
+            <FooterLink to="/contact">Liên hệ</FooterLink>
+            <FooterLink to="/about">Về chúng tôi</FooterLink>
+          </ul>
+        </div>
+
+        {/* Cột 4 — Liên hệ */}
+        <div className="flex flex-col px-8 py-12 lg:px-10">
+          <h4 className="text-sm font-bold mb-5" style={{ color: C }}>
+            Liên hệ
+          </h4>
+          <ul className="space-y-5 text-sm leading-7 text-white/35">
+            <li>
+              1103-Al Ghanem Business Building,
+              <br />Al-Majaz-3, Sharjah,
+              <br />United Arab Emirates
+            </li>
+            <li>
+              <a
+                href="mailto:info@goldenartframe.com"
+                style={{ color: "rgba(255,255,255,0.4)" }}
+                onMouseEnter={e => e.currentTarget.style.color = C}
+                onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
+              >
+                info@goldenartframe.com
+              </a>
+            </li>
+            <li>
+              <a
+                href="tel:+971522640871"
+                style={{ color: "rgba(255,255,255,0.4)" }}
+                onMouseEnter={e => e.currentTarget.style.color = C}
+                onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
+              >
+                +971 52 264 0871
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* ── Bottom bar — không có border ─────────────────────────────── */}
+      <div className="w-full px-8 lg:px-10">
+        <div className="flex flex-col items-center justify-between gap-3 py-5 sm:flex-row">
+          <p className="text-xs text-white/20">
             © {new Date().getFullYear()} Golden Art Frames. All rights reserved.
           </p>
-          <div className="flex items-center gap-1.5 text-xs text-white/25">
-            <span>Made With</span>
-            <span style={{ color: ACCENT }}>♥</span>
+          <div className="flex items-center gap-1.5 text-xs text-white/20">
+            <span>Made with</span>
+            <span style={{ color: M }}>♥</span>
             <span>by Fazeel Khan</span>
           </div>
         </div>
