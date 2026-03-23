@@ -12,7 +12,7 @@ import PageLoader from "./components/PageLoader.jsx";
 import SplashScreen from "./components/SplashScreen.jsx";
 import { usePageTracker } from "./lib/usePageTracker.js";
 
-// ── Lazy page imports ─────────────────────────────────────────────────────────
+// Lazy page imports (Giữ nguyên của bạn)
 const HomePage               = lazy(() => import("./pages/HomePage.jsx"));
 const ProductsPage           = lazy(() => import("./pages/ProductsPage.jsx"));
 const CartPage               = lazy(() => import("./pages/CartPage.jsx"));
@@ -23,12 +23,10 @@ const AccountPage            = lazy(() => import("./pages/AccountPage.jsx"));
 const ContactPage            = lazy(() => import("./pages/ContactPage.jsx"));
 const AboutPage              = lazy(() => import("./pages/AboutPage.jsx"));
 const Delivery               = lazy(() => import("./pages/Delivery.jsx"));
-
 const LoginPage              = lazy(() => import("./pages/Login.jsx"));
 const SignupPage             = lazy(() => import("./pages/Signup.jsx"));
 const ForgotPasswordPage     = lazy(() => import("./pages/ForgotPasswordPage.jsx"));
 const ResetPasswordPage      = lazy(() => import("./pages/ResetPasswordPage.jsx"));
-
 const EditorPrintPortrait    = lazy(() => import("./pages/EditorPrint&Frame.jsx"));
 const EditorPrint            = lazy(() => import("./pages/EditorPrint.jsx"));
 const EditorCanvas           = lazy(() => import("./pages/EditorCanvas.jsx"));
@@ -38,10 +36,8 @@ const EditorWeddingFrame     = lazy(() => import("./pages/EditorWeddingFrame.jsx
 const EditorWeddingPrint     = lazy(() => import("./pages/EditorWeddingPrint.jsx"));
 const EditorFineArtPrint     = lazy(() => import("./pages/EditorFineArtPrint.jsx"));
 const EditorMultiplePrints   = lazy(() => import("./pages/EditorMultiplePrints.jsx"));
-
 const BlogListPage           = lazy(() => import("./pages/BlogListPage.jsx"));
 const BlogPostPage           = lazy(() => import("./pages/BlogPostPage.jsx"));
-
 const AdminOrdersPage        = lazy(() => import("./pages/AdminOrdersPage.jsx"));
 const AdminBlogsPage         = lazy(() => import("./pages/AdminBlogsPage.jsx"));
 const AdminBlogEditorPage    = lazy(() => import("./pages/AdminBlogEditorPage.jsx"));
@@ -63,15 +59,30 @@ export default function App() {
   usePageTracker();
   const location = useLocation();
 
+  // 🪄 TỰ ĐỘNG ĐỔI TIÊU ĐỀ TAB (Cho 500.000 sản phẩm)
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.startsWith('/editor/')) {
+      document.title = "Đang thiết kế tác phẩm... | Lavender Prime";
+    } else if (path === '/') {
+      document.title = "Lavender Prime Studio | Tranh Nghệ Thuật Cao Cấp";
+    } else {
+      const pageName = path.split('/')[1] || "";
+      const formattedName = pageName.charAt(0).toUpperCase() + pageName.slice(1);
+      document.title = formattedName ? `${formattedName} | Lavender Prime` : "Lavender Prime";
+    }
+  }, [location]);
+
   return (
     <HelmetProvider>
+      <Helmet titleTemplate="%s | Lavender Prime" defaultTitle="Lavender Prime Studio" />
+      
       <SplashScreen />
       <ScrollToTop />
       <Navbar />
 
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* Public */}
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/cart" element={<CartPage />} />
@@ -81,17 +92,14 @@ export default function App() {
           <Route path="/order/:id" element={<OrderSuccessPage />} />
           <Route path="/orders" element={<UserOrdersPage />} />
 
-          {/* Auth */}
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route path="/signup" element={<GuestRoute><SignupPage /></GuestRoute>} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-          {/* Protected */}
           <Route path="/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
           <Route path="/checkout" element={<RequireAuth><CheckoutPage /></RequireAuth>} />
 
-          {/* Editors - Có thể tùy biến SEO cho từng loại Editor nếu cần */}
           <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
           <Route path="/editor/print" element={<EditorPrint />} />
           <Route path="/editor/canvas" element={<EditorCanvas />} />
@@ -102,11 +110,9 @@ export default function App() {
           <Route path="/editor/fine-art-print" element={<EditorFineArtPrint />} />
           <Route path="/editor/multiple-prints" element={<EditorMultiplePrints />} />
 
-          {/* Blog */}
           <Route path="/blog" element={<BlogListPage />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
 
-          {/* Admin */}
           <Route path="/admin" element={<AdminOrdersPage />} />
           <Route path="/admin/dashboard" element={<RequireRole roles={["admin"]}><AdminDashboardPage /></RequireRole>} />
           <Route path="/admin/blogs" element={<RequireRole roles={["admin", "manager"]}><AdminBlogsPage /></RequireRole>} />
