@@ -1,11 +1,6 @@
-// client/src/App.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-// App routes — all pages are lazy-loaded so the branded PageLoader shows
-// while JavaScript chunks are being fetched.
-// ─────────────────────────────────────────────────────────────────────────────
-
-import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { lazy, Suspense, useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { HelmetProvider, Helmet } from "react-helmet-async";
 
 import Navbar from "./components/Navbar.jsx";
 import Footer from "./components/Footer.jsx";
@@ -30,7 +25,7 @@ const AboutPage              = lazy(() => import("./pages/AboutPage.jsx"));
 const Delivery               = lazy(() => import("./pages/Delivery.jsx"));
 
 const LoginPage              = lazy(() => import("./pages/Login.jsx"));
-const SignupPage              = lazy(() => import("./pages/Signup.jsx"));
+const SignupPage             = lazy(() => import("./pages/Signup.jsx"));
 const ForgotPasswordPage     = lazy(() => import("./pages/ForgotPasswordPage.jsx"));
 const ResetPasswordPage      = lazy(() => import("./pages/ResetPasswordPage.jsx"));
 
@@ -53,29 +48,23 @@ const AdminBlogEditorPage    = lazy(() => import("./pages/AdminBlogEditorPage.js
 const AdminPricingPage       = lazy(() => import("./pages/AdminPricingPage.jsx"));
 const AdminDashboardPage     = lazy(() => import("./pages/AdminDashboardPage.jsx"));
 
-// ── 404 ───────────────────────────────────────────────────────────────────────
 function NotFound() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
-      <img
-        src="/logo.png"
-        alt="Golden Art Frames"
-        className="h-24 w-auto object-contain"
-      />
+      <img src="/logo.png" alt="Lavender Prime" className="h-24 w-auto object-contain" />
       <p className="text-7xl font-extrabold text-slate-200">404</p>
       <p className="text-lg font-bold text-slate-700">Page Not Found</p>
-      <a href="/" className="text-sm font-semibold text-[#FF633F] hover:underline">
-        ← Back To Home
-      </a>
+      <a href="/" className="text-sm font-semibold text-purple-600 hover:underline">← Back To Home</a>
     </div>
   );
 }
 
-// ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
   usePageTracker();
+  const location = useLocation();
+
   return (
-    <>
+    <HelmetProvider>
       <SplashScreen />
       <ScrollToTop />
       <Navbar />
@@ -102,7 +91,7 @@ export default function App() {
           <Route path="/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
           <Route path="/checkout" element={<RequireAuth><CheckoutPage /></RequireAuth>} />
 
-          {/* Editors */}
+          {/* Editors - Có thể tùy biến SEO cho từng loại Editor nếu cần */}
           <Route path="/editor/print-frame" element={<EditorPrintPortrait />} />
           <Route path="/editor/print" element={<EditorPrint />} />
           <Route path="/editor/canvas" element={<EditorCanvas />} />
@@ -119,33 +108,17 @@ export default function App() {
 
           {/* Admin */}
           <Route path="/admin" element={<AdminOrdersPage />} />
-          <Route
-            path="/admin/dashboard"
-            element={<RequireRole roles={["admin"]}><AdminDashboardPage /></RequireRole>}
-          />
-          <Route
-            path="/admin/blogs"
-            element={<RequireRole roles={["admin", "manager"]}><AdminBlogsPage /></RequireRole>}
-          />
-          <Route
-            path="/admin/blogs/new"
-            element={<RequireRole roles={["admin", "manager"]}><AdminBlogEditorPage mode="create" /></RequireRole>}
-          />
-          <Route
-            path="/admin/blogs/:id/edit"
-            element={<RequireRole roles={["admin", "manager"]}><AdminBlogEditorPage mode="edit" /></RequireRole>}
-          />
-          <Route
-            path="/admin/pricing"
-            element={<RequireRole roles={["admin", "manager"]}><AdminPricingPage /></RequireRole>}
-          />
+          <Route path="/admin/dashboard" element={<RequireRole roles={["admin"]}><AdminDashboardPage /></RequireRole>} />
+          <Route path="/admin/blogs" element={<RequireRole roles={["admin", "manager"]}><AdminBlogsPage /></RequireRole>} />
+          <Route path="/admin/blogs/new" element={<RequireRole roles={["admin", "manager"]}><AdminBlogEditorPage mode="create" /></RequireRole>} />
+          <Route path="/admin/blogs/:id/edit" element={<RequireRole roles={["admin", "manager"]}><AdminBlogEditorPage mode="edit" /></RequireRole>} />
+          <Route path="/admin/pricing" element={<RequireRole roles={["admin", "manager"]}><AdminPricingPage /></RequireRole>} />
 
-          {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
 
       <Footer />
-    </>
+    </HelmetProvider>
   );
 }
