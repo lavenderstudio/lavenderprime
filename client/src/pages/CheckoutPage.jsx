@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 // client/src/pages/CheckoutPage.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Modern Checkout — matches HomePage / CartPage theme.
-// ALL logic is preserved exactly. Only the UI is redesigned.
+// Museum Design — Thanh toán liền mạch phong cách Gallery
+// Cyan × Magenta thuần · Typography tối giản · Tràn viền hoàn toàn
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import api from "../lib/api.js";
 import { getSessionId } from "../lib/session.js";
 
@@ -15,57 +15,52 @@ import { getSessionId } from "../lib/session.js";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 
-const ACCENT = "#FF633F";
+// ─── Bảng màu hệ thống ───────────────────────────────────────────────────────
+const C = "#00e5ff";   // Cyan thuần
+const M = "#e040fb";   // Magenta thuần
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const UAE_CITIES = [
   "Abu Dhabi", "Dubai", "Sharjah", "Ajman",
   "Ras Al Khaimah", "Fujairah", "Umm Al Quwain", "Al Ain", "Khorfakkan",
 ];
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// ─── Thành phần giao diện dùng chung ──────────────────────────────────────────
+const INPUT_STYLE = 
+  "w-full border-b border-slate-200 bg-transparent px-0 py-3 text-sm font-bold text-slate-900 outline-none " +
+  "transition-all duration-300 focus:border-[#00e5ff] placeholder:text-slate-300 placeholder:font-normal";
 
-// ─── Shared input style ───────────────────────────────────────────────────────
-const INPUT_BASE =
-  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm outline-none " +
-  "transition-all duration-200 focus:border-[#FF633F]/60 focus:ring-2 focus:ring-[#FF633F]/15 " +
-  "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed placeholder:text-slate-400";
-
-// ─── Labeled input field ──────────────────────────────────────────────────────
-function Field({ label, required: req, children }) {
+function Reveal({ children, delay = 0 }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-bold uppercase tracking-widest text-slate-500">
-        {label}{req && <span style={{ color: ACCENT }}> *</span>}
-      </label>
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
-// ─── Section card ─────────────────────────────────────────────────────────────
-function Section({ step, title, subtitle, children }) {
+function SectionLabel({ step, title }) {
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-      <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4"
-        style={{ background: `linear-gradient(135deg, ${ACCENT}10 0%, transparent 70%)` }}>
-        <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold text-white"
-          style={{ background: ACCENT }}
-        >
-          {step}
-        </span>
-        <div>
-          <p className="text-sm font-extrabold text-slate-900">{title}</p>
-          {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
-        </div>
-      </div>
-      <div className="p-6">{children}</div>
+    <div className="mb-8 flex items-center gap-4">
+      <span className="font-mono text-xs font-bold text-white bg-slate-900 px-2 py-1 leading-none">
+        {step.padStart(2, '0')}
+      </span>
+      <h3 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
+        {title}
+      </h3>
+      <div className="h-px flex-1 bg-slate-100" />
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PAYMENT STEP
+// THANH TOÁN (STRIPE)
 // ─────────────────────────────────────────────────────────────────────────────
 function PaymentStep({ orderId, onPaid }) {
   const stripe = useStripe();
@@ -75,90 +70,35 @@ function PaymentStep({ orderId, onPaid }) {
 
   const handlePay = async (e) => {
     e.preventDefault();
-    setMsg("");
     if (!stripe || !elements) return;
     setLoading(true);
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      redirect: "if_required",
-    });
-
-    if (error) {
-      setMsg(error.message || "Payment failed.");
-      setLoading(false);
-      return;
-    }
-
-    if (paymentIntent?.status === "succeeded") {
-      onPaid?.();
-    } else {
-      setMsg("Payment submitted. Please wait while we confirm it...");
-    }
+    const { error, paymentIntent } = await stripe.confirmPayment({ elements, redirect: "if_required" });
+    if (error) { setMsg(error.message); setLoading(false); return; }
+    if (paymentIntent?.status === "succeeded") onPaid?.();
     setLoading(false);
   };
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-      <div
-        className="flex items-center gap-3 border-b border-slate-100 px-6 py-4"
-        style={{ background: `linear-gradient(135deg, ${ACCENT}10 0%, transparent 70%)` }}
-      >
-        <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold text-white"
-          style={{ background: ACCENT }}
-        >
-          3
-        </span>
-        <div>
-          <p className="text-sm font-extrabold text-slate-900">Payment</p>
-          <p className="text-xs text-slate-400">Secured by Stripe — card details never touch our servers</p>
-        </div>
-        {/* Lock icon */}
-        <svg className="ml-auto h-4 w-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-      </div>
-
-      <form onSubmit={handlePay} className="p-6">
+    <div className="mt-12 border-t-2 border-slate-900 pt-10">
+      <SectionLabel step="3" title="Phương thức thanh toán" />
+      <div className="bg-slate-50 p-8">
         <PaymentElement />
-
-        <motion.button
-          type="submit"
-          whileTap={{ scale: 0.97 }}
-          disabled={!stripe || !elements || loading}
-          className="mt-5 w-full rounded-2xl py-3.5 text-sm font-extrabold text-white shadow-sm
-                     transition-all duration-300 hover:brightness-110 hover:scale-[1.02]
-                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          style={{ background: "#059669" }}
+        <button
+          onClick={handlePay}
+          disabled={!stripe || loading}
+          className="mt-8 w-full py-5 text-xs font-black uppercase tracking-[0.2em] text-white transition-all hover:scale-[1.02]"
+          style={{ background: "#000" }}
         >
-          {loading ? "Processing Payment…" : "Pay Now 🔒"}
-        </motion.button>
-
-        <AnimatePresence>
-          {msg && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-800"
-            >
-              {msg}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <p className="mt-3 text-center text-xs text-slate-400">
-          Order ID: <span className="font-mono">{orderId}</span>
-        </p>
-      </form>
+          {loading ? "Đang xử lý..." : "Xác nhận thanh toán 🔒"}
+        </button>
+        {msg && <p className="mt-4 text-xs font-bold text-rose-500">{msg}</p>}
+      </div>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PAGE
+// TRANG CHÍNH
 // ─────────────────────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -169,490 +109,147 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [creating, setCreating] = useState(false);
-  const [saveAddress, setSaveAddress] = useState(true);
-  const [orderTotals, setOrderTotals] = useState(null);
-  const [emailLocked, setEmailLocked] = useState(false);
-  const [countryLocked, setCountryLocked] = useState(false);
-
-  const [customer, setCustomer] = useState({ fullName: "", email: "", phone: "" });
   const [shippingAddress, setShippingAddress] = useState({
     line1: "", line2: "", city: "", postcode: "", country: "United Arab Emirates",
   });
+  const [customer, setCustomer] = useState({ fullName: "", email: "", phone: "" });
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  function isMultiAssets(assets) {
-    return !!assets && Array.isArray(assets.items) && assets.items.length > 0;
-  }
-  function getThumbUrlFromItem(item) {
-    const assets = item?.assets || {};
-    if (isMultiAssets(assets)) {
-      const first = assets.items.find((x) => x?.previewUrl || x?.originalUrl);
-      return first?.previewUrl || first?.originalUrl || "";
-    }
-    return assets.previewUrl || assets.originalUrl || "";
-  }
-  function getMiniFramesCount(item) {
-    const assets = item?.assets || {};
-    if (!isMultiAssets(assets)) return 0;
-    return assets.items.length;
-  }
-
-  // ── Load user profile ──────────────────────────────────────────────────────
   useEffect(() => {
-    const loadProfile = async () => {
-      try {
-        const res = await api.get("/users/me");
-        const u = res.data?.user;
-        if (u?.fullName) setCustomer((prev) => ({ ...prev, fullName: u.fullName }));
-        if (u?.email) { setCustomer((prev) => ({ ...prev, email: u.email })); setEmailLocked(true); }
-        if (u?.phone) setCustomer((prev) => ({ ...prev, phone: u.phone }));
-        const profileCountry = u?.shippingAddress?.country;
-        if (profileCountry) {
-          setShippingAddress((prev) => ({ ...prev, ...u.shippingAddress, country: profileCountry }));
-          setCountryLocked(true);
-        } else if (u?.shippingAddress) {
-          setShippingAddress((prev) => ({ ...prev, ...u.shippingAddress, country: prev.country }));
-        }
-        if (u?.shippingAddress) {
-          setShippingAddress((prev) => ({
-            ...prev, ...u.shippingAddress,
-            country: u.shippingAddress.country || prev.country,
-          }));
-        }
-      } catch { /* silently ignored: not logged in */ }
-    };
-    loadProfile();
-  }, []);
-
-  // ── Load cart ──────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await api.get(`/cart/${sessionId}`);
-        setCart(res.data);
-        if (!res.data?.items?.length) setError("Your cart is empty.");
-      } catch (err) {
-        setError(err?.response?.data?.message || err.message);
-      }
-    };
-    load();
+    api.get(`/cart/${sessionId}`).then(res => setCart(res.data)).catch(err => setError(err.message));
   }, [sessionId]);
 
-  const subtotal = cart?.items?.reduce((sum, item) => sum + (item.price?.total || 0), 0) || 0;
-  const currency = cart?.items?.[0]?.price?.currency || "AED";
-
-  // ── Submit form → create order + PaymentIntent ─────────────────────────────
   const onSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    if (creating) return;
+    setCreating(true);
     try {
-      setCreating(true);
-      if (saveAddress) {
-        await api.patch("/users/me", { fullName: customer.fullName, phone: customer.phone, shippingAddress });
-      }
       const orderRes = await api.post("/orders/checkout", { sessionId, customer, shippingAddress });
-      const createdOrderId = orderRes.data._id;
-      setOrderId(createdOrderId);
-      setOrderTotals(orderRes.data.totals);
-      const piRes = await api.post("/payments/create-intent", { orderId: createdOrderId });
+      const piRes = await api.post("/payments/create-intent", { orderId: orderRes.data._id });
+      setOrderId(orderRes.data._id);
       setClientSecret(piRes.data.clientSecret);
-    } catch (err) {
-      setError(err?.response?.data?.message || err.message);
-    } finally {
-      setCreating(false);
-    }
+    } catch (err) { setError(err.message); }
+    setCreating(false);
   };
 
-  const displayTotals = orderTotals || { subtotal, shipping: 0, grandTotal: subtotal, currency };
-
-  const estimatedDelivery = useMemo(() => {
-    const hasFreeShipping = cart?.items?.some(
-      (it) => it.productSlug === "print-and-frame" || it.productSlug === "wedding-frame"
-    );
-    if (hasFreeShipping) return 0;
-    const c = String(shippingAddress?.country || "").trim().toLowerCase();
-    const isUAE = c === "united arab emirates" || c === "uae" || c === "u.a.e";
-    return isUAE ? 35 : 100;
-  }, [shippingAddress?.country, cart?.items]);
-
-  const deliveryToShow =
-    typeof displayTotals?.shipping === "number" && orderTotals
-      ? displayTotals.shipping
-      : estimatedDelivery;
-
-  const totalToShow = orderTotals ? displayTotals.grandTotal : subtotal + estimatedDelivery;
-
-  const isUAE = useMemo(() => {
-    const c = String(shippingAddress.country || "").toLowerCase();
-    return c === "united arab emirates" || c === "uae" || c === "u.a.e" || c.includes("emirates");
-  }, [shippingAddress.country]);
+  const subtotal = cart?.items?.reduce((sum, item) => sum + (item.price?.total || 0), 0) || 0;
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
-
-      {/* ── Hero header ──────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950 px-4 py-14 text-center">
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 h-52 w-52 -translate-x-1/2 rounded-full opacity-25 blur-3xl"
-          style={{ background: ACCENT }}
-        />
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: ACCENT }}
-        >
-          Golden Art Frames
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-3 text-4xl font-extrabold text-white"
-        >
-          Checkout
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
-          className="mt-2 text-sm text-white/50"
-        >
-          Complete your order securely
-        </motion.p>
-
-        {/* Back to cart */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.45 }}
-          className="mt-5"
-        >
-          <Link
-            to="/cart"
-            className="group inline-flex items-center gap-1.5 text-sm font-bold text-white/40
-                       transition-all duration-300 hover:text-white/80"
-          >
-            <span>←</span>
-            <span className="relative after:absolute after:left-0 after:-bottom-0.5
-                             after:h-[1.5px] after:w-full after:origin-left after:scale-x-0
-                             after:bg-white/60 after:transition-transform after:duration-300
-                             group-hover:after:scale-x-100">
-              Back To Cart
-            </span>
-          </Link>
-        </motion.div>
+    <div className="min-h-screen bg-white font-sans antialiased">
+      {/* ── Header Bảo Tàng ── */}
+      <section className="relative border-b border-slate-100 bg-white px-10 py-20 sm:px-16 lg:px-24">
+        <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: C }} />
+        <Reveal>
+          <p className="font-mono text-xs tracking-[0.3em] text-slate-400">GIAO DỊCH AN TOÀN</p>
+          <h1 className="mt-4 font-extrabold leading-none tracking-tighter text-slate-900" style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}>
+            Thanh <span style={{ WebkitTextStroke: `1.5px ${M}`, color: "transparent" }}>Toán.</span>
+          </h1>
+        </Reveal>
       </section>
 
-      {/* ── Body ─────────────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-7xl px-4 py-10">
-
-        {/* Error */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"
-            >
-              <b>Error:</b> {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="grid gap-8 lg:grid-cols-12 lg:items-start">
-
-          {/* ── LEFT: Form + Payment ──────────────────────────────────────── */}
-          <div className="space-y-5 lg:col-span-8">
-
-            <form onSubmit={onSubmit} className="space-y-5">
-
-              {/* Step 1 — Customer details */}
-              <Section
-                step="1"
-                title="Customer Details"
-                subtitle="We'll use this to send order updates"
-              >
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="Full Name" required>
-                    <input
-                      className={INPUT_BASE}
-                      placeholder="e.g. Ahmed Al Zaabi"
-                      value={customer.fullName}
-                      onChange={(e) => setCustomer({ ...customer, fullName: e.target.value })}
-                      required
-                      disabled={!!clientSecret}
-                    />
-                  </Field>
-                  <Field label="Email Address" required>
-                    <input
-                      className={INPUT_BASE}
-                      placeholder="your@email.com"
-                      type="email"
-                      value={customer.email}
-                      onChange={(e) => setCustomer({ ...customer, email: e.target.value })}
-                      required
-                      disabled={emailLocked || !!clientSecret}
-                    />
-                  </Field>
-                  <Field label="Phone Number" required>
-                    <input
-                      className={`${INPUT_BASE} sm:col-span-2`}
-                      placeholder="+971 50 000 0000"
-                      value={customer.phone}
-                      onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
-                      required
-                      disabled={!!clientSecret}
-                    />
-                  </Field>
+      <div className="mx-auto max-w-[1600px] px-10 py-16 sm:px-16 lg:px-24">
+        <div className="grid gap-20 lg:grid-cols-12">
+          
+          {/* ── BÊN TRÁI: NHẬP LIỆU ── */}
+          <div className="lg:col-span-7">
+            <form onSubmit={onSubmit}>
+              <Reveal delay={0.1}>
+                <SectionLabel step="1" title="Thông tin khách hàng" />
+                <div className="grid gap-8 sm:grid-cols-2">
+                  <input className={INPUT_STYLE} placeholder="Họ và tên *" required 
+                    onChange={e => setCustomer({...customer, fullName: e.target.value})} />
+                  <input className={INPUT_STYLE} type="email" placeholder="Email *" required 
+                    onChange={e => setCustomer({...customer, email: e.target.value})} />
+                  <input className={`${INPUT_STYLE} sm:col-span-2`} placeholder="Số điện thoại *" required 
+                    onChange={e => setCustomer({...customer, phone: e.target.value})} />
                 </div>
-              </Section>
+              </Reveal>
 
-              {/* Step 2 — Shipping address */}
-              <Section
-                step="2"
-                title="Shipping Address"
-                subtitle="We package securely and deliver to your door"
-              >
-                <div className="grid gap-4">
-                  <Field label="Address Line 1" required>
-                    <input
-                      className={INPUT_BASE}
-                      placeholder="Building name, street"
-                      value={shippingAddress.line1}
-                      onChange={(e) => setShippingAddress({ ...shippingAddress, line1: e.target.value })}
-                      required
-                      disabled={!!clientSecret}
-                    />
-                  </Field>
-                  <Field label="Address Line 2">
-                    <input
-                      className={INPUT_BASE}
-                      placeholder="Apartment, suite, unit (optional)"
-                      value={shippingAddress.line2}
-                      onChange={(e) => setShippingAddress({ ...shippingAddress, line2: e.target.value })}
-                      disabled={!!clientSecret}
-                    />
-                  </Field>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="City" required>
-                      {isUAE ? (
-                        <select
-                          className={INPUT_BASE}
-                          value={shippingAddress.city}
-                          onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
-                          required
-                          disabled={!!clientSecret}
-                        >
-                          <option value="">Select city…</option>
-                          {UAE_CITIES.map((city) => (
-                            <option key={city} value={city}>{city}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          className={INPUT_BASE}
-                          placeholder="City"
-                          value={shippingAddress.city}
-                          onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
-                          required
-                          disabled={!!clientSecret}
-                        />
-                      )}
-                    </Field>
-                    <Field label="Postcode">
-                      <input
-                        className={INPUT_BASE}
-                        placeholder="Optional"
-                        value={shippingAddress.postcode}
-                        onChange={(e) => setShippingAddress({ ...shippingAddress, postcode: e.target.value })}
-                        disabled={!!clientSecret}
-                      />
-                    </Field>
+              <Reveal delay={0.2}>
+                <div className="mt-16">
+                  <SectionLabel step="2" title="Địa chỉ giao hàng" />
+                  <div className="grid gap-8">
+                    <input className={INPUT_STYLE} placeholder="Số nhà, tên đường *" required 
+                      onChange={e => setShippingAddress({...shippingAddress, line1: e.target.value})} />
+                    <div className="grid gap-8 sm:grid-cols-2">
+                      <select className={INPUT_STYLE} required onChange={e => setShippingAddress({...shippingAddress, city: e.target.value})}>
+                        <option value="">Chọn thành phố (UAE) *</option>
+                        {UAE_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <input className={INPUT_STYLE} placeholder="Mã bưu điện (tùy chọn)" 
+                        onChange={e => setShippingAddress({...shippingAddress, postcode: e.target.value})} />
+                    </div>
                   </div>
-
-                  <Field label="Country" required>
-                    <input
-                      className={INPUT_BASE}
-                      placeholder="Country"
-                      value={shippingAddress.country}
-                      onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
-                      required
-                      disabled={countryLocked || !!clientSecret}
-                    />
-                  </Field>
-
-                  {/* Save address toggle */}
-                  <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 transition hover:border-[#FF633F]/30">
-                    <input
-                      type="checkbox"
-                      checked={saveAddress}
-                      onChange={(e) => setSaveAddress(e.target.checked)}
-                      disabled={!!clientSecret}
-                      className="h-4 w-4 rounded border-slate-300 accent-[#FF633F]"
-                    />
-                    <span className="text-sm font-semibold text-slate-700">Save this address for next time</span>
-                  </label>
                 </div>
+              </Reveal>
 
-                {/* Continue CTA */}
-                <motion.button
-                  type="submit"
-                  whileTap={{ scale: 0.97 }}
-                  disabled={!cart?.items?.length || creating || !!clientSecret}
-                  className="mt-5 w-full rounded-2xl py-3.5 text-sm font-extrabold text-white shadow-sm
-                             transition-all duration-300 hover:brightness-110 hover:scale-[1.02]
-                             disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  style={{
-                    background: !cart?.items?.length || creating || !!clientSecret
-                      ? "#94a3b8"
-                      : ACCENT
-                  }}
-                >
-                  {creating
-                    ? "Creating Secure Checkout…"
-                    : clientSecret
-                    ? "Details Saved ✅"
-                    : "Continue To Payment →"}
-                </motion.button>
-                <p className="mt-2 text-center text-xs text-slate-400">
-                  We'll create your order first, then take payment securely via Stripe.
-                </p>
-              </Section>
+              {!clientSecret && (
+                <Reveal delay={0.3}>
+                  <button type="submit" disabled={creating}
+                    className="mt-12 w-full py-5 text-xs font-black uppercase tracking-[0.2em] text-white transition-all hover:scale-[1.02]"
+                    style={{ background: "#000" }}>
+                    {creating ? "Đang khởi tạo..." : "Tiếp tục đến thanh toán →"}
+                  </button>
+                </Reveal>
+              )}
             </form>
 
-            {/* Step 3 — Payment (only after clientSecret) */}
             <AnimatePresence>
               {clientSecret && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                >
+                <Reveal>
                   <Elements stripe={stripePromise} options={{ clientSecret }}>
                     <PaymentStep orderId={orderId} onPaid={() => navigate(`/order/${orderId}`)} />
                   </Elements>
-                </motion.div>
+                </Reveal>
               )}
             </AnimatePresence>
           </div>
 
-          {/* ── RIGHT: Order summary ──────────────────────────────────────── */}
-          <div className="lg:col-span-4 lg:sticky lg:top-24 h-fit">
-            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-
-              {/* Header */}
-              <div
-                className="px-6 py-5"
-                style={{ background: `linear-gradient(135deg, ${ACCENT}15 0%, transparent 70%)` }}
-              >
-                <h3 className="text-lg font-extrabold text-slate-900">Order Summary</h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {cart?.items?.length ?? 0} item{cart?.items?.length !== 1 ? "s" : ""}
-                </p>
-              </div>
-
-              {/* Items */}
-              <div className="space-y-3 px-6 pt-4">
-                {(cart?.items || []).map((item) => {
-                  const cfg = item.config || {};
-                  const material = typeof cfg.material === "string" && cfg.material.length ? cfg.material : null;
-                  const frame = typeof cfg.frame === "string" && cfg.frame.length ? cfg.frame : null;
-                  const mat = typeof cfg.mat === "string" && cfg.mat.length ? cfg.mat : null;
-                  const size = typeof cfg.size === "string" && cfg.size.length ? cfg.size : "—";
-                  const qty = Number(item.quantity || cfg.quantity || 1);
-                  const thumb = getThumbUrlFromItem(item);
-                  const isMiniFrames = item.productSlug === "mini-frames";
-                  const miniCount = getMiniFramesCount(item);
-
-                  return (
-                    <div
-                      key={item._id}
-                      className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3"
-                    >
-                      {/* Thumb */}
-                      {thumb ? (
-                        <img
-                          src={thumb}
-                          alt="preview"
-                          className="h-12 w-12 shrink-0 rounded-xl border border-slate-200 object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-[9px] font-bold text-slate-400">
-                          No img
-                        </div>
-                      )}
-
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-extrabold text-slate-900">
-                          {item.productSlug
-                            ?.split("-")
-                            .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-                            .join(" ") || "Item"}
-                        </p>
-                        <p className="mt-0.5 text-[11px] font-semibold leading-snug text-slate-400">
-                          {isMiniFrames
-                            ? `${miniCount} photos · ${frame || "—"} · ${size}`
-                            : [material && `Mat: ${material}`, frame && `Frame: ${frame}`, mat && `Mat: ${mat}`, `Size: ${size}`]
-                                .filter(Boolean).join(" · ")}
-                        </p>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <p className="text-xs font-extrabold text-slate-900">
-                          {item.price?.total} {item.price?.currency}
-                        </p>
-                        <p className="text-[10px] text-slate-400">Qty: {qty}</p>
-                      </div>
+          {/* ── BÊN PHẢI: TÓM TẮT ĐƠN HÀNG ── */}
+          <div className="lg:col-span-5">
+            <div className="sticky top-10 border border-slate-100 bg-white p-8">
+              <h3 className="font-mono text-xs font-bold uppercase tracking-[0.2em] text-slate-900 mb-8">
+                Giỏ hàng của bạn ({cart?.items?.length || 0})
+              </h3>
+              
+              <div className="space-y-6">
+                {cart?.items?.map((item, i) => (
+                  <div key={i} className="flex gap-4 border-b border-slate-50 pb-6">
+                    <div className="h-20 w-16 shrink-0 bg-slate-100">
+                      <img src={item.assets?.previewUrl} alt="" className="h-full w-full object-cover" />
                     </div>
-                  );
-                })}
+                    <div className="flex-1">
+                      <p className="text-xs font-black uppercase leading-none text-slate-900">{item.productSlug?.replace(/-/g, ' ')}</p>
+                      <p className="mt-2 text-[10px] text-slate-400 uppercase tracking-wider">
+                        Kích thước: {item.config?.size} | Khung: {item.config?.frame}
+                      </p>
+                      <p className="mt-1 font-mono text-xs font-bold" style={{ color: C }}>
+                        {item.price?.total} {item.price?.currency}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              {/* Totals */}
-              <div className="px-6 pb-6 pt-4">
-                <div className="space-y-2 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">Subtotal</span>
-                    <span className="font-extrabold text-slate-900">
-                      {displayTotals.subtotal} {displayTotals.currency}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-500">
-                      {orderTotals ? "Delivery" : "Est. Delivery"}
-                    </span>
-                    <span className="font-extrabold text-slate-900">
-                      {deliveryToShow} {currency}
-                    </span>
-                  </div>
-                  <div className="h-px bg-slate-200" />
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-slate-900">Total</span>
-                    <span className="text-lg font-extrabold" style={{ color: ACCENT }}>
-                      {totalToShow} {currency}
-                    </span>
-                  </div>
+              <div className="mt-8 space-y-4 font-mono text-xs uppercase tracking-widest">
+                <div className="flex justify-between text-slate-400">
+                  <span>Tạm tính</span>
+                  <span>{subtotal} AED</span>
                 </div>
+                <div className="flex justify-between text-slate-400">
+                  <span>Phí vận chuyển</span>
+                  <span>Tính tại bước sau</span>
+                </div>
+                <div className="border-t border-slate-900 pt-4 flex justify-between text-base font-black text-slate-900">
+                  <span className="tracking-tighter">Tổng cộng</span>
+                  <span style={{ color: M }}>{subtotal} AED</span>
+                </div>
+              </div>
 
-                {/* Trust pills */}
-                <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  {["🔒 Secure checkout", "📦 Premium packaging", "🚚 UAE delivery"].map(t => (
-                    <span
-                      key={t}
-                      className="rounded-full border border-slate-100 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-500"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-                <p className="mt-3 text-center text-xs text-slate-400">
-                  Preview is for reference only.
-                </p>
+              <div className="mt-10 grid grid-cols-2 gap-2">
+                {["Giao hàng UAE", "Đóng gói cao cấp"].map(tag => (
+                  <div key={tag} className="border border-slate-100 py-3 text-center text-[10px] font-bold uppercase text-slate-400">
+                    {tag}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
