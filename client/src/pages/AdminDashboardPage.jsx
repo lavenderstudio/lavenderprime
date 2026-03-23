@@ -1,480 +1,264 @@
 /* eslint-disable no-unused-vars */
-// client/src/pages/AdminDashboardPage.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Admin-only Overview Dashboard — analytics charts & KPIs
-// Accessible at /admin/dashboard — only role="admin" can view.
-// ─────────────────────────────────────────────────────────────────────────────
-
 import api from "../lib/api.js";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
+import ShinyText from "../components/reactbits/ShinyText.jsx";
 
-const ACCENT  = "#FF633F";
-const COLORS  = [ACCENT, "#6366f1", "#22c55e", "#f59e0b", "#14b8a6", "#ec4899", "#8b5cf6", "#0ea5e9"];
+// ── Bảng màu Bảo tàng ────────────────────────────────────────────────────────
+const C = "#00e5ff";   // Cyan
+const M = "#e040fb";   // Magenta
+const COLORS = [C, M, "#1e293b", "#94a3b8"];
 const STATUS_COLORS = {
-  paid:             ACCENT,
-  completed:        "#22c55e",
-  processing:       "#f59e0b",
-  shipped:          "#3b82f6",
-  cancelled:        "#ef4444",
-  refunded:         "#8b5cf6",
-  requires_payment: "#94a3b8",
+  paid: C,
+  completed: "#10b981",
+  processing: "#f59e0b",
+  shipped: M,
+  cancelled: "#ef4444",
+  refunded: "#8b5cf6",
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function humanSlug(slug = "") {
-  return slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-}
-
-function fmt(n = 0) {
-  return n.toLocaleString("en-AE", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
-
-function fmtCurrency(n = 0) {
-  return `AED ${fmt(n)}`;
-}
-
-// ── Stat Card ────────────────────────────────────────────────────────────────
-function StatCard({ label, value, icon, accent = ACCENT, delay = 0 }) {
+// ── Components trang trí ─────────────────────────────────────────────────────
+function Reveal({ children, delay = 0 }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true });
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm flex items-center gap-4"
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
     >
-      <div
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl"
-        style={{ background: `${accent}15`, color: accent }}
-      >
-        {icon}
-      </div>
-      <div>
-        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">{label}</p>
-        <p className="mt-0.5 text-2xl font-extrabold text-slate-900">{value}</p>
-      </div>
+      {children}
     </motion.div>
   );
 }
 
-// ── Chart Panel ──────────────────────────────────────────────────────────────
+function Hairline() {
+  return <div className="h-px w-full bg-slate-100" />;
+}
+
+// ── Stat Card kiểu Gallery ───────────────────────────────────────────────────
+function StatCard({ label, value, icon, accent = C, delay = 0 }) {
+  return (
+    <Reveal delay={delay}>
+      <div className="group relative flex flex-col border-r border-slate-100 bg-white p-8 last:border-r-0 transition-all hover:bg-slate-50">
+        <div className="absolute top-0 left-0 h-1 w-0 bg-current transition-all group-hover:w-full" style={{ color: accent }} />
+        <span className="mb-4 text-2xl">{icon}</span>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">{label}</p>
+        <p className="mt-2 font-mono text-3xl font-extrabold tracking-tighter text-slate-900">{value}</p>
+      </div>
+    </Reveal>
+  );
+}
+
+// ── Chart Panel kiểu Minimalist ──────────────────────────────────────────────
 function ChartPanel({ title, subtitle, children, delay = 0 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
-    >
-      <p className="text-sm font-extrabold text-slate-900">{title}</p>
-      {subtitle && <p className="mt-0.5 text-xs text-slate-400">{subtitle}</p>}
-      <div className="mt-4">{children}</div>
-    </motion.div>
+    <Reveal delay={delay}>
+      <div className="border border-slate-100 bg-white p-8 shadow-sm">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="h-4 w-1" style={{ background: C }} />
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">{subtitle}</p>
+            <h3 className="text-lg font-extrabold tracking-tight text-slate-900">{title}</h3>
+          </div>
+        </div>
+        <div className="h-[300px] w-full">{children}</div>
+      </div>
+    </Reveal>
   );
 }
 
-// ── Custom Tooltip ────────────────────────────────────────────────────────────
+// ── Tooltip tùy chỉnh ────────────────────────────────────────────────────────
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 shadow-lg text-xs">
-      {label && <p className="font-bold text-slate-500 mb-1">{label}</p>}
+    <div className="border border-slate-900 bg-slate-900 px-4 py-3 text-white shadow-2xl">
+      <p className="mb-2 font-mono text-[10px] uppercase tracking-widest opacity-50">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} style={{ color: p.color }} className="font-semibold">
-          {p.name}: {typeof p.value === "number" && p.name?.toLowerCase().includes("revenue")
-            ? fmtCurrency(p.value)
-            : fmt(p.value)}
+        <p key={i} className="text-xs font-bold uppercase tracking-tight">
+          {p.name}: <span style={{ color: p.color }}>{p.value.toLocaleString()}</span>
         </p>
       ))}
     </div>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// PAGE
-// ─────────────────────────────────────────────────────────────────────────────
 export default function AdminDashboardPage() {
   const navigate = useNavigate();
-
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [me, setMe] = useState(null);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  // ── Auth check ────────────────────────────────────────────────────────────
   useEffect(() => {
     const check = async () => {
       try {
         const res = await api.get("/auth/me");
-        const user = res.data?.user;
-        if (!user || user.role !== "admin") {
-          setError("Forbidden — Admin access only.");
-          setCheckingAuth(false);
-          return;
+        if (res.data?.user?.role !== "admin") {
+          navigate("/login"); return;
         }
-        setMe(user);
+        setMe(res.data.user);
         setCheckingAuth(false);
         fetchAnalytics();
-      } catch {
-        navigate("/login", { replace: true });
-      }
+      } catch { navigate("/login"); }
     };
     check();
   }, []);
 
-  // ── Fetch analytics ───────────────────────────────────────────────────────
   const fetchAnalytics = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await api.get("/admin/analytics");
       setData(res.data);
-    } catch (err) {
-      setError(err?.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  // ── Auth loading screen ───────────────────────────────────────────────────
-  if (checkingAuth) {
-    return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{ background: `radial-gradient(ellipse 60% 40% at 50% 55%, ${ACCENT}18 0%, transparent 70%)` }}
-        />
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col items-center"
-        >
-          <img src="/logo.png" alt="Golden Art Frames" className="h-14 w-auto object-contain" style={{ filter: "brightness(0) invert(1)" }} />
-          <div className="mt-8 relative h-10 w-10">
-            <div className="absolute inset-0 rounded-full border-2 border-white/10" />
-            <motion.div
-              className="absolute inset-0 rounded-full border-2 border-transparent"
-              style={{ borderTopColor: ACCENT }}
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 0.9, ease: "linear" }}
-            />
-          </div>
-          <p className="mt-5 text-xs font-bold uppercase tracking-widest text-white/30">Checking Access…</p>
-        </motion.div>
-      </div>
-    );
-  }
+  if (checkingAuth) return null; // Hoặc loading spinner tối giản
 
-  // ── Derive numbers ────────────────────────────────────────────────────────
-  const statusMap = {};
-  (data?.ordersByStatus || []).forEach(s => { statusMap[s._id] = s.count; });
-
-  const totalOrders  = Object.values(statusMap).reduce((a, b) => a + b, 0);
-  const paidOrders   = (statusMap.paid || 0);
-  const fulfilledOrders = (statusMap.completed || 0);
-
-  // Daily orders chart — merge orders + revenue by day
-  const dailyMap = {};
-  (data?.dailyOrders || []).forEach(d => {
-    dailyMap[d._id] = { date: d._id, orders: d.orders, revenue: d.revenue || 0 };
-  });
-  const dailyData = Object.values(dailyMap).sort((a, b) => a.date.localeCompare(b.date));
-
-  // Daily visits
-  const visitMap = {};
-  (data?.dailyVisits || []).forEach(d => { visitMap[d._id] = { date: d._id, visits: d.visits }; });
-  const visitData = Object.values(visitMap).sort((a, b) => a.date.localeCompare(b.date));
-
-  // Top products
-  const topProducts = (data?.topProducts || []).map(p => ({ name: humanSlug(p._id), count: p.count }));
-
-  // Status pie
-  const statusPie = (data?.ordersByStatus || [])
-    .filter(s => s._id !== "requires_payment")
-    .map(s => ({ name: s._id.charAt(0).toUpperCase() + s._id.slice(1), value: s.count }));
-
-  // Traffic source pie
-  const trafficPie = (data?.trafficBySource || []).map(t => ({
-    name: t._id.charAt(0).toUpperCase() + t._id.slice(1),
-    value: t.visits,
-  }));
-
-  // Top pages
-  const topPages = (data?.topPages || []).map(p => ({ path: p._id, views: p.views }));
+  // Xử lý dữ liệu biểu đồ
+  const dailyData = (data?.dailyOrders || []).map(d => ({
+    Ngày: d._id.slice(5),
+    Đơn: d.orders,
+    DoanhThu: d.revenue
+  })).sort((a, b) => a.Ngày.localeCompare(b.Ngày));
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
-      {/* suppress recharts SVG focus ring */}
-      <style>{`.recharts-wrapper svg:focus { outline: none; }`}</style>
+    <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-cyan-100">
+      <style>{`.recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line { stroke: #f1f5f9; }`}</style>
 
-      {/* ── Dark header ─────────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-slate-950 px-4 pb-6 pt-10">
-        <div
-          className="pointer-events-none absolute left-1/4 top-0 h-40 w-40 rounded-full opacity-20 blur-3xl"
-          style={{ background: ACCENT }}
-        />
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: ACCENT }}>
-                Golden Art Frames
-              </p>
-              <h1 className="mt-1 text-3xl font-extrabold text-white">Overview Dashboard</h1>
-              {me && (
-                <p className="mt-1 text-xs text-white/40">
-                  Logged in as <span className="font-bold text-white/60">{me.fullName || me.email}</span>{" "}
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase">{me.role}</span>
-                </p>
-              )}
+      {/* ── Header Tràn Viền ───────────────────────────────────────────────── */}
+      <header className="relative border-b border-slate-100 bg-white px-10 py-16 sm:px-16 lg:px-24">
+        <div className="absolute left-0 top-0 h-full w-1" style={{ background: C }} />
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-4 flex items-center gap-3">
+              <span className="font-mono text-[10px] tracking-[0.3em] text-slate-400 uppercase">Hệ thống quản trị</span>
+              <div className="h-px w-12 bg-cyan-200" />
+              <span className="bg-slate-900 px-2 py-0.5 font-mono text-[9px] text-white">v2.0.25</span>
             </div>
+            <h1 className="text-5xl font-extrabold tracking-tighter sm:text-6xl">
+              Bảng <span style={{ color: "transparent", WebkitTextStroke: `1.5px ${M}` }}>Điều Khiển</span>
+            </h1>
+            <p className="mt-4 font-mono text-xs text-slate-400">
+              Chào buổi sáng, <span className="text-slate-900 font-bold underline decoration-cyan-400">{me?.fullName || "Quản trị viên"}</span>
+            </p>
+          </div>
 
-            <div className="flex flex-wrap items-center gap-2 mb-1">
-              <Link
-                to="/admin"
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-extrabold text-white/80 transition-all duration-200 hover:bg-white/10 hover:text-white"
-              >
-                ← Admin Orders
-              </Link>
-              <button
-                onClick={fetchAnalytics}
-                disabled={loading}
-                className="rounded-2xl px-4 py-2 text-sm font-extrabold text-white transition-all disabled:opacity-50"
-                style={{ background: ACCENT }}
-              >
-                {loading ? "Refreshing…" : "↻ Refresh"}
-              </button>
+          <div className="flex gap-4">
+            <Link to="/admin" className="border border-slate-200 px-6 py-3 font-mono text-[10px] font-bold uppercase tracking-widest transition hover:bg-slate-900 hover:text-white">
+              ← Đơn hàng
+            </Link>
+            <button 
+              onClick={fetchAnalytics}
+              className="px-6 py-3 font-mono text-[10px] font-bold uppercase tracking-widest text-white transition hover:scale-105"
+              style={{ background: C }}
+            >
+              {loading ? "Đang cập nhật..." : "Làm mới dữ liệu"}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Chỉ số chính (KPIs) ─────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 border-b border-slate-100 sm:grid-cols-2 lg:grid-cols-5">
+        <StatCard label="Tổng doanh thu" value={`${data?.totalRevenue?.toLocaleString()} AED`} icon="💰" delay={0.1} />
+        <StatCard label="Tổng đơn hàng" value={data?.ordersByStatus?.reduce((a,b)=>a+b.count,0) || 0} icon="📦" delay={0.15} />
+        <StatCard label="Đã thanh toán" value={data?.ordersByStatus?.find(s=>s._id==='paid')?.count || 0} icon="✨" delay={0.2} accent={M} />
+        <StatCard label="Thành viên" value={data?.totalUsers || 0} icon="👥" delay={0.25} />
+        <StatCard label="Thời gian xử lý" value="~48h" icon="⏱" delay={0.3} accent={M} />
+      </div>
+
+      {/* ── Biểu đồ & Phân tích ────────────────────────────────────────────── */}
+      <main className="px-10 py-20 sm:px-16 lg:px-24">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
+          
+          {/* Biểu đồ doanh thu - Chiếm 2/3 */}
+          <div className="lg:col-span-2">
+            <ChartPanel title="Hiệu suất kinh doanh" subtitle="Dữ liệu 30 ngày gần nhất">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={dailyData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="Ngày" axisLine={false} tickLine={false} tick={{fontFamily: 'monospace', fontSize: 10}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontFamily: 'monospace', fontSize: 10}} />
+                  <Tooltip content={<ChartTooltip />} />
+                  <Line type="stepAfter" dataKey="DoanhThu" name="Doanh thu" stroke={C} strokeWidth={3} dot={false} />
+                  <Line type="monotone" dataKey="Đơn" name="Số đơn" stroke={M} strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartPanel>
+          </div>
+
+          {/* Phân loại trạng thái - Chiếm 1/3 */}
+          <ChartPanel title="Tình trạng đơn hàng" subtitle="Phân bổ tổng thể">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data?.ordersByStatus?.map(s => ({ name: s._id, value: s.count }))}
+                  innerRadius={70}
+                  outerRadius={100}
+                  paddingAngle={8}
+                  dataKey="value"
+                >
+                  {data?.ordersByStatus?.map((entry, index) => (
+                    <Cell key={index} fill={STATUS_COLORS[entry._id] || COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<ChartTooltip />} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="mt-4 flex flex-wrap justify-center gap-4">
+               {data?.ordersByStatus?.map((s, i) => (
+                 <div key={i} className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-tighter">
+                   <div className="h-2 w-2" style={{ background: STATUS_COLORS[s._id] || COLORS[i % COLORS.length] }} />
+                   {s._id}: {s.count}
+                 </div>
+               ))}
+            </div>
+          </ChartPanel>
+
+          {/* Trang truy cập nhiều nhất */}
+          <div className="lg:col-span-3 mt-12">
+            <div className="flex items-center gap-4 mb-8">
+              <h2 className="text-2xl font-extrabold tracking-tighter">Lưu lượng truy cập</h2>
+              <div className="h-px flex-1 bg-slate-100" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1">
+              {data?.topPages?.map((p, i) => (
+                <div key={i} className="border border-slate-100 p-6 transition hover:bg-slate-50">
+                  <p className="font-mono text-[10px] text-slate-400 mb-2">PAGEPATH / {i+1}</p>
+                  <p className="font-mono text-sm font-bold truncate mb-4">{p._id}</p>
+                  <div className="flex items-end justify-between">
+                    <span className="text-3xl font-extrabold tracking-tighter" style={{ color: i % 2 === 0 ? C : M }}>{p.views}</span>
+                    <span className="font-mono text-[9px] text-slate-400 uppercase">Lượt xem</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* ── Body ──────────────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-7xl px-4 py-8 space-y-6">
-
-        {/* Error / Forbidden */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"
-            >
-              <b>Error:</b> {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Loading shimmer */}
-        {loading && !data && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-100" />
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
+      <footer className="border-t border-slate-100 px-10 py-10 sm:px-16 lg:px-24">
+        <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+          <p className="font-mono text-[10px] uppercase tracking-widest text-slate-400">
+            © 2026 Golden Art Frames / Lavender Prime Studio
+          </p>
+          <div className="flex gap-6">
+            {["Bảo mật", "Hệ thống", "Hỗ trợ"].map(item => (
+              <button key={item} className="font-mono text-[10px] uppercase tracking-widest text-slate-400 hover:text-cyan-500">
+                {item}
+              </button>
             ))}
           </div>
-        )}
-
-        {data && (
-          <>
-            {/* ══ KPI STAT CARDS ══════════════════════════════════════════ */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-              <StatCard label="Total Revenue"     value={fmtCurrency(data.totalRevenue)} icon="💰" delay={0}    />
-              <StatCard label="Total Orders"      value={fmt(totalOrders)}               icon="📦" delay={0.05} />
-              <StatCard label="Paid Orders"       value={fmt(paidOrders)}                icon="✅" delay={0.1}  />
-              <StatCard label="Fulfilled Orders"  value={fmt(fulfilledOrders)}           icon="🚀" accent="#22c55e" delay={0.15} />
-              <StatCard label="Registered Users"  value={fmt(data.totalUsers)}           icon="👥" accent="#6366f1" delay={0.2}  />
-            </div>
-
-            {/* ══ ORDERS & REVENUE OVER TIME ═══════════════════════════════ */}
-            <ChartPanel
-              title="Orders & Revenue — Last 30 Days"
-              subtitle="All non-pending orders. Revenue in AED."
-              delay={0.25}
-            >
-              {dailyData.length === 0 ? (
-                <p className="py-8 text-center text-sm text-slate-400">No order data yet.</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={dailyData} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={v => v.slice(5)} />
-                    <YAxis yAxisId="left"  tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                    <Tooltip content={<ChartTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: 11 }} />
-                    <Line yAxisId="left"  type="monotone" dataKey="orders"  name="Orders"  stroke={ACCENT}    strokeWidth={2.5} dot={false} />
-                    <Line yAxisId="right" type="monotone" dataKey="revenue" name="Revenue (AED)" stroke="#6366f1" strokeWidth={2.5} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </ChartPanel>
-
-            {/* ══ TOP PRODUCTS + STATUS PIE ════════════════════════════════ */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
-              {/* Top products bar chart */}
-              <ChartPanel title="Top Products" subtitle="By items sold (paid + fulfilled orders)" delay={0.3}>
-                {topProducts.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-slate-400">No product data yet.</p>
-                ) : (
-                  <ResponsiveContainer width="100%" height={240}>
-                    <BarChart data={topProducts} margin={{ top: 4, right: 8, left: 0, bottom: 0 }} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                      <XAxis type="number" tick={{ fontSize: 10, fill: "#94a3b8" }} allowDecimals={false} />
-                      <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "#475569" }} width={120} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Bar dataKey="count" name="Items Sold" fill={ACCENT} radius={[0, 6, 6, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </ChartPanel>
-
-              {/* Order status donut */}
-              <ChartPanel title="Order Status Breakdown" subtitle="All-time order distribution" delay={0.35}>
-                {statusPie.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-slate-400">No order data yet.</p>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <Pie
-                          data={statusPie}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={55}
-                          outerRadius={85}
-                          paddingAngle={3}
-                          dataKey="value"
-                          nameKey="name"
-                        >
-                          {statusPie.map((entry, i) => (
-                            <Cell key={i} fill={STATUS_COLORS[entry.name.toLowerCase()] || COLORS[i % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<ChartTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    {/* Legend */}
-                    <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1">
-                      {statusPie.map((entry, i) => (
-                        <span key={i} className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-                          <span className="h-2.5 w-2.5 rounded-full" style={{ background: STATUS_COLORS[entry.name.toLowerCase()] || COLORS[i % COLORS.length] }} />
-                          {entry.name} ({entry.value})
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </ChartPanel>
-            </div>
-
-            {/* ══ TRAFFIC ══════════════════════════════════════════════════ */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
-              {/* Traffic source donut */}
-              <ChartPanel title="Traffic by Source" subtitle="Where visitors came from — last 30 days" delay={0.4}>
-                {trafficPie.length === 0 ? (
-                  <div className="py-8 text-center text-sm text-slate-400">
-                    <p>No traffic data yet.</p>
-                    <p className="mt-1 text-xs text-slate-300">Data populates as users visit pages.</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <ResponsiveContainer width="100%" height={200}>
-                      <PieChart>
-                        <Pie
-                          data={trafficPie}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={55}
-                          outerRadius={85}
-                          paddingAngle={3}
-                          dataKey="value"
-                          nameKey="name"
-                        >
-                          {trafficPie.map((_, i) => (
-                            <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<ChartTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1">
-                      {trafficPie.map((entry, i) => (
-                        <span key={i} className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-                          <span className="h-2.5 w-2.5 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
-                          {entry.name} ({fmt(entry.value)})
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </ChartPanel>
-
-              {/* Daily visits line chart */}
-              <ChartPanel title="Daily Website Visits" subtitle="Page views per day — last 30 days" delay={0.45}>
-                {visitData.length === 0 ? (
-                  <div className="py-8 text-center text-sm text-slate-400">
-                    <p>No visit data yet.</p>
-                    <p className="mt-1 text-xs text-slate-300">Data populates as users visit pages.</p>
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={visitData} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={v => v.slice(5)} />
-                      <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} allowDecimals={false} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Line type="monotone" dataKey="visits" name="Visits" stroke="#6366f1" strokeWidth={2.5} dot={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </ChartPanel>
-            </div>
-
-            {/* ══ TOP PAGES TABLE ═══════════════════════════════════════════ */}
-            <ChartPanel title="Top Pages" subtitle="Most visited paths — last 30 days" delay={0.5}>
-              {topPages.length === 0 ? (
-                <p className="py-8 text-center text-sm text-slate-400">No page view data yet.</p>
-              ) : (
-                <div className="overflow-hidden rounded-xl border border-slate-100">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50">
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">#</th>
-                        <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Page Path</th>
-                        <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Views</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {topPages.map((p, i) => (
-                        <tr key={i} className="transition hover:bg-slate-50/60">
-                          <td className="px-4 py-2.5 text-xs font-bold text-slate-400">{i + 1}</td>
-                          <td className="px-4 py-2.5 font-mono text-xs text-slate-700">{p.path}</td>
-                          <td className="px-4 py-2.5 text-right">
-                            <span
-                              className="rounded-full px-2.5 py-0.5 text-xs font-extrabold"
-                              style={{ background: `${ACCENT}15`, color: ACCENT }}
-                            >
-                              {fmt(p.views)}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </ChartPanel>
-          </>
-        )}
-      </div>
+        </div>
+      </footer>
     </div>
   );
 }
