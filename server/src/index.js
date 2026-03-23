@@ -60,7 +60,8 @@ app.use("/api/analytics", analyticsRouter);
 
 // --- LOGIC SEO CHO 500.000 SẢN PHẨM ---
 if (process.env.NODE_ENV === "production") {
-    const clientDistPath = path.join(__dirname, "../client/dist");
+    // Sửa đường dẫn để khớp với cấu trúc Monorepo trên Railway
+    const clientDistPath = path.join(process.cwd(), "client/dist");
     app.use(express.static(clientDistPath));
 
     app.get(["/editor/:id", "/blog/:slug"], async (req, res) => {
@@ -73,6 +74,7 @@ if (process.env.NODE_ENV === "production") {
             let html = fs.readFileSync(indexPath, "utf8");
             let metaData = { title: "Lavender Prime", image: "", desc: "Bản in nghệ thuật cao cấp" };
 
+            // 1. Lấy meta cho Sản phẩm (Editor)
             if (req.path.startsWith("/editor/") && mongoose.Types.ObjectId.isValid(slugOrId)) {
                 const product = await mongoose.connection.collection("products").findOne(
                     { _id: new mongoose.Types.ObjectId(slugOrId) },
@@ -85,21 +87,38 @@ if (process.env.NODE_ENV === "production") {
                         desc: product.description 
                     };
                 }
+            } 
+            // 2. Lấy meta cho Blog (Thêm phần này để SEO blog)
+            else if (req.path.startsWith("/blog/")) {
+                const blog = await mongoose.connection.collection("blogs").findOne(
+                    { slug: slugOrId },
+                    { projection: { title: 1, coverImage: 1, excerpt: 1 } }
+                );
+                if (blog) {
+                    metaData = { 
+                        title: blog.title + " | Lavender Prime", 
+                        image: blog.coverImage, 
+                        desc: blog.excerpt 
+                    };
+                }
             }
 
+            // Thay thế các placeholder trong index.html
             html = html
                 .replace(/__TITLE__/g, metaData.title)
                 .replace(/__OG_TITLE__/g, metaData.title)
-                .replace(/__OG_IMAGE__/g, metaData.image)
-                .replace(/__DESCRIPTION__/g, metaData.desc?.substring(0, 160))
-                .replace(/__OG_DESCRIPTION__/g, metaData.desc?.substring(0, 160));
+                .replace(/__OG_IMAGE__/g, metaData.image || "")
+                .replace(/__DESCRIPTION__/g, (metaData.desc || "").substring(0, 160))
+                .replace(/__OG_DESCRIPTION__/g, (metaData.desc || "").substring(0, 160));
 
             res.send(html);
         } catch (error) {
+            console.error("SEO Injection Error:", error);
             res.sendFile(indexPath);
         }
     });
 
+    // Các trang khác trả về index.html mặc định
     app.get(/^(?!\/api).*/, (req, res) => {
         res.sendFile(path.join(clientDistPath, "index.html"));
     });
