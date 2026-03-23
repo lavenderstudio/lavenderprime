@@ -1,30 +1,79 @@
-// client/src/pages/UserOrdersPage.jsx
 // ─────────────────────────────────────────────────────────────────────────────
-// Modern User Orders page — matches site theme.
-// ALL existing logic is preserved exactly. Only the UI is redesigned.
+// User Orders Page — Museum Gallery Edition (Cyan × Magenta)
+// Tràn viền · Việt hóa · Đẳng cấp triển lãm
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import api from "../lib/api.js";
 
-const ACCENT = "#FF633F";
+// ─── Bảng màu ────────────────────────────────────────────────────────────────
+const C = "#00e5ff"; // Cyan
+const M = "#e040fb"; // Magenta
 
-// ─── Status badge ─────────────────────────────────────────────────────────────
+// ─── Reveal Animation ────────────────────────────────────────────────────────
+function Reveal({ children, delay = 0, className = "" }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-20px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Đường kẻ trang trí ──────────────────────────────────────────────────────
+function Hairline() {
+  return <div className="w-full h-px bg-slate-100" />;
+}
+
+// ─── Trạng thái đơn hàng (Việt hóa) ──────────────────────────────────────────
 function statusUi(statusRaw) {
   const s = String(statusRaw || "").toLowerCase();
+  
+  const map = {
+    paid: { label: "Đã thanh toán", color: "#22c55e" },
+    processing: { label: "Đang chế tác", color: C },
+    shipped: { label: "Đang vận chuyển", color: M },
+    completed: { label: "Hoàn thành", color: "#22c55e" },
+    requires_payment: { label: "Chờ thanh toán", color: M },
+    cancelled: { label: "Đã hủy", color: "#f43f5e" },
+    refunded: { label: "Đã hoàn tiền", color: "#94a3b8" },
+  };
 
-  if (["paid", "processing", "shipped", "completed"].includes(s))
-    return { label: s.charAt(0).toUpperCase() + s.slice(1), dot: "#22c55e", bg: "#f0fdf4", border: "#86efac", text: "#166534" };
+  const res = map[s] || { label: statusRaw || "Đang xử lý", color: "#94a3b8" };
+  return res;
+}
 
-  if (s === "requires_payment" || s === "payment_required")
-    return { label: "Payment Required", dot: ACCENT, bg: `${ACCENT}15`, border: `${ACCENT}55`, text: ACCENT };
+// ─── Stacked thumbnails (Kiểu gallery) ───────────────────────────────────────
+function ThumbStack({ urls }) {
+  const stack = (urls || []).slice(0, 3);
+  if (!urls?.length) return <div className="h-16 w-12 bg-slate-50 border border-slate-100 flex items-center justify-center text-[8px] text-slate-300 uppercase">No Img</div>;
 
-  if (s === "cancelled" || s === "refunded")
-    return { label: s.charAt(0).toUpperCase() + s.slice(1), dot: "#f43f5e", bg: "#fff1f2", border: "#fecdd3", text: "#9f1239" };
-
-  return { label: statusRaw || "Pending", dot: "#94a3b8", bg: "#f8fafc", border: "#e2e8f0", text: "#475569" };
+  return (
+    <div className="relative h-20 w-16 shrink-0 group">
+      {stack.map((u, i) => (
+        <img
+          key={i}
+          src={u}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover border border-white shadow-sm transition-transform duration-500 group-hover:translate-x-1"
+          style={{ 
+            zIndex: 10 - i, 
+            transform: `translate(${i * 4}px, ${i * -2}px)`,
+            filter: i > 0 ? "grayscale(100%) opacity(0.5)" : "none"
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -37,66 +86,20 @@ function getItemThumbUrls(it) {
 }
 
 function humanSlug(slug) {
-  return (slug || "Custom Print")
-    .split("-")
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
-
-function isWeddingFrameItem(item) {
-  return item?.productSlug === "wedding-frame" || item?.productSlug === "wedding-print";
-}
-
-// ─── Stacked thumbnails ───────────────────────────────────────────────────────
-function ThumbStack({ urls, alt = "preview" }) {
-  const stack = (urls || []).slice(0, 3);
-
-  if (!urls?.length) {
-    return (
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-[9px] font-bold text-slate-400">
-        No img
-      </div>
-    );
-  }
-
-  if (urls.length === 1) {
-    return (
-      <img
-        src={stack[0]}
-        alt={alt}
-        className="h-14 w-14 shrink-0 rounded-xl border border-slate-200 object-cover bg-white"
-        loading="lazy"
-      />
-    );
-  }
-
-  return (
-    <div className="relative h-14 w-14 shrink-0">
-      {stack.map((u, i) => (
-        <img
-          key={u + i}
-          src={u}
-          alt={`${alt}-${i}`}
-          className="absolute h-14 w-14 rounded-xl border border-slate-200 object-cover bg-white shadow-sm"
-          style={{ transform: `translate(${i * 3}px, ${i * 3}px)`, zIndex: 10 - i }}
-          loading="lazy"
-        />
-      ))}
-      {urls.length > 3 && (
-        <div className="absolute -bottom-1 -right-1 z-20 rounded-full border border-white bg-slate-900 px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow">
-          +{urls.length - 3}
-        </div>
-      )}
-    </div>
-  );
+  const dict = {
+    "print-frame": "In & Đóng Khung",
+    "fine-art-print": "In Nghệ Thuật",
+    "canvas": "In Canvas",
+    "collage-frame": "Khung Collage",
+  };
+  return dict[slug] || "Sản Phẩm Tùy Chỉnh";
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PAGE
+// MAIN PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 export default function UserOrdersPage() {
   const navigate = useNavigate();
-
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -104,7 +107,6 @@ export default function UserOrdersPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        setError("");
         setLoading(true);
         const res = await api.get("/orders/my");
         setOrders(res.data.orders || []);
@@ -113,7 +115,7 @@ export default function UserOrdersPage() {
           navigate("/login", { state: { from: "/orders" }, replace: true });
           return;
         }
-        setError(err?.response?.data?.message || err.message);
+        setError("Không thể tải danh sách đơn hàng.");
       } finally {
         setLoading(false);
       }
@@ -122,227 +124,133 @@ export default function UserOrdersPage() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] font-sans text-slate-900 antialiased">
-
-      {/* ── Hero header ──────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950 px-4 py-14 text-center">
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 h-52 w-52 -translate-x-1/2 rounded-full opacity-25 blur-3xl"
-          style={{ background: ACCENT }}
-        />
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="text-xs font-bold uppercase tracking-widest"
-          style={{ color: ACCENT }}
-        >
-          Golden Art Frames
-        </motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-3 text-4xl font-extrabold text-white"
-        >
-          My Orders
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.38 }}
-          className="mt-2 text-sm text-white/50"
-        >
-          Track and manage all your Golden Art Frames orders
-        </motion.p>
+    <div className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-cyan-100">
+      
+      {/* ── Section 1: Hero Editorial ────────────────────────────────────── */}
+      <section className="relative border-b border-slate-100 pt-32 pb-20 px-10 sm:px-16 lg:px-24">
+        {/* Accent Vertical Line */}
+        <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: C }} />
+        
+        <Reveal>
+          <div className="flex items-center gap-4 mb-6">
+            <span className="font-mono text-xs tracking-[0.3em] text-slate-400 uppercase">Thư viện cá nhân</span>
+            <div className="h-px w-12" style={{ background: M }} />
+          </div>
+          <h1 
+            className="font-extrabold leading-[0.9] tracking-tighter text-slate-900"
+            style={{ fontSize: "clamp(3rem, 8vw, 6rem)" }}
+          >
+            Đơn Hàng<br />
+            <span style={{ color: "transparent", WebkitTextStroke: `1px ${C}` }}>Của Bạn.</span>
+          </h1>
+        </Reveal>
       </section>
 
-      {/* ── Body ─────────────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-5xl px-4 py-10">
-
-        {/* Error */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700"
-            >
-              <b>Error:</b> {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Loading skeletons */}
+      {/* ── Section 2: Order List ────────────────────────────────────────── */}
+      <section className="py-0">
         {loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map(n => (
-              <div key={n} className="h-48 animate-pulse rounded-3xl border border-slate-100 bg-white" />
-            ))}
+          <div className="px-10 sm:px-16 lg:px-24 py-20 space-y-12">
+            {[1, 2].map(n => <div key={n} className="h-40 w-full bg-slate-50 animate-pulse" />)}
           </div>
-
-        /* Empty state */
         ) : orders.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mx-auto max-w-md rounded-3xl border border-slate-100 bg-white p-12 text-center shadow-sm"
-          >
-            <div
-              className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full text-4xl"
-              style={{ background: `${ACCENT}15` }}
-            >
-              📦
-            </div>
-            <h2 className="text-2xl font-extrabold text-slate-900">No Orders Yet</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              When you place an order, it will appear here with full status and details.
-            </p>
-            <motion.div whileTap={{ scale: 0.97 }} className="mt-6">
-              <Link
-                to="/products"
-                className="inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-extrabold text-white shadow-sm transition-all duration-300 hover:brightness-110 hover:scale-[1.03]"
-                style={{ background: ACCENT }}
-              >
-                Start Shopping
-              </Link>
-            </motion.div>
-          </motion.div>
-
-        /* Orders list */
+          <div className="px-10 sm:px-16 lg:px-24 py-32 text-center">
+            <p className="font-mono text-sm text-slate-400 uppercase tracking-widest">Chưa có dữ liệu lưu trữ</p>
+            <Link to="/products" className="mt-8 inline-block font-extrabold text-sm border-b-2 border-slate-900 pb-1 hover:text-cyan-500 hover:border-cyan-500 transition-all">
+              Bắt đầu bộ sưu tập của bạn →
+            </Link>
+          </div>
         ) : (
-          <div className="space-y-5">
-            {orders.map((o, oIdx) => {
+          <div className="divide-y divide-slate-100">
+            {orders.map((o, idx) => {
               const st = statusUi(o.status);
               const orderNo = String(o.orderNumber ?? "").padStart(6, "0");
               const total = o.totals?.grandTotal ?? o.totals?.subtotal;
-              const currency = o.totals?.currency;
-              const itemCount = (o.items || []).length;
-
+              
               return (
-                <motion.div
-                  key={o._id}
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: oIdx * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm
-                             transition-shadow duration-300 hover:shadow-md"
-                >
-                  {/* ── Order header ──────────────────────────────────── */}
-                  <div
-                    className="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
-                    style={{ background: `linear-gradient(135deg, ${ACCENT}08 0%, transparent 60%)` }}
-                  >
-                    {/* Left: order number + status + date */}
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-sm font-extrabold text-slate-900">
-                        Order <span className="font-mono">#{orderNo}</span>
-                      </span>
-
-                      {/* Status pill */}
-                      <span
-                        className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-extrabold"
-                        style={{ background: st.bg, borderColor: st.border, color: st.text }}
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: st.dot }} />
-                        {st.label}
-                      </span>
-
-                      <span className="text-xs text-slate-400">
-                        {new Date(o.createdAt).toLocaleString()}
-                      </span>
-                    </div>
-
-                    {/* Right: total + CTAs */}
-                    <div className="flex flex-wrap items-center gap-3 sm:ml-auto">
-                      <div className="text-right">
-                        <p className="text-xs text-slate-400">{itemCount} item{itemCount !== 1 ? "s" : ""}</p>
-                        <p className="text-base font-extrabold" style={{ color: ACCENT }}>
-                          {total} {currency}
-                        </p>
+                <Reveal key={o._id} delay={idx * 0.05}>
+                  <div className="group grid lg:grid-cols-12 items-stretch hover:bg-slate-50 transition-colors duration-500">
+                    
+                    {/* Mã đơn & Trạng thái */}
+                    <div className="lg:col-span-3 p-10 lg:border-r border-slate-100 flex flex-col justify-between">
+                      <div>
+                        <p className="font-mono text-[10px] tracking-widest text-slate-400 uppercase mb-2">Mã lưu trữ</p>
+                        <p className="text-2xl font-extrabold tracking-tighter font-mono">#{orderNo}</p>
                       </div>
-
-                      <Link to={`/order/${o._id}`}>
-                        <motion.button
-                          whileTap={{ scale: 0.96 }}
-                          type="button"
-                          className="rounded-2xl px-4 py-2 text-xs font-extrabold text-white shadow-sm
-                                     transition-all duration-300 hover:brightness-110"
-                          style={{ background: ACCENT }}
-                        >
-                          View Details
-                        </motion.button>
-                      </Link>
-
-                      <Link to="/products">
-                        <button
-                          type="button"
-                          className="group rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-700 shadow-sm transition-all duration-300 hover:bg-slate-50"
-                        >
-                          <span className="relative after:absolute after:left-0 after:-bottom-0.5
-                                           after:h-[1.5px] after:w-full after:origin-left after:scale-x-0
-                                           after:bg-[#FF633F] after:transition-transform after:duration-300
-                                           group-hover:after:scale-x-100 group-hover:text-[#FF633F]">
-                            Continue Shopping
-                          </span>
-                        </button>
-                      </Link>
+                      <div className="mt-8 flex items-center gap-3">
+                        <div className="h-2 w-2 rounded-full" style={{ background: st.color }} />
+                        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: st.color }}>
+                          {st.label}
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* ── Items grid ────────────────────────────────────── */}
-                  <div className="px-6 pb-5 pt-3">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {(o.items || []).slice(0, 4).map((it, idx) => {
-                        const urls = getItemThumbUrls(it);
-                        const isMini = Array.isArray(it?.assets?.items) && it.assets.items.length > 0;
-                        const isWedding = isWeddingFrameItem(it);
-                        const qty = isMini ? it.assets.items.length : Number(it.config?.quantity || 1);
-
-                        const specs = [
-                          it.config?.size && `Size: ${it.config.size}`,
-                          it.config?.frame && `Frame: ${it.config.frame}`,
-                          isMini && it.config?.mat ? `Type: ${it.config.mat}` : it.config?.mat ? `Mat: ${it.config.mat}` : null,
-                          it.config?.material && `Matl: ${it.config.material}`,
-                          isWedding && it.personalization?.groomName && it.personalization?.brideName
-                            ? `${it.personalization.groomName} & ${it.personalization.brideName}`
-                            : null,
-                          `Qty: ${qty}`,
-                        ].filter(Boolean).join(" · ");
-
-                        return (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-3"
-                          >
-                            <ThumbStack urls={urls} alt={it.productSlug || "preview"} />
-
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-extrabold text-slate-900">
-                                {humanSlug(it.productSlug)}
-                              </p>
-                              <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400">
-                                {specs}
+                    {/* Chi tiết sản phẩm */}
+                    <div className="lg:col-span-6 p-10 flex flex-col justify-center">
+                      <div className="space-y-6">
+                        {o.items?.slice(0, 2).map((it, i) => (
+                          <div key={i} className="flex gap-6 items-start">
+                            <ThumbStack urls={getItemThumbUrls(it)} />
+                            <div className="min-w-0">
+                              <h3 className="text-sm font-extrabold uppercase tracking-tight text-slate-900">{humanSlug(it.productSlug)}</h3>
+                              <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                                {it.config?.size && `Kích thước: ${it.config.size} · `}
+                                {it.config?.frame && `Khung: ${it.config.frame} · `}
+                                {`SL: ${it.config?.quantity || 1}`}
                               </p>
                             </div>
                           </div>
-                        );
-                      })}
+                        ))}
+                        {o.items?.length > 2 && (
+                          <p className="font-mono text-[10px] text-slate-300 uppercase">+{o.items.length - 2} sản phẩm khác trong tệp</p>
+                        )}
+                      </div>
                     </div>
 
-                    {(o.items || []).length > 4 && (
-                      <p className="mt-3 text-xs font-semibold text-slate-400">
-                        +{(o.items || []).length - 4} more item{(o.items || []).length - 4 !== 1 ? "s" : ""}
-                      </p>
-                    )}
+                    {/* Tổng tiền & Hành động */}
+                    <div className="lg:col-span-3 p-10 bg-slate-900 lg:bg-transparent flex flex-col justify-between items-end border-t lg:border-t-0 border-slate-100">
+                      <div className="text-right">
+                        <p className="font-mono text-[10px] text-slate-400 uppercase tracking-widest mb-1">Tổng giá trị</p>
+                        <p className="text-2xl font-extrabold text-white lg:text-slate-900 tabular-nums">
+                          {total} <span className="text-sm font-normal opacity-50">{o.totals?.currency}</span>
+                        </p>
+                      </div>
+                      
+                      <div className="mt-8 flex gap-4">
+                        <Link 
+                          to={`/order/${o._id}`}
+                          className="px-6 py-3 text-[10px] font-extrabold uppercase tracking-[0.2em] border border-slate-200 text-white lg:text-slate-900 hover:bg-slate-900 hover:text-white transition-all"
+                        >
+                          Chi tiết
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                </motion.div>
+                </Reveal>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
+
+      {/* ── Section 3: Footer Support ───────────────────────────────────── */}
+      <Hairline />
+      <section className="px-10 sm:px-16 lg:px-24 py-20 flex flex-col lg:flex-row justify-between items-start gap-10">
+        <Reveal className="max-w-md">
+          <h2 className="text-xl font-extrabold tracking-tight mb-4">Bạn cần hỗ trợ về đơn hàng?</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
+            Mọi tác phẩm đều được chúng tôi bảo hành chất lượng lưu trữ. Nếu có bất kỳ vấn đề gì về vận chuyển hoặc chế tác, vui lòng liên hệ đội ngũ curator.
+          </p>
+        </Reveal>
+        <div className="flex gap-3">
+          <button className="px-8 py-4 bg-slate-900 text-white text-xs font-bold uppercase tracking-widest hover:bg-cyan-500 transition-colors">
+            Nhắn tin hỗ trợ
+          </button>
+          <Link to="/products" className="px-8 py-4 border border-slate-200 text-xs font-bold uppercase tracking-widest hover:border-magenta-500 hover:text-magenta-500 transition-all">
+            Tiếp tục mua sắm
+          </Link>
+        </div>
+      </section>
+
     </div>
   );
 }
